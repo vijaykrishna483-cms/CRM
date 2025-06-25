@@ -6,7 +6,7 @@ import {
   deleteEmployee,
   getAllEmployees
 } from '../Controllers/EmployeeControllers/personalInfo.js';
-import { addBankDetails, deleteBankDetails, getAllBankDetails, updateBankDetails } from '../Controllers/EmployeeControllers/bankDetails.js';
+import { addBankDetails, deleteBankDetails, getAllBankDetails, updateBankDetails } from '../Controllers/EmployeeControllers/BankDetails.js';
 import { addExpenditure, addReimbursement, addReimbursementReview, getAllExpenditures, getAllReimbursementReviews, getExpendituresByReimbursementId, getReimbursements } from '../Controllers/EmployeeControllers/Reimbursement.js';
 
 
