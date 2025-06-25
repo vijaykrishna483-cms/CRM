@@ -1,6 +1,6 @@
 import express from 'express';
-import { addCollege, addPoc, addService, deletePoc, getAllColleges, getPocs, getServices, updatePoc, updateProposalServiceName } from '../Controllers/CollegeControllers/collegeData.js';
-import { addProposal, addProposalService, deleteProposalService, getAllProposals, getAllServices, getProposalServices, updateProposal } from '../Controllers/CollegeControllers/proposal.js';
+import { addCollege, addPoc, addService, deletePoc, getAllColleges, getPocs, getServices, updatePoc } from '../Controllers/CollegeControllers/collegeData.js';
+import { addProposal, addProposalService, deleteProposalService, getAllProposals, getProposalServices, updateProposal } from '../Controllers/CollegeControllers/proposal.js';
 import { addTrainerToProposal, getAllTrainerAllocations } from '../Controllers/CollegeControllers/trainerAllocatn.js';
 
 const router = express.Router();
