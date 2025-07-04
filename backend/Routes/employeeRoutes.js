@@ -7,7 +7,7 @@ import {
   getAllEmployees
 } from '../Controllers/EmployeeControllers/personalInfo.js';
 import { addBankDetails, deleteBankDetails, getAllBankDetails, updateBankDetails } from '../Controllers/EmployeeControllers/BankDetails.js';
-import { addExpenditure, addReimbursement, addReimbursementReview, getAllExpenditures, getAllReimbursementReviews, getExpendituresByReimbursementId, getReimbursements } from '../Controllers/EmployeeControllers/Reimbursement.js';
+import {  addReimbursement, addReimbursementReview, getAllReimbursementReviews, getReimbursements, updateReimbursementStatus } from '../Controllers/EmployeeControllers/Reimbursement.js';
 
 
 const router = express.Router();
@@ -27,15 +27,17 @@ router.delete('/bankDelete/:id', deleteBankDetails);
 
 router.post('/addreimbursment', addReimbursement);
 router.get('/getreimbursments', getReimbursements);
+router.patch('/reimbursements/:reimbursement_id/status', updateReimbursementStatus);
 
 
-router.post('/addexpenditure', addExpenditure);
-router.get('/getallexpenditures', getAllExpenditures);
-router.get('/getbyreimbursement/:reimbursement_id', getExpendituresByReimbursementId);
+
 
 
 router.post('/addreview', addReimbursementReview);
 router.get('/getallreviews', getAllReimbursementReviews);
 
+
+// router.post("/review-note", addReviewNote);
+// router.get("/review-notes", getAllReviewNotes);
 
 export default router;

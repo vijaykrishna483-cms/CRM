@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../libs/apiCall';
 import { toast } from 'react-toastify';
+import usePageAccess from '../../components/useAccessPage';
+
 const TrainerData = () => {
+
+    const { allowed, loading: permissionLoading } = usePageAccess("trainerdataentry");
+
+
   const [trainerInfo, setTrainerInfo] = useState({
     trainer_id: '',
     trainer_name: '',
@@ -11,6 +17,7 @@ const TrainerData = () => {
     email: '',
     status: 'Active',
     location: '',
+    employment_type: '', // Corrected field name
     charge: '',
     service_ids: []
   });
@@ -67,10 +74,10 @@ const TrainerData = () => {
     try {
       if (editId) {
         await api.put(`/trainer/update/${editId}`, trainerInfo);
-         toast.success('Trainer updated successfully!');
+        toast.success('Trainer updated successfully!');
       } else {
         await api.post('/trainer/add', trainerInfo);
-         toast.success('Trainer added successfully!');
+        toast.success('Trainer added successfully!');
       }
       resetForm();
       fetchTrainers();
@@ -91,6 +98,7 @@ const TrainerData = () => {
       email: trainer.email,
       status: trainer.status,
       location: trainer.location,
+      employment_type: trainer.employment_type,
       charge: trainer.charge,
       service_ids: trainer.services?.map(s => s.service_id)
     });
@@ -108,6 +116,7 @@ const TrainerData = () => {
       email: '',
       status: 'Active',
       location: '',
+      employment_type: '',
       charge: '',
       service_ids: []
     });
@@ -115,8 +124,46 @@ const TrainerData = () => {
     setShowForm(false);
   };
 
+        if (!allowed && !permissionLoading) return (
+  <div className="min-h-[60vh] flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center bg-white px-8 py-10 ">
+      <svg
+        className="w-14 h-14 text-red-500 mb-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fee2e2" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 9l-6 6m0-6l6 6"
+          stroke="red"
+          strokeWidth="2"
+        />
+      </svg>
+      <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
+      <p className="text-gray-600 text-center mb-4">
+        You do not have permission to view this page.<br />
+        Please contact the administrator if you believe this is a mistake.
+      </p>
+      <button
+        className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
+        onClick={() => window.location.href = "/"}
+      >
+        Go to Home
+      </button>
+    </div>
+  </div>
+);
+  if (permissionLoading) return <div>Loading...</div>;  
+
+  
+
+  
   return (
-    <div className="w-full min-h-screen bg-white px-6 sm:px-10 py-12">
+    <div className="w-full min-h-screen bg-white px-6 sm:px-10 ">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-[#4f378a]">Trainer Management</h1>
         <button 
@@ -134,7 +181,17 @@ const TrainerData = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {['trainer_id', 'trainer_name', 'aadhar_id', 'pan_id', 'contact_number', 'email', 'status', 'location'].map(field => (
+            {[
+              'trainer_id',
+              'trainer_name',
+              'aadhar_id',
+              'pan_id',
+              'contact_number',
+              'email',
+              'status',
+              'location',
+             // Corrected: no leading space
+            ].map(field => (
               <input
                 key={field}
                 name={field}
@@ -153,6 +210,18 @@ const TrainerData = () => {
               onChange={handleChange}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
+
+            <select
+  name="employment_type"
+  value={trainerInfo.employment_type}
+  onChange={handleChange}
+  className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+>
+  <option value="">Select Type</option>
+  <option value="Full Time">Full Time</option>
+  <option value="Freelancer">Freelancer</option>
+</select>
+
           </div>
 
           <div className="mt-6">
@@ -195,7 +264,6 @@ const TrainerData = () => {
             Refresh
           </button>
         </div>
-
         {loading ? (
           <p className="text-center py-4">Loading trainers...</p>
         ) : (
@@ -207,6 +275,7 @@ const TrainerData = () => {
                 <th className="p-2 text-left">Contact</th>
                 <th className="p-2 text-left">Email</th>
                 <th className="p-2 text-left">Status</th>
+                <th className="p-2 text-left">Employment Type</th>
                 <th className="p-2 text-left">Charge</th>
                 <th className="p-2 text-left">Services</th>
                 <th className="p-2 text-left">Actions</th>
@@ -220,6 +289,7 @@ const TrainerData = () => {
                   <td className="p-2">{trainer.contact_number}</td>
                   <td className="p-2">{trainer.email}</td>
                   <td className="p-2">{trainer.status}</td>
+                  <td className="p-2">{trainer.employment_type}</td>
                   <td className="p-2">₹{trainer.charge}</td>
                   <td className="p-2 max-w-xs">
                     <div className="flex flex-wrap gap-1">
@@ -239,7 +309,7 @@ const TrainerData = () => {
               ))}
               {trainers.length === 0 && (
                 <tr>
-                  <td colSpan="8" className="p-2 text-center text-gray-400">
+                  <td colSpan="9" className="p-2 text-center text-gray-400">
                     No trainers found
                   </td>
                 </tr>

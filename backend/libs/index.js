@@ -20,11 +20,7 @@ export const comparePassword = async (userPassword, password) => {
     }
 }
 
-export const createJWT = (id) => {
-   return JWT.sign({
-    userId:id },
-    process.env.JWT_SECRET, {
-        expiresIn:"1d"
-    }
-)
-}
+export const createJWT = (payload) => {
+    return JWT.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+};
+

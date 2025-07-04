@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../libs/apiCall';
 import { toast } from 'react-toastify';
+import usePageAccess from '../../components/useAccessPage';
 
 const Allocation = () => {
   const [proposals, setProposals] = useState([]);
@@ -10,12 +11,20 @@ const Allocation = () => {
   const [loading, setLoading] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [ratings, setRatings] = useState({});
+  const [allServices, setAllServices] = useState([]);
 
+       const { allowed, loading: permissionLoading } = usePageAccess("trainerallocation");
+
+
+       
   useEffect(() => {
     fetchProposals();
     fetchTrainers();
     fetchAllocations();
+    fetchRatings();
   }, []);
 
   const fetchProposals = async () => {
@@ -34,8 +43,18 @@ const Allocation = () => {
     setLoading(true);
     try {
       const res = await api.get('/trainer/getAllTrainers');
-      setTrainers(res.data?.data || []);
-      setFilteredTrainers(res.data?.data || []);
+      const trainersData = res.data?.data || [];
+      setTrainers(trainersData);
+      setFilteredTrainers(trainersData);
+      
+      // Extract unique services
+      const services = new Set();
+      trainersData.forEach(trainer => {
+        trainer.services?.forEach(service => {
+          services.add(service.service_name);
+        });
+      });
+      setAllServices(Array.from(services));
     } catch {
       toast.error('Failed to fetch trainers');
     } finally {
@@ -55,6 +74,37 @@ const Allocation = () => {
     }
   };
 
+  const fetchRatings = async () => {
+    try {
+      const res = await api.get('/trainer/allreviews');
+      const reviews = res.data || [];
+      
+      // Calculate average ratings per trainer
+      const ratingsData = {};
+      reviews.forEach(review => {
+        if (!ratingsData[review.trainer_id]) {
+          ratingsData[review.trainer_id] = {
+            total: 0,
+            count: 0
+          };
+        }
+        ratingsData[review.trainer_id].total += review.trainer_star_rating;
+        ratingsData[review.trainer_id].count++;
+      });
+      
+      // Calculate averages
+      const averages = {};
+      Object.keys(ratingsData).forEach(trainerId => {
+        averages[trainerId] = 
+          (ratingsData[trainerId].total / ratingsData[trainerId].count).toFixed(1);
+      });
+      
+      setRatings(averages);
+    } catch (error) {
+      console.error('Error fetching ratings:', error);
+    }
+  };
+
   const handleLocationSearch = (e) => {
     const searchTerm = e.target.value.toLowerCase();
     setLocationSearch(searchTerm);
@@ -66,6 +116,21 @@ const Allocation = () => {
     
     const results = trainers.filter(trainer => 
       trainer.location?.toLowerCase().includes(searchTerm)
+    );
+    setFilteredTrainers(results);
+  };
+
+  const handleServiceFilter = (e) => {
+    const service = e.target.value;
+    setServiceFilter(service);
+    
+    if (!service) {
+      setFilteredTrainers(trainers);
+      return;
+    }
+    
+    const results = trainers.filter(trainer => 
+      trainer.services?.some(s => s.service_name === service)
     );
     setFilteredTrainers(results);
   };
@@ -84,7 +149,6 @@ const Allocation = () => {
       });
       setSuccessMessage(`Trainer added to proposal successfully!`);
       setTimeout(() => setSuccessMessage(''), 3000);
-      // Refresh allocations table
       await fetchAllocations();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error adding trainer to proposal');
@@ -93,11 +157,248 @@ const Allocation = () => {
     }
   };
 
-  return (
-    <div className="w-full min-h-screen bg-white px-6 sm:px-10 py-12">
-      <h1 className="text-2xl font-bold text-center mb-10 text-[#4f378a]">Trainer Allocation</h1>
 
- <div className="bg-white mb-10 p-4 rounded-xl shadow-sm border overflow-x-auto">
+   const [checkedStatus, setCheckedStatus] = useState({});
+
+  const toggleCheck = (trainerId) => {
+    setCheckedStatus(prev => ({
+      ...prev,
+      [trainerId]: !prev[trainerId]
+    }));
+  };
+
+
+   const [visibleTrainers, setVisibleTrainers] = useState([]);
+
+  // Update visible trainers when filteredTrainers changes
+  useEffect(() => {
+    setVisibleTrainers(filteredTrainers);
+  }, [filteredTrainers]);
+
+  // Handler to remove a trainer from the visible list
+  const removeTrainer = (trainerId) => {
+    setVisibleTrainers(prev => prev.filter(trainer => trainer.trainer_id !== trainerId));
+  };
+const [open, setOpen] = useState(true);
+  if (!allowed && !permissionLoading) return (
+  <div className="min-h-[60vh] flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center bg-white px-8 py-10 ">
+      <svg
+        className="w-14 h-14 text-red-500 mb-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fee2e2" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 9l-6 6m0-6l6 6"
+          stroke="red"
+          strokeWidth="2"
+        />
+      </svg>
+      <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
+      <p className="text-gray-600 text-center mb-4">
+        You do not have permission to view this page.<br />
+        Please contact the administrator if you believe this is a mistake.
+      </p>
+      <button
+        className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
+        onClick={() => window.location.href = "/"}
+      >
+        Go to Home
+      </button>
+    </div>
+  </div>
+);
+  if (permissionLoading) return <div>Loading...</div>;  
+
+  
+  return (
+    <div className="w-full min-h-screen bg-white px-6 sm:px-10 ">
+      <h1 className="text-3xl font-bold text-center mb-10 text-[#4f378a]">Trainer Allocation</h1>
+
+
+ <div className="flex flex-wrap gap-4 bg-transparent justify-center  rounded-2xl px-4 py-2 mb-8">
+        <button
+          onClick={() => setOpen(true)}
+          className={`px-6 py-2 rounded-xl transition-all duration-200 font-medium text-base
+    ${
+      open
+        ? "bg-[#6750a4] text-white shadow font-semibold scale-105"
+        : "bg-[#f3e6f1] text-[#6750a4] hover:bg-[#e9d4ff] hover:text-[#6750a4]"
+    }
+  `}
+          style={{
+            minWidth: "140px",
+            boxShadow: open ? "0 2px 8px #6750a433" : undefined,
+          }}
+        >
+          Allot Trainers
+        </button>
+
+        <button
+          onClick={() => setOpen(false)}
+          className={`px-6 py-2 rounded-xl transition-all duration-200 font-medium text-base
+    ${
+      open
+        ? "bg-[#f3e6f1] text-[#6750a4] hover:bg-[#e9d4ff] hover:text-[#6750a4]"
+        : "bg-[#6750a4] text-white shadow font-semibold scale-105"
+    }
+  `}
+          style={{
+            minWidth: "140px",
+            boxShadow: open ? "0 2px 8px #6750a433" : undefined,
+          }}
+        >
+          View Allocations
+        </button>
+      </div>
+
+      {open ? <>
+      
+        <div className="max-w-3xl mx-auto bg-gray-50 rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
+        <h2 className="text-lg font-semibold mb-4 text-[#4f378a]">Select Proposal</h2>
+        <select
+          value={selectedProposal}
+          onChange={(e) => setSelectedProposal(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-left"
+        >
+          <option value="">Select a proposal</option>
+          {proposals.map(proposal => (
+            <option key={proposal.proposal_id} value={proposal.proposal_id}>
+              {proposal.proposal_code}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Filters Section */}
+      <div className="max-w-3xl mx-auto bg-gray-50 rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
+        <h2 className="text-lg font-semibold mb-4 text-[#4f378a]">Filter Trainers</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4  text-left">
+          {/* Location Filter */}
+
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Service</label>
+            <select
+              value={serviceFilter}
+              onChange={handleServiceFilter}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="">All Services</option>
+              {allServices.map(service => (
+                <option key={service} value={service}>{service}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input
+              type="text"
+              placeholder="Enter location (e.g., New York)"
+              value={locationSearch}
+              onChange={handleLocationSearch}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+          
+          {/* Service Filter */}
+        
+        </div>
+      </div>
+
+      {successMessage && (
+        <div className="max-w-3xl mx-auto mb-6 p-3 bg-green-100 text-green-800 rounded-lg">
+          {successMessage}
+        </div>
+      )}
+
+      {/* Allocations Table */}
+     
+
+      {/* Available Trainers */}
+       <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-sm font-semibold text-[#4f378a]">
+          Available Trainers {locationSearch && `in ${locationSearch}`} 
+          {serviceFilter && ` offering ${serviceFilter}`}
+        </h3>
+        <button 
+          onClick={fetchTrainers}
+          className="text-sm text-gray-500 hover:text-gray-700"
+        >
+          Refresh Trainers
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="text-center py-4">Loading trainers...</p>
+      ) : visibleTrainers.length === 0 ? (
+        <p className="text-center py-4 text-gray-400">
+          {locationSearch || serviceFilter 
+            ? `No trainers found matching your criteria` 
+            : 'Enter filters to search for trainers'}
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {visibleTrainers.map(trainer => (
+            <div key={trainer.trainer_id} className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-[#4f378a] font-semibold">{trainer.trainer_name}</h4>
+                <button
+                  onClick={() => removeTrainer(trainer.trainer_id)}
+                  className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded"
+                  title="Remove from view"
+                >
+                  ✖
+                </button>
+              </div>
+              <p><strong>Location:</strong> {trainer.location}</p>
+              <p>
+                <strong>Status:</strong> 
+                <span className={`px-2 py-1 text-xs rounded-full ${
+                  trainer.status === 'Active' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {trainer.status}
+                </span>
+              </p>
+              <p><strong>Rating:</strong> {ratings[trainer.trainer_id] || 'N/A'}</p>
+              <p><strong>Contact:</strong> {trainer.contact_number}</p>
+              <p><strong>Email:</strong> {trainer.email}</p>
+              <p><strong>Charge:</strong> ₹{trainer.charge}/session</p>
+              <div className="flex flex-wrap gap-1 mb-2">
+                {trainer.services?.map((service, idx) => (
+                  <span 
+                    key={idx} 
+                    className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                  >
+                    {service.service_name}
+                  </span>
+                ))}
+              </div>
+              <button
+                onClick={() => handleAddTrainer(trainer.trainer_id)}
+                className="px-4 py-2 bg-purple-100 hover:bg-purple-200 rounded-full font-medium text-xs text-gray-700"
+                disabled={loading}
+              >
+                Add to Proposal
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+
+      
+       </>  :<>
+<div className="bg-white mb-10 p-4 rounded-xl shadow-sm border overflow-x-auto h-[400px] overflow-y-auto">
+
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-[#4f378a]">All Trainer Allocations</h2>
           <button 
@@ -156,125 +457,15 @@ const Allocation = () => {
             </tbody>
           </table>
         )}
-      </div>
+      </div> </>}
+
+
+
 
 
       {/* Proposal Selection */}
-      <div className="max-w-3xl mx-auto bg-gray-50 rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
-        <h2 className="text-lg font-semibold mb-4 text-[#4f378a]">Select Proposal</h2>
-        <select
-          value={selectedProposal}
-          onChange={(e) => setSelectedProposal(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        >
-          <option value="">Select a proposal</option>
-          {proposals.map(proposal => (
-            <option key={proposal.proposal_id} value={proposal.proposal_id}>
-              {proposal.proposal_code}
-            </option>
-          ))}
-        </select>
-      </div>
+    
 
-      {/* Location Search */}
-      <div className="max-w-3xl mx-auto bg-gray-50 rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
-        <h2 className="text-lg font-semibold mb-4 text-[#4f378a]">Search Trainers by Location</h2>
-        <input
-          type="text"
-          placeholder="Enter location (e.g., New York)"
-          value={locationSearch}
-          onChange={handleLocationSearch}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        />
-      </div>
-
-      {successMessage && (
-        <div className="max-w-3xl mx-auto mb-6 p-3 bg-green-100 text-green-800 rounded-lg">
-          {successMessage}
-        </div>
-      )}
-
-      {/* Allocations Table */}
-     
-
-      {/* Available Trainers */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-semibold text-[#4f378a]">
-            Available Trainers {locationSearch && `in ${locationSearch}`}
-          </h3>
-          <button 
-            onClick={fetchTrainers}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            Refresh Trainers
-          </button>
-        </div>
-        
-        {loading ? (
-          <p className="text-center py-4">Loading trainers...</p>
-        ) : filteredTrainers.length === 0 ? (
-          <p className="text-center py-4 text-gray-400">
-            {locationSearch 
-              ? `No trainers found in ${locationSearch}` 
-              : 'Enter a location to search for trainers'}
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTrainers.map(trainer => (
-              <div key={trainer.trainer_id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium text-[#4f378a]">{trainer.trainer_name}</h3>
-                    <p className="text-sm text-gray-600">{trainer.location}</p>
-                  </div>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    trainer.status === 'Active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {trainer.status}
-                  </span>
-                </div>
-                
-                <div className="mt-3">
-                  <p className="text-sm">
-                    <span className="font-medium">Contact:</span> {trainer.contact_number}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Email:</span> {trainer.email}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Charge:</span> ₹{trainer.charge}/session
-                  </p>
-                </div>
-                
-                <div className="mt-3">
-                  <h4 className="text-sm font-medium mb-1">Services:</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {trainer.services?.map((service, idx) => (
-                      <span 
-                        key={idx} 
-                        className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                      >
-                        {service.service_name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                <button
-                  onClick={() => handleAddTrainer(trainer.trainer_id)}
-                  className="mt-4 w-full py-2 bg-purple-100 hover:bg-purple-200 rounded-full font-medium text-sm text-gray-700"
-                  disabled={loading}
-                >
-                  Add to Proposal
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 };

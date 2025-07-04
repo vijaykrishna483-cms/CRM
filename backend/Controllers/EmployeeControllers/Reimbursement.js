@@ -2,14 +2,34 @@ import { pool } from "../../libs/database.js";
 
 // Controller: Add a new reimbursement
 export async function addReimbursement(req, res) {
-  const { date, employee_id, reimbursement_id, duration, from_date, to_date, location, program } = req.body;
+  const {
+    date, employee_id, reimbursement_id, duration,
+    from_date, to_date, location, program, word_link, excel_link, status
+  } = req.body;
+
+  // Build columns and values arrays
+  const columns = [
+    'date', 'employee_id', 'reimbursement_id', 'duration',
+    'from_date', 'to_date', 'location', 'program', 'word_link', 'excel_link'
+  ];
+  const values = [
+    date, employee_id, reimbursement_id, duration,
+    from_date, to_date, location, program, word_link, excel_link
+  ];
+
+  // If status is provided, add it to the insert
+  if (status) {
+    columns.push('status');
+    values.push(status);
+  }
+
+  // Build placeholders like $1, $2, ...
+  const placeholders = columns.map((_, idx) => `$${idx + 1}`).join(', ');
 
   try {
     const result = await pool.query(
-      `INSERT INTO reimbursements 
-      (date, employee_id, reimbursement_id, duration, from_date, to_date, location, program)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [date, employee_id, reimbursement_id, duration, from_date, to_date, location, program]
+      `INSERT INTO reimbursements (${columns.join(', ')}) VALUES (${placeholders}) RETURNING *`,
+      values
     );
     res.status(201).json({ message: 'Reimbursement added successfully', data: result.rows[0] });
   } catch (err) {
@@ -17,6 +37,7 @@ export async function addReimbursement(req, res) {
     res.status(500).json({ error: 'Failed to add reimbursement' });
   }
 }
+
 
 // Controller: Get all reimbursements
 export async function getReimbursements(req, res) {
@@ -26,6 +47,35 @@ export async function getReimbursements(req, res) {
   } catch (err) {
     console.error('Error fetching reimbursements:', err);
     res.status(500).json({ error: 'Failed to retrieve reimbursements' });
+  }
+}
+
+// Allowed status values
+const validStatuses = ['requested', 'pending', 'paid', 'rejected'];
+
+export async function updateReimbursementStatus(req, res) {
+  const { reimbursement_id } = req.params; // This is the VARCHAR from route
+  const { status } = req.body;
+
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status value' });
+  }
+
+  try {
+    // Correct: Use reimbursement_id column in WHERE clause
+    const result = await pool.query(
+      'UPDATE reimbursements SET status = $1 WHERE reimbursement_id = $2 RETURNING *',
+      [status, reimbursement_id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Reimbursement not found' });
+    }
+
+    res.json({ message: 'Status updated successfully', data: result.rows[0] });
+  } catch (err) {
+    console.error('Error updating reimbursement status:', err);
+    res.status(500).json({ error: 'Failed to update status' });
   }
 }
 
@@ -106,11 +156,70 @@ export async function addReimbursementReview(req, res) {
 // 2. Get All Reimbursement Reviews
 export async function getAllReimbursementReviews(req, res) {
   try {
-    const result = await pool.query('SELECT * FROM reimbursement_reviews');
+    const query = `
+      SELECT 
+        * 
+      FROM reimbursement_reviews
+    `;
+
+    const result = await pool.query(query);
     res.status(200).json(result.rows);
   } catch (err) {
     console.error('Error fetching reimbursement reviews:', err);
     res.status(500).json({ error: 'Failed to retrieve reimbursement reviews' });
   }
 }
+
+
+
+
+// Add a new review note
+// export async function addReviewNote(req, res) {
+//   const { review_id, note, } = req.body; // Remove reimbursement_id
+
+//   if (!review_id || !note) {
+//     return res.status(400).json({ status: "failed", message: "Required fields missing" });
+//   }
+
+//   try {
+//     const result = await pool.query(
+//       `INSERT INTO reimbursement_review_notes (review_id, note, paid_status)
+//        VALUES ($1, $2, $3) RETURNING *`, // Remove reimbursement_id
+//       [review_id, note, paid_status || 'Pending']
+//     );
+
+//     return res.status(200).json({
+//       status: "success",
+//       message: "Review note added successfully",
+//       data: result.rows[0]
+//     });
+//   } catch (error) {
+//     console.error("Error adding review note:", error);
+//     return res.status(500).json({
+//       status: "failed",
+//       message: "Server error while adding review note"
+//     });
+//   }
+// }
+
+
+// // Get all review notes
+// export async function getAllReviewNotes(req, res) {
+//   try {
+//     const result = await pool.query(
+//       `SELECT * FROM reimbursement_review_notes ORDER BY created_at DESC`
+//     );
+
+//     return res.status(200).json({
+//       status: "success",
+//       data: result.rows
+//     });
+//   } catch (error) {
+//     console.error("Error fetching review notes:", error);
+//     return res.status(500).json({
+//       status: "failed",
+//       message: "Server error while fetching review notes"
+//     });
+//   }
+// }
 

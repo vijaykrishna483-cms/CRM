@@ -1,7 +1,9 @@
 import { pool } from "../../libs/database.js";
 
+const ALLOWED_EMPLOYMENT_TYPES = ['Freelancer', 'Full Time'];
+
 export async function addTrainerWithServices(req, res) {
-  const {
+  const { 
     trainer_id,
     trainer_name,
     aadhar_id,
@@ -11,40 +13,62 @@ export async function addTrainerWithServices(req, res) {
     status,
     location,
     charge,
-    service_ids  // expecting an array like [1,3,5]
+    employment_type,
+    service_ids = []
   } = req.body;
+
+  // Validate employment type
+  if (!ALLOWED_EMPLOYMENT_TYPES.includes(employment_type)) {
+    return res.status(400).json({
+      error: `Invalid employment type. Allowed values: ${ALLOWED_EMPLOYMENT_TYPES.join(', ')}`
+    });
+  }
 
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
 
-    // 1. Insert into trainers
+    // Insert trainer
     await client.query(
       `INSERT INTO trainers 
-      (trainer_id, trainer_name, aadhar_id, pan_id, contact_number, email, status, location, charge)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [trainer_id, trainer_name, aadhar_id, pan_id, contact_number, email, status, location, charge]
+      (trainer_id, trainer_name, aadhar_id, pan_id, contact_number, email, status, location, charge, employment_type)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [trainer_id, trainer_name, aadhar_id, pan_id, contact_number, email, status, location, charge, employment_type]
     );
 
-    // 2. Insert multiple services into trainer_services_map
-    const insertServicePromises = service_ids.map(service_id => {
-      return client.query(
-        `INSERT INTO trainer_services_map (trainer_id, service_id)
-         VALUES ($1, $2)`,
-        [trainer_id, service_id]
+    // Validate service IDs
+    if (service_ids.length > 0) {
+      const serviceCheck = await client.query(
+        'SELECT service_id FROM services WHERE service_id = ANY($1)',
+        [service_ids]
       );
-    });
+      
+      if (serviceCheck.rows.length !== service_ids.length) {
+        throw new Error('One or more invalid service IDs');
+      }
 
-    await Promise.all(insertServicePromises);
+      // Insert services
+      const insertPromises = service_ids.map(service_id => 
+        client.query(
+          `INSERT INTO trainer_services_map (trainer_id, service_id)
+          VALUES ($1, $2)`,
+          [trainer_id, service_id]
+        )
+      );
+      await Promise.all(insertPromises);
+    }
 
     await client.query('COMMIT');
-    res.status(201).json({ message: 'Trainer and services added successfully' });
+    res.status(201).json({ message: 'Trainer added successfully' });
 
   } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error adding trainer with services:', error);
-    res.status(500).json({ error: 'Failed to add trainer with services' });
+    await client.query('ROLLBACK').catch(console.error);
+    
+    const statusCode = error.message.includes('invalid') ? 400 : 500;
+    res.status(statusCode).json({
+      error: error.message || 'Database operation failed'
+    });
   } finally {
     client.release();
   }
@@ -65,12 +89,13 @@ export async function getTrainerWithServices(req, res) {
           t.status,
           t.location,
           t.charge,
+          t.employment_type,
           ARRAY_AGG(s.service_name) AS services
        FROM trainers t
-       JOIN trainer_services_map ts ON t.trainer_id = ts.trainer_id
-       JOIN services s ON ts.service_id = s.service_id
+       LEFT JOIN trainer_services_map ts ON t.trainer_id = ts.trainer_id
+       LEFT JOIN services s ON ts.service_id = s.service_id
        WHERE t.trainer_id = $1
-       GROUP BY t.id`,
+       GROUP BY t.trainer_id`,
       [trainer_id]
     );
 
@@ -85,7 +110,6 @@ export async function getTrainerWithServices(req, res) {
   }
 }
 
-
 export async function updateTrainerWithServices(req, res) {
   const { trainer_id } = req.params;
   const {
@@ -97,51 +121,38 @@ export async function updateTrainerWithServices(req, res) {
     status,
     location,
     charge,
-    service_ids // optional
+    employment_type,
+    service_ids
   } = req.body;
+
+  // Validate employment type
+  if (employment_type && !ALLOWED_EMPLOYMENT_TYPES.includes(employment_type)) {
+    return res.status(400).json({
+      error: `Invalid employment type. Allowed values: ${ALLOWED_EMPLOYMENT_TYPES.join(', ')}`
+    });
+  }
 
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
 
-    // 1. Build dynamic update query based on fields present
+    // Build dynamic update query
     const fields = [];
     const values = [];
     let idx = 1;
 
-    if (trainer_name !== undefined) {
-      fields.push(`trainer_name = $${idx++}`);
-      values.push(trainer_name);
-    }
-    if (aadhar_id !== undefined) {
-      fields.push(`aadhar_id = $${idx++}`);
-      values.push(aadhar_id);
-    }
-    if (pan_id !== undefined) {
-      fields.push(`pan_id = $${idx++}`);
-      values.push(pan_id);
-    }
-    if (contact_number !== undefined) {
-      fields.push(`contact_number = $${idx++}`);
-      values.push(contact_number);
-    }
-    if (email !== undefined) {
-      fields.push(`email = $${idx++}`);
-      values.push(email);
-    }
-    if (status !== undefined) {
-      fields.push(`status = $${idx++}`);
-      values.push(status);
-    }
-    if (location !== undefined) {
-      fields.push(`location = $${idx++}`);
-      values.push(location);
-    }
-    if (charge !== undefined) {
-      fields.push(`charge = $${idx++}`);
-      values.push(charge);
-    }
+    const fieldMappings = {
+      trainer_name, aadhar_id, pan_id, contact_number, email, 
+      status, location, charge, employment_type
+    };
+
+    Object.entries(fieldMappings).forEach(([key, value]) => {
+      if (value !== undefined) {
+        fields.push(`${key} = $${idx++}`);
+        values.push(value);
+      }
+    });
 
     // Only perform update if fields exist
     if (fields.length > 0) {
@@ -153,33 +164,48 @@ export async function updateTrainerWithServices(req, res) {
       await client.query(query, values);
     }
 
-    // 2. If service_ids is provided, update services mapping
-    if (service_ids !== undefined && Array.isArray(service_ids)) {
+    // Update services if provided
+    if (service_ids !== undefined) {
       // Delete old mappings
       await client.query(
         `DELETE FROM trainer_services_map WHERE trainer_id = $1`,
         [trainer_id]
       );
 
-      // Insert new mappings
-      const insertServicePromises = service_ids.map(service_id => {
-        return client.query(
-          `INSERT INTO trainer_services_map (trainer_id, service_id)
-           VALUES ($1, $2)`,
-          [trainer_id, service_id]
+      // Insert new mappings if provided
+      if (Array.isArray(service_ids) && service_ids.length > 0) {
+        // Validate service IDs
+        const serviceCheck = await client.query(
+          'SELECT service_id FROM services WHERE service_id = ANY($1)',
+          [service_ids]
         );
-      });
+        
+        if (serviceCheck.rows.length !== service_ids.length) {
+          throw new Error('One or more invalid service IDs');
+        }
 
-      await Promise.all(insertServicePromises);
+        const insertPromises = service_ids.map(service_id => 
+          client.query(
+            `INSERT INTO trainer_services_map (trainer_id, service_id)
+            VALUES ($1, $2)`,
+            [trainer_id, service_id]
+          )
+        );
+        await Promise.all(insertPromises);
+      }
     }
 
     await client.query('COMMIT');
-    res.status(200).json({ message: 'Trainer and services updated successfully' });
+    res.status(200).json({ message: 'Trainer updated successfully' });
 
   } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error updating trainer with services:', error);
-    res.status(500).json({ error: 'Failed to update trainer with services' });
+    await client.query('ROLLBACK').catch(console.error);
+    console.error('Error updating trainer:', error);
+    
+    const statusCode = error.message.includes('invalid') ? 400 : 500;
+    res.status(statusCode).json({
+      error: error.message || 'Failed to update trainer'
+    });
   } finally {
     client.release();
   }
@@ -199,6 +225,7 @@ export async function getAllTrainers(req, res) {
           t.status,
           t.location,
           t.charge,
+          t.employment_type,
           COALESCE(
             JSON_AGG(
               DISTINCT JSONB_BUILD_OBJECT(
@@ -213,7 +240,7 @@ export async function getAllTrainers(req, res) {
         LEFT JOIN services s ON ts.service_id = s.service_id
         GROUP BY 
           t.id, t.trainer_id, t.trainer_name, t.aadhar_id, t.pan_id, 
-          t.contact_number, t.email, t.status, t.location, t.charge
+          t.contact_number, t.email, t.status, t.location, t.charge, t.employment_type
         ORDER BY t.trainer_id`
     );
 

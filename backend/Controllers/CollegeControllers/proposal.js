@@ -12,9 +12,11 @@ export const addProposal = async (req, res) => {
       duration,
       fromDate,
       toDate,
+      status, // new field
     } = req.body;
 
-    if (!collegeCode || !proposalCode || !issueDate || !quotedPrice || !duration || !fromDate || !toDate) {
+    // Validate required fields (excluding fromDate, toDate)
+    if (!collegeCode || !proposalCode || !issueDate || !quotedPrice || !duration) {
       return res.status(400).json({
         status: 'failed',
         message: 'Missing required fields',
@@ -40,19 +42,20 @@ export const addProposal = async (req, res) => {
       `INSERT INTO proposals (
         proposal_id, college_code, proposal_code,
         issue_date, last_updated, quoted_price,
-        duration, from_date, to_date
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        duration, from_date, to_date, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *`,
       [
         proposalId,
         collegeCode,
         proposalCode,
         issueDate,
-        lastUpdated || issueDate, // default to issueDate if not provided
+        lastUpdated || issueDate,
         quotedPrice,
         duration,
-        fromDate,
-        toDate,
+        fromDate || null,
+        toDate || null,
+        status || 'pending'
       ]
     );
 
@@ -91,16 +94,7 @@ export const getAllProposals = async (req, res) => {
 
 export const updateProposal = async (req, res) => {
   const { proposalId } = req.params;
-  const {
-    collegeCode,
-    proposalCode,
-    issueDate,
-    lastUpdated,
-    quotedPrice,
-    duration,
-    fromDate,
-    toDate,
-  } = req.body;
+  const updates = req.body;
 
   try {
     // Check if proposal exists
@@ -116,80 +110,45 @@ export const updateProposal = async (req, res) => {
       });
     }
 
-    // Update fields if provided, else retain existing values
-    const existing = check.rows[0];
-    const updatedProposal = await pool.query(
-      `UPDATE proposals SET
-        college_code = $1,
-        proposal_code = $2,
-        issue_date = $3,
-        last_updated = $4,
-        quoted_price = $5,
-        duration = $6,
-        from_date = $7,
-        to_date = $8
-      WHERE proposal_id = $9
-      RETURNING *`,
-      [
-        collegeCode || existing.college_code,
-        proposalCode || existing.proposal_code,
-        issueDate || existing.issue_date,
-        lastUpdated || new Date(), // update timestamp
-        quotedPrice || existing.quoted_price,
-        duration || existing.duration,
-        fromDate || existing.from_date,
-        toDate || existing.to_date,
-        proposalId,
-      ]
-    );
+    // Dynamically build SET clause and values
+    const fields = [];
+    const values = [];
+    let idx = 1;
+
+    for (const key in updates) {
+      fields.push(`${key} = $${idx}`);
+      values.push(updates[key]);
+      idx++;
+    }
+
+    // Add last_updated to track modification
+    fields.push(`last_updated = $${idx}`);
+    values.push(new Date());
+
+    // Add proposalId for WHERE clause
+    const query = `
+      UPDATE proposals
+      SET ${fields.join(', ')}
+      WHERE proposal_id = $${idx + 1}
+      RETURNING *;
+    `;
+    values.push(proposalId);
+
+    const updated = await pool.query(query, values);
 
     return res.status(200).json({
       status: 'success',
       message: 'Proposal updated successfully',
-      data: updatedProposal.rows[0],
+      data: updated.rows[0],
     });
   } catch (error) {
     console.error('Error updating proposal:', error);
-    res.status(500).json({
+    return res.status(500).json({
       status: 'failed',
       message: 'Could not update proposal',
     });
   }
 };
-
-
-export const addProposalServiceDetail = async (req, res) => {
-  try {
-    const { proposalId, serviceName } = req.body;
-
-    if (!proposalId || !serviceName) {
-      return res.status(400).json({
-        status: 'failed',
-        message: 'Proposal ID and Service Name are required',
-      });
-    }
-
-    const result = await pool.query(
-      `INSERT INTO proposal_service_details (proposal_id, service_name)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [proposalId, serviceName]
-    );
-
-    return res.status(200).json({
-      status: 'success',
-      message: 'Service added to proposal successfully',
-      data: result.rows[0],
-    });
-  } catch (error) {
-    console.error('Error adding proposal service:', error);
-    res.status(500).json({
-      status: 'failed',
-      message: 'Server error',
-    });
-  }
-};
-
 
 
 
@@ -215,25 +174,168 @@ export const getAllServices = async (req, res) => {
   }
 };
 
+export const getAllProposalPlans = async (req, res) => {
+  try {
+    // Fetch all plans
+    const plansResult = await pool.query(
+      'SELECT * FROM proposal_plans ORDER BY plan_id ASC'
+    );
+    
+    const plans = plansResult.rows;
+    const planIds = plans.map(plan => plan.plan_id);
+
+    // Initialize services map
+    let servicesMap = {};
+    
+    // Fetch services if plans exist
+    if (planIds.length > 0) {
+      const servicesResult = await pool.query(
+        `SELECT ps.plan_id, s.service_id, s.service_name, s.service_code
+         FROM plan_services ps
+         JOIN services s ON ps.service_id = s.service_id
+         WHERE ps.plan_id = ANY($1)`,
+        [planIds]
+      );
+      
+      // Map services to plan IDs
+      servicesResult.rows.forEach(row => {
+        if (!servicesMap[row.plan_id]) {
+          servicesMap[row.plan_id] = [];
+        }
+        servicesMap[row.plan_id].push({
+          service_id: row.service_id,
+          service_name: row.service_name,
+          service_code: row.service_code
+        });
+      });
+    }
+
+    // Combine plans with their services
+    const plansWithServices = plans.map(plan => ({
+      ...plan,
+      services: servicesMap[plan.plan_id] || []  // Default to empty array
+    }));
+
+    return res.status(200).json({
+      status: 'success',
+      data: plansWithServices,
+    });
+  } catch (error) {
+    console.error('Error fetching proposal plans:', error);
+    return res.status(500).json({
+      status: 'failed',
+      message: 'Server error',
+    });
+  }
+};
+
+
+
+
+export const addProposalPlan = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { plan_name, plan_code, duration, zipfile_link, services } = req.body;
+
+    // Validate required fields
+    if (!plan_name || !plan_code || duration === undefined) {
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Plan name, code, and duration are required',
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // 1. Check for duplicate plan_code
+    const exists = await client.query(
+      'SELECT 1 FROM proposal_plans WHERE plan_code = $1',
+      [plan_code]
+    );
+
+    if (exists.rowCount > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Plan code already exists',
+      });
+    }
+
+    // 2. Insert new plan
+    const planResult = await client.query(
+      `INSERT INTO proposal_plans 
+       (plan_name, plan_code, duration, zipfile_link) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING plan_id`,
+      [plan_name, plan_code, duration, zipfile_link || null]
+    );
+    
+    const planId = planResult.rows[0].plan_id;
+
+    // 3. Link services if provided
+    if (services && services.length > 0) {
+      // Validate service IDs
+      const serviceCheck = await client.query(
+        'SELECT service_id FROM services WHERE service_id = ANY($1::int[])',
+        [services]
+      );
+      
+      if (serviceCheck.rowCount !== services.length) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({
+          status: 'failed',
+          message: 'One or more service IDs are invalid',
+        });
+      }
+
+      // Insert service relationships
+      for (const serviceId of services) {
+        await client.query(
+          'INSERT INTO plan_services (plan_id, service_id) VALUES ($1, $2)',
+          [planId, serviceId]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+    
+    return res.status(201).json({
+      status: 'success',
+      message: 'Plan added successfully',
+      data: { plan_id: planId }
+    });
+    
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error adding proposal plan:', error);
+    return res.status(500).json({
+      status: 'failed',
+      message: 'Server error',
+    });
+  } finally {
+    client.release();
+  }
+};
+
 
 
 
 // Controller for adding service to proposal
 export const addProposalService = async (req, res) => {
   try {
-    const { proposalId, serviceId } = req.body;
+    const { proposalId, planId } = req.body;
 
-    if (!proposalId || !serviceId) {
+    if (!proposalId || !planId) {
       return res.status(400).json({
         status: 'failed',
-        message: 'Proposal ID and Service ID are required',
+        message: 'Proposal ID and Plan  ID are required',
       });
     }
 
     // Check if service exists
     const serviceCheck = await pool.query(
-      'SELECT EXISTS (SELECT 1 FROM services WHERE service_id = $1)',
-      [serviceId]
+      'SELECT EXISTS (SELECT 1 FROM proposal_plans WHERE plan_id = $1)',
+      [planId]
     );
 
     if (!serviceCheck.rows[0].exists) {
@@ -245,10 +347,10 @@ export const addProposalService = async (req, res) => {
 
     // Insert into proposal_services table
     const result = await pool.query(
-      `INSERT INTO proposal_services (proposal_id, service_id)
+      `INSERT INTO proposal_plan_details (proposal_id, plan_id)
        VALUES ($1, $2)
        RETURNING *`,
-      [proposalId, serviceId]
+      [proposalId, planId]
     );
 
     return res.status(200).json({
@@ -271,9 +373,9 @@ export const getProposalServices = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT s.* 
-       FROM services s
-       JOIN proposal_services ps ON s.service_id = ps.service_id
+      `SELECT p.* 
+       FROM proposal_plans p
+       JOIN proposal_plan_details ps ON p.plan_id = ps.plan_id
        WHERE ps.proposal_id = $1`,
       [proposalId]
     );
@@ -291,28 +393,29 @@ export const getProposalServices = async (req, res) => {
   }
 };
 
-export const deleteProposalService = async (req, res) => {
-  const { proposalId, serviceId } = req.params;
 
-  if (!proposalId || !serviceId) {
+export const deleteProposalService = async (req, res) => {
+  const { proposalId, planId } = req.params;
+
+  if (!proposalId || !planId) {
     return res.status(400).json({
       status: 'failed',
-      message: 'Proposal ID and Service ID are required',
+      message: 'Proposal ID and plan ID are required',
     });
   }
 
   try {
     const result = await pool.query(
-      `DELETE FROM proposal_services 
-       WHERE proposal_id = $1 AND service_id = $2
+      `DELETE FROM proposal_plan_details 
+       WHERE proposal_id = $1 AND plan_id = $2
        RETURNING *`,
-      [proposalId, serviceId]
+      [proposalId, planId]
     );
 
     if (result.rowCount === 0) {
       return res.status(404).json({
         status: 'failed',
-        message: 'No such mapping found between proposal and service',
+        message: 'No such mapping found between proposal and plan',
       });
     }
 
@@ -328,3 +431,7 @@ export const deleteProposalService = async (req, res) => {
     });
   }
 };
+
+
+
+

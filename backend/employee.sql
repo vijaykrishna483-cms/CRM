@@ -38,8 +38,12 @@ CREATE TABLE reimbursements (
     duration VARCHAR(20),
     from_date DATE,
     to_date DATE,
+    word_link VARCHAR(255),
+    excel_link VARCHAR(255),
     location VARCHAR(100),
     program VARCHAR(200),
+    status VARCHAR(20) NOT NULL DEFAULT 'requested'
+         CHECK (status IN ('requested', 'pending', 'paid', 'rejected'));
     CONSTRAINT fk_employee
         FOREIGN KEY (employee_id)
         REFERENCES employees(employee_id)
@@ -47,13 +51,24 @@ CREATE TABLE reimbursements (
 );
 
 
-CREATE TABLE expenditures (
+
+
+
+
+CREATE TABLE reimbursement_reviews (
     id SERIAL PRIMARY KEY,
-    reimbursement_id VARCHAR(50) NOT NULL
-      REFERENCES reimbursements(reimbursement_id) ON DELETE CASCADE,
-    expense_category VARCHAR(100),
-    expense_amount NUMERIC(12,2),
-    additional_cost NUMERIC(12,2),
-    total_cost NUMERIC(12,2),
-    invoice VARCHAR(200)
+    reimbursement_id VARCHAR(50) NOT NULL,
+    review_comment TEXT,
+    reimbursement_amount NUMERIC(12,2),
+    approved_by VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_reimbursement
+        FOREIGN KEY (reimbursement_id)
+        REFERENCES reimbursements(reimbursement_id)
+        ON DELETE CASCADE
 );
+
+
+
+

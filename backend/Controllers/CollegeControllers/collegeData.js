@@ -58,12 +58,60 @@ export const getAllColleges = async (req, res) => {
   }
 };
 
+export const deleteCollege = async (req, res) => {
+  const { collegeId } = req.params;
+
+  try {
+    await pool.query('BEGIN');
+
+    // Get college_code for use in deleting proposals
+    const collegeCodeResult = await pool.query(
+      'SELECT college_code FROM colleges WHERE college_id = $1',
+      [collegeId]
+    );
+
+    if (collegeCodeResult.rowCount === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(404).json({
+        status: 'failed',
+        message: 'College not found',
+      });
+    }
+
+    const collegeCode = collegeCodeResult.rows[0].college_code;
+
+    // Delete related proposals
+    await pool.query('DELETE FROM proposals WHERE college_code = $1', [collegeCode]);
+
+    // Delete related POCs
+    await pool.query('DELETE FROM college_pocs WHERE college_id = $1', [collegeId]);
+
+    // Delete the college
+    await pool.query('DELETE FROM colleges WHERE college_id = $1', [collegeId]);
+
+    await pool.query('COMMIT');
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'College and related records deleted',
+    });
+
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    console.error('Error deleting college:', error);
+    return res.status(500).json({
+      status: 'failed',
+      message: 'Server error while deleting college',
+    });
+  }
+};
+
 
 export const addPoc = async (req, res) => {
   try {
-    const { collegeId, pocName, pocDesignation, pocEmail, pocContact } = req.body;
+    const { collegeId, pocName, pocDesignation, pocEmail, pocContact, pocRedEmail } = req.body;
 
-    if (!collegeId || !pocName || !pocDesignation || !pocEmail || !pocContact) {
+    if (!collegeId || !pocName || !pocDesignation || !pocEmail || !pocContact || !pocRedEmail) {
       return res.status(400).json({
         status: 'failed',
         message: 'All fields are required'
@@ -71,10 +119,10 @@ export const addPoc = async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO college_pocs (college_id, poc_name, poc_designation, poc_email, poc_contact)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO college_pocs (college_id, poc_name, poc_designation, poc_email, poc_contact, poc_red_email)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [collegeId, pocName, pocDesignation, pocEmail, pocContact]
+      [collegeId, pocName, pocDesignation, pocEmail, pocContact, pocRedEmail]
     );
 
     return res.status(200).json({
@@ -85,6 +133,27 @@ export const addPoc = async (req, res) => {
 
   } catch (error) {
     console.error('Error adding POC:', error);
+    res.status(500).json({
+      status: 'failed',
+      message: 'Server error'
+    });
+  }
+};
+
+
+export const getAllPocs = async (req, res) => {
+  try {
+    // Optional filter by pocRedEmail
+
+
+     const result = await pool.query('SELECT * FROM college_pocs ORDER BY poc_id ASC');
+
+    return res.status(200).json({
+      status: 'success',
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error('Error fetching POCs:', error);
     res.status(500).json({
       status: 'failed',
       message: 'Server error'
