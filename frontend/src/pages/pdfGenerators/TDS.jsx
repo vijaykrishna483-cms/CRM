@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import api from '../../libs/apiCall';
 
 function ZipUploader() {
   const [tableData, setTableData] = useState([]);
@@ -12,7 +13,7 @@ function ZipUploader() {
     formData.append('zipFile', file);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/zip/upload', formData);
+      const res = await api.post('/zip/upload', formData);
       setTableData(res.data);
     } catch (err) {
       console.error('Upload failed:', err);

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import usePageAccess from '../../components/useAccessPage';
+import api from '../../libs/apiCall';
 
 // Number to words function (Indian format)
 const numberToWords = (num) => {
@@ -70,7 +71,7 @@ const Toe = () => {
   const handleSubmit = async () => {
     const payload = { ...formData };
     try {
-      const res = await axios.post('http://localhost:5000/api/pdf/tef', payload, {
+      const res = await api.post('/pdf/tef', payload, {
         responseType: 'blob'
       });
 

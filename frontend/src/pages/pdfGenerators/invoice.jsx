@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import usePageAccess from '../../components/useAccessPage';
+import api from '../../libs/apiCall';
 
 // Number to words function (Indian format, supports decimals)
 const numberToWords = (num) => {
@@ -54,7 +55,7 @@ const DocxForm = () => {
     const fetchEmployees = async () => {
       setLoading(true);
       try {
-        const res = await axios.get('http://localhost:5000/api/employee');
+        const res = await api.get('/employee');
         setEmployeeData(res.data || []);
       } catch (err) {
         toast.error('Failed to fetch employees.');
@@ -118,7 +119,7 @@ const DocxForm = () => {
   const handleSubmit = async () => {
     const payload = { ...formData, address: getFullAddress() };
     try {
-      const res = await axios.post('http://localhost:5000/api/pdf/invoice', payload, {
+      const res = await api.post('/pdf/invoice', payload, {
         responseType: 'blob'
       });
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import api from "../libs/apiCall";
 
 const usePageAccess = (component) => {
   const [allowed, setAllowed] = useState(false);
@@ -15,8 +16,8 @@ const usePageAccess = (component) => {
       }
 
       try {
-        const res = await axios.post(
-          "http://localhost:5000/api/auth/check",
+        const res = await api.post(
+          "/auth/check",
           { component },
           {
             headers: {

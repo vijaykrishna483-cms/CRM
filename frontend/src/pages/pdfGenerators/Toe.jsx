@@ -3,6 +3,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import axios from 'axios';
 import usePageAccess from '../../components/useAccessPage';
+import api from '../../libs/apiCall';
 
 const Toe = () => {
     const { allowed, loading: permissionLoading } = usePageAccess("toegenerator");
@@ -59,7 +60,7 @@ const Toe = () => {
    const handleSubmit = async () => {
     const payload = { ...formData };
     try {
-      const res = await axios.post('http://localhost:5000/api/pdf/toe', payload, {
+      const res = await api.post('/pdf/toe', payload, {
         responseType: 'blob'
       });
 
