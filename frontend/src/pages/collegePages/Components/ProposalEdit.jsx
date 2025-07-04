@@ -242,45 +242,11 @@ const ProposalEdit = () => {
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditForm({});
-  };
-
-  const handleDeleteService = async (proposalId, planId) => {
-    if (!window.confirm("Are you sure you want to remove this service?"))
-      return;
-
-    try {
-      await api.delete(`/college/proposal/${proposalId}/service/${planId}`);
-
-      // Update UI without refetching
-      setProposalServices((prev) => ({
-        ...prev,
-        [proposalId]: (prev[proposalId] || []).filter(
-          (s) => s.plan_id != planId
-        ),
-      }));
-
-      toast.success("Service removed successfully!");
-    } catch (err) {
-      toast.error(`Failed to remove service: ${err.message}`);
-    }
-  };
 
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filtering logic
-  const filteredProposals = proposals.filter((proposal) => {
-    const collegeMatch =
-      proposal.college_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposal.college_code.toLowerCase().includes(searchTerm.toLowerCase());
-    const proposalMatch =
-      proposal.proposal_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposal.proposal_code.toLowerCase().includes(searchTerm.toLowerCase());
-
-    return collegeMatch || proposalMatch;
-  });
+ 
 
   useEffect(() => {
     if (form.fromDate && form.duration) {
@@ -572,11 +538,10 @@ if (!allowed && !permissionLoading) return (
             </div>
           </div>
 
-          {/* Proposals Table */}
+          <ProposalView  showDetails={false}/>
         </>
       ) : (
         <>
-          <ProposalView/>
         </>
       )}
     </div>

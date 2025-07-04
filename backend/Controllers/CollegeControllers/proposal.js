@@ -92,6 +92,11 @@ export const getAllProposals = async (req, res) => {
 };
 
 
+// utils/toSnakeCase.js
+function toSnakeCase(str) {
+  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+}
+
 export const updateProposal = async (req, res) => {
   const { proposalId } = req.params;
   const updates = req.body;
@@ -110,18 +115,25 @@ export const updateProposal = async (req, res) => {
       });
     }
 
-    // Dynamically build SET clause and values
+    // Only allow these fields to be updated
+    const allowedFields = [
+      'collegeCode', 'proposalCode', 'issueDate',
+      'quotedPrice', 'duration', 'fromDate', 'toDate'
+    ];
+
     const fields = [];
     const values = [];
     let idx = 1;
 
     for (const key in updates) {
-      fields.push(`${key} = $${idx}`);
+      if (!allowedFields.includes(key)) continue;
+      const dbKey = toSnakeCase(key);
+      fields.push(`${dbKey} = $${idx}`);
       values.push(updates[key]);
       idx++;
     }
 
-    // Add last_updated to track modification
+    // Add last_updated
     fields.push(`last_updated = $${idx}`);
     values.push(new Date());
 
@@ -149,6 +161,7 @@ export const updateProposal = async (req, res) => {
     });
   }
 };
+
 
 
 

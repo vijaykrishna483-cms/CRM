@@ -180,7 +180,7 @@ const Vieww = () => {
               <th className="p-2 text-left">Contact</th>
               <th className="p-2 text-left">Email</th>
 
-              <th className="p-2 text-left">Actions</th>
+              {/* <th className="p-2 text-left">Actions</th> */}
             </tr>
           </thead>
           <tbody>
@@ -189,10 +189,10 @@ const Vieww = () => {
                 <tr className="hover:bg-gray-50 border-t text-left">
                   <td className="p-2 text-red-500 flex  items-center gap-1">
                     {" "}
-                    <MinusCircle
+                    {/* <MinusCircle
                       size={16}
                       onClick={() => deleteCollege(college.college_id)}
-                    />{" "}
+                    />{" "} */}
                     {college.college_code}
                   </td>
                   <td className="p-2">{college.college_name}</td>
@@ -216,11 +216,10 @@ const Vieww = () => {
                     <td className="p-2">{poc.poc_name}</td>
                     <td className="p-2">{poc.poc_designation}</td>
                     <td className="p-2">{poc.poc_contact}</td>
-                    <td className="p-2">
-                      {poc.poc_email} <br />{" "}
-                      <span className="text-red-600">{poc.poc_red_email}</span>
+                    <td className="p-2"> {poc.poc_email} <br />{" "}
+                      {/* <span className="text-red-600">{poc.poc_red_email}</span> */}
                     </td>
-                    <td className="p-2">
+                    {/* <td className="p-2">
                       <button
                         onClick={() => handleDeletePOC(poc.poc_id)}
                         className="text-red-500 hover:text-red-700"
@@ -228,7 +227,7 @@ const Vieww = () => {
                       >
                         <MinusCircle size={16} />
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </React.Fragment>

@@ -109,20 +109,13 @@ export const deleteCollege = async (req, res) => {
 
 export const addPoc = async (req, res) => {
   try {
-    const { collegeId, pocName, pocDesignation, pocEmail, pocContact, pocRedEmail } = req.body;
-
-    if (!collegeId || !pocName || !pocDesignation || !pocEmail || !pocContact || !pocRedEmail) {
-      return res.status(400).json({
-        status: 'failed',
-        message: 'All fields are required'
-      });
-    }
-
+    
+    const { collegeId, pocName, pocDesignation, pocEmail, pocContact } = req.body;
     const result = await pool.query(
-      `INSERT INTO college_pocs (college_id, poc_name, poc_designation, poc_email, poc_contact, poc_red_email)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO college_pocs (college_id, poc_name, poc_designation, poc_email, poc_contact)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [collegeId, pocName, pocDesignation, pocEmail, pocContact, pocRedEmail]
+      [collegeId, pocName, pocDesignation, pocEmail, pocContact]
     );
 
     return res.status(200).json({

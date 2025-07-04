@@ -57,13 +57,11 @@ const CollegeData = () => {
         </button>
       </div>
 
-      {open && (
-        <Add
-        />
-      )}
+      {open ? <> <Add
+        /></> : <>   <Vieww
+      /> </> }
 
-      <Vieww
-      />
+   
     </div>
   );
 };

@@ -14,6 +14,9 @@ export async function addTrainerWithServices(req, res) {
     location,
     charge,
     employment_type,
+    address_line1,
+    address_line2,
+    address_line3,
     service_ids = []
   } = req.body;
 
@@ -32,9 +35,9 @@ export async function addTrainerWithServices(req, res) {
     // Insert trainer
     await client.query(
       `INSERT INTO trainers 
-      (trainer_id, trainer_name, aadhar_id, pan_id, contact_number, email, status, location, charge, employment_type)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [trainer_id, trainer_name, aadhar_id, pan_id, contact_number, email, status, location, charge, employment_type]
+      (trainer_id, trainer_name, aadhar_id, pan_id, contact_number, email, status, location, charge, employment_type,address_line1, address_line2, address_line3)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      [trainer_id, trainer_name, aadhar_id, pan_id, contact_number, email, status, location, charge, employment_type,address_line1,address_line2,address_line3]
     );
 
     // Validate service IDs
@@ -224,6 +227,9 @@ export async function getAllTrainers(req, res) {
           t.email,
           t.status,
           t.location,
+          t.address_line1,
+          t.address_line2,
+          t.address_line3,
           t.charge,
           t.employment_type,
           COALESCE(

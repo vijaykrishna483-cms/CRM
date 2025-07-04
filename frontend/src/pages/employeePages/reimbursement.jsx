@@ -49,6 +49,33 @@ const Reimbursement = () => {
     });
   };
 
+function getNextReimbursementCode(existingCodes) {
+  const numbers = existingCodes
+    .map(code => {
+      const match = code && code.match(/^REIMB(\d{2})$/);
+      return match ? parseInt(match[1], 10) : null;
+    })
+    .filter(num => num !== null);
+
+  const max = numbers.length > 0 ? Math.max(...numbers) : 0;
+  const nextNum = max + 1;
+  return `REIMB${nextNum.toString().padStart(2, "0")}`;
+}
+// Some code that uses 'open' here (e.g., in a useEffect or function)
+const [open, setOpen] = useState(true);
+
+
+useEffect(() => {
+  if (open) {
+    const codes = reimbursements.map(r => r.reimbursement_id);
+    const nextCode = getNextReimbursementCode(codes);
+    setReimbursementInfo(info => ({
+      ...info,
+      reimbursement_id: nextCode,
+    }));
+  }
+}, [reimbursements, open]);
+
   const handleAddReimbursement = async () => {
     setLoading(true);
     try {
@@ -74,7 +101,6 @@ const Reimbursement = () => {
       setLoading(false);
     }
   };
-const [open, setOpen] = useState(true);
 
       if (!allowed && !permissionLoading) return (
   <div className="min-h-[60vh] flex flex-col items-center justify-center">
@@ -183,14 +209,16 @@ const [open, setOpen] = useState(true);
             >
               Reimbursement ID
             </label>
-            <input
-              id="reimbursement_id"
-              name="reimbursement_id"
-              placeholder="Reimbursement ID"
-              value={reimbursementInfo.reimbursement_id}
-              onChange={handleReimbursementChange}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            />
+         <input
+  id="reimbursement_id"
+  name="reimbursement_id"
+  placeholder="Reimbursement ID"
+  value={reimbursementInfo.reimbursement_id}
+  onChange={handleReimbursementChange}
+  className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+  readOnly
+/>
+
           </div>
 
           <div className="flex flex-col text-left">
@@ -313,7 +341,114 @@ const [open, setOpen] = useState(true);
         >
           {loading ? "Adding..." : "Add Reimbursement"}
         </button>
-      </div> </> :<>
+      </div> 
+      
+      
+       <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto mb-10">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-sm font-semibold text-[#4f378a]">
+            Reimbursement Entries
+          </h3>
+          <button
+            onClick={fetchReimbursements}
+            className="text-sm text-gray-500 hover:text-gray-700"
+          >
+            Refresh
+          </button>
+        </div>
+        {loading ? (
+          <p className="text-center py-4">Loading reimbursements...</p>
+        ) : (
+          <table className="w-full text-sm border-collapse">
+            <thead className="text-gray-600 bg-gray-100 border-b">
+              <tr>
+                <th className="p-2 text-left">Date</th>
+                <th className="p-2 text-left">Employee ID</th>
+                <th className="p-2 text-left">Reimbursement ID</th>
+                <th className="p-2 text-left">Program</th>
+                                <th className="p-2 text-left">Location</th>
+                <th className="p-2 text-left">Duration</th>
+
+                <th className="p-2 text-left">Word Link</th>
+                <th className="p-2 text-left">Excel Link</th>
+                                <th className="p-2 text-left">Status</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {reimbursements.map((reimb) => (
+                <tr
+                  key={reimb.id}
+                  className="hover:bg-gray-50 border-t text-left"
+                >
+                  <td className="p-2">
+                    {new Date(reimb.date).toLocaleDateString()}
+                  </td>
+                  <td className="p-2">{reimb.employee_id}</td>
+                  <td className="p-2">{reimb.reimbursement_id}</td>
+                  <td className="p-2">{reimb.program}</td>
+                                    <td className="p-2">{reimb.location}</td>
+                                                      <td className="p-2">{reimb.duration} days</td>
+
+
+                  <td className="p-2">
+                    {reimb.word_link ? (
+                      <a
+                        href={reimb.word_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 text-xs"
+                      >
+                        View Word
+                      </a>
+                    ) : (
+                      <span className="text-gray-400 text-xs">No document</span>
+                    )}
+                  </td>
+                  <td className="p-2">
+                    {reimb.excel_link ? (
+                      <a
+                        href={reimb.excel_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 text-xs"
+                      >
+                        View Excel
+                      </a>
+                    ) : (
+                      <span className="text-gray-400 text-xs">No document</span>
+                    )}
+                  </td>
+                  <td className="p-2">
+  {reimb.status === 'requested' && (
+    <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Requested</span>
+  )}
+  {reimb.status === 'pending' && (
+    <span className="px-2 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-full">Pending</span>
+  )}
+  {reimb.status === 'paid' && (
+    <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">Paid</span>
+  )}
+  {reimb.status === 'rejected' && (
+    <span className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">Rejected</span>
+  )}
+</td>
+
+                </tr>
+              ))}
+              {reimbursements.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="p-2 text-center text-gray-400">
+                    No reimbursements found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
+      </div></> :<>
+
+      
       
       
         <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto mb-10">
@@ -337,9 +472,10 @@ const [open, setOpen] = useState(true);
                 <th className="p-2 text-left">Date</th>
                 <th className="p-2 text-left">Employee ID</th>
                 <th className="p-2 text-left">Reimbursement ID</th>
-                <th className="p-2 text-left">Duration</th>
-                <th className="p-2 text-left">Location</th>
                 <th className="p-2 text-left">Program</th>
+                                <th className="p-2 text-left">Location</th>
+                <th className="p-2 text-left">Duration</th>
+
                 <th className="p-2 text-left">Word Link</th>
                 <th className="p-2 text-left">Excel Link</th>
                                 <th className="p-2 text-left">Status</th>
@@ -357,9 +493,11 @@ const [open, setOpen] = useState(true);
                   </td>
                   <td className="p-2">{reimb.employee_id}</td>
                   <td className="p-2">{reimb.reimbursement_id}</td>
-                  <td className="p-2">{reimb.duration} days</td>
-                  <td className="p-2">{reimb.location}</td>
                   <td className="p-2">{reimb.program}</td>
+                                    <td className="p-2">{reimb.location}</td>
+                                                      <td className="p-2">{reimb.duration} days</td>
+
+
                   <td className="p-2">
                     {reimb.word_link ? (
                       <a

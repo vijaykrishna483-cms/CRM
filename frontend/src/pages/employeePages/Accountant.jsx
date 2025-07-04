@@ -4,13 +4,10 @@ import { toast } from 'react-toastify';
 import usePageAccess from '../../components/useAccessPage';
 
 const Accountant = () => {
+  const { allowed, loading: permissionLoading } = usePageAccess("accountantpage");
 
-           const { allowed, loading: permissionLoading } = usePageAccess("reimbursementpaid");
-
-       
-
-  const [reimbursements, setReimbursements] = useState([]); // For reviews
-  const [reimbursementss, setReimbursementss] = useState([]); // For reimbursement data
+  const [reimbursements, setReimbursements] = useState([]);
+  const [reimbursementss, setReimbursementss] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -47,7 +44,6 @@ const Accountant = () => {
     try {
       await api.patch(`/employee/reimbursements/${id}/status`, { status: newStatus });
       toast.success('Status Updated');
-      // Refresh both data sets after update
       fetchReviews();
       fetchReimbursements();
     } catch (err) {
@@ -56,49 +52,60 @@ const Accountant = () => {
     }
   };
 
-  // Create a mapping of reimbursement_id to status
+  // Map reimbursement_id to status
   const statusMap = {};
   reimbursementss.forEach(item => {
     statusMap[item.reimbursement_id] = item.status;
   });
 
-        if (!allowed && !permissionLoading) return (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center">
-    <div className="flex flex-col items-center bg-white px-8 py-10 ">
-      <svg
-        className="w-14 h-14 text-red-500 mb-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fee2e2" />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15 9l-6 6m0-6l6 6"
-          stroke="red"
-          strokeWidth="2"
-        />
-      </svg>
-      <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
-      <p className="text-gray-600 text-center mb-4">
-        You do not have permission to view this page.<br />
-        Please contact the administrator if you believe this is a mistake.
-      </p>
-      <button
-        className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
-        onClick={() => window.location.href = "/"}
-      >
-        Go to Home
-      </button>
+  // Helper to get color classes for select based on status
+  const getStatusSelectClass = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-50 text-yellow-800 border-yellow-300';
+      case 'paid':
+        return 'bg-green-50 text-green-800 border-green-300';
+      case 'rejected':
+        return 'bg-red-50 text-red-800 border-red-300';
+      default:
+        return 'bg-white text-gray-700 border-gray-300';
+    }
+  };
+
+  if (!allowed && !permissionLoading) return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center bg-white px-8 py-10 ">
+        <svg
+          className="w-14 h-14 text-red-500 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fee2e2" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15 9l-6 6m0-6l6 6"
+            stroke="red"
+            strokeWidth="2"
+          />
+        </svg>
+        <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
+        <p className="text-gray-600 text-center mb-4">
+          You do not have permission to view this page.<br />
+          Please contact the administrator if you believe this is a mistake.
+        </p>
+        <button
+          className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
+          onClick={() => window.location.href = "/"}
+        >
+          Go to Home
+        </button>
+      </div>
     </div>
-  </div>
-);
-  if (permissionLoading) return <div>Loading...</div>;  
-
-  
-
+  );
+  if (permissionLoading) return <div>Loading...</div>;
 
   return (
     <div className="w-full min-h-screen bg-white px-6 sm:px-10 ">
@@ -128,7 +135,7 @@ const Accountant = () => {
             <thead className="bg-gray-100 text-left text-gray-600">
               <tr>
                 <th className="p-3">Reimb ID</th>
-                <th className="p-3">Employee ID</th>
+                {/* <th className="p-3">Employee ID</th> */}
                 <th className="p-3">Amount</th>
                 <th className="p-3">Approved By</th>
                 <th className="p-3">Comment</th>
@@ -138,13 +145,10 @@ const Accountant = () => {
             </thead>
             <tbody>
               {reimbursements.map((row) => {
-                // Get current status from reimbursementss data
                 const currentStatus = statusMap[row.reimbursement_id] || '';
-                
                 return (
                   <tr key={row.id} className="border-t hover:bg-gray-50">
                     <td className="p-3">{row.reimbursement_id}</td>
-                    <td className="p-3">{row.employee_id}</td>
                     <td className="p-3">₹{row.reimbursement_amount}</td>
                     <td className="p-3">{row.approved_by}</td>
                     <td className="p-3 max-w-xs">{row.review_comment}</td>
@@ -159,7 +163,7 @@ const Accountant = () => {
                           const newStatus = e.target.value;
                           statusUpdate(row.reimbursement_id, newStatus);
                         }}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        className={`border rounded-lg px-3 py-2 text-sm transition-colors duration-200 ${getStatusSelectClass(currentStatus)}`}
                         disabled={loading}
                       >
                         <option value="">Select Status</option>

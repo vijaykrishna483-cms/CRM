@@ -6,9 +6,9 @@ export async function addExamCollegeMapping(req, res) {
 
   try {
     await pool.query(
-      `INSERT INTO exam_college_map (exam_id, college_code, college_batch)
-       VALUES ($1, $2, $3)`,
-      [exam_id, college_code, college_batch]
+      `INSERT INTO exam_college_map (exam_id, college_code, college_batch, date_of_issue)
+       VALUES ($1, $2, $3, $4)`,
+      [exam_id, college_code, college_batch, new Date()]
     );
 
     res.status(201).json({ message: 'Exam-College mapping added successfully' });
@@ -29,11 +29,12 @@ export async function getAllExamCollegeMappings(req, res) {
         ecm.college_code,
         c.college_name,
         ecm.college_batch,
+        ecm.date_of_issue,
         ARRAY_AGG(DISTINCT ecat.category_name) AS exam_categories
       FROM exam_college_map ecm
       JOIN colleges c ON ecm.college_code = c.college_code
       JOIN exam_categories_map ecat ON ecm.exam_id = ecat.exam_id
-      GROUP BY ecm.id, ecm.exam_id, ecm.college_code, c.college_name, ecm.college_batch
+      GROUP BY ecm.id, ecm.exam_id, ecm.college_code, c.college_name, ecm.college_batch, ecm.date_of_issue
     `);
 
     res.status(200).json(result.rows);

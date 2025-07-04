@@ -19,7 +19,8 @@ CREATE TABLE exam_college_map (
     id SERIAL PRIMARY KEY,
     exam_id VARCHAR(30) NOT NULL REFERENCES exams(exam_id) ON DELETE CASCADE,
     college_id VARCHAR(20) NOT NULL REFERENCES colleges(college_id) ON DELETE CASCADE,
-    college_batch VARCHAR(50)
+    college_batch VARCHAR(50),
+    date_of_issue DATE
 );
 
 

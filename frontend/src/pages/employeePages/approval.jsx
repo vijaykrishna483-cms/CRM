@@ -26,7 +26,9 @@ const Approval = () => {
     setLoading(true);
     try {
       const res = await api.get("/employee/getreimbursments");
-      setReimbursements(res.data || []);
+      const reim=res.data.filter(item => item.status === "requested");
+      setReimbursements(reim || []);
+      
     } catch (err) {
       toast.error("Failed to fetch reimbursements");
     } finally {
@@ -262,7 +264,6 @@ const Approval = () => {
                   <option value="">Select Status</option>
                   <option value="pending">pending</option>
                   <option value="rejected">rejected</option>
-                  <option value="paid">paid</option>
                 </select>
               </div>
             </div>

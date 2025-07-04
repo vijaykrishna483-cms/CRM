@@ -8,7 +8,7 @@ const ProposalSender = () => {
 
   const options = [
     { label: "Upload", value: "upload" },
-    { label: "Send Mail", value: "sendmail" },
+    { label: "Sent Mail", value: "sendmail" },
     { label: "Active", value: "active" }
   ];
 

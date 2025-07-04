@@ -183,7 +183,7 @@ useEffect(() => {
 
           {/* POC Red Email */}
          <div>
-  <label className="block text-sm font-semibold text-gray-700 mb-1">POC Red Email</label>
+  <label className="block text-sm font-semibold text-gray-700 mb-1">Designated Mail</label>
   {loadingRedEmails ? (
     <div className="text-gray-500 text-sm">Loading emails...</div>
   ) : (
@@ -193,7 +193,7 @@ useEffect(() => {
       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#6750a4]"
       required
     >
-      <option value="">Select POC Red Email</option>
+      <option value="">Select Email</option>
       {redEmails.map(email => (
         <option key={email} value={email}>
           {email}
@@ -251,7 +251,7 @@ useEffect(() => {
                   <th className="px-4 py-2 border">Proposal Code</th>
                   <th className="px-4 py-2 border">Status</th>
                   <th className="px-4 py-2 border">ZIP File Link</th>
-                  <th className="px-4 py-2 border">POC Red Email</th>
+                  <th className="px-4 py-2 border">Designated Mail</th>
                   <th className="px-4 py-2 border">Uploaded At</th>
                                     {/* <th className="px-4 py-2 border">Send Mail</th> */}
 

@@ -55,7 +55,7 @@ const[open, setOpen] = useState(false);
         </>
       ) : (
         <>
-          <ProposalView/>
+          <ProposalView  showDetails={true}/>
         </>
       )}
     </div>

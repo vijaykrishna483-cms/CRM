@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import usePageAccess from "../../../components/useAccessPage";
 import api from "../../../libs/apiCall";
+import { MinusCircle } from "lucide-react";
 
 const Add = () => {
   const { allowed, loading: loadingg } = usePageAccess("collegedataedition");
@@ -18,7 +19,6 @@ const Add = () => {
     name: "",
     designation: "",
     mail: "",
-    redEmail: "",
     contact: "",
   });
 
@@ -108,8 +108,7 @@ const Add = () => {
       !pocInfo.name ||
       !pocInfo.designation ||
       !pocInfo.mail ||
-      !pocInfo.contact ||
-      !pocInfo.redEmail
+      !pocInfo.contact
     ) {
       toast.info("Please fill all fields including college ID.");
       return;
@@ -130,7 +129,6 @@ const Add = () => {
         pocName: pocInfo.name,
         pocDesignation: pocInfo.designation,
         pocEmail: pocInfo.mail,
-        pocRedEmail: pocInfo.redEmail,
         pocContact: pocInfo.contact,
       });
 
@@ -146,6 +144,70 @@ const Add = () => {
       setLoading(false);
     }
   };
+
+
+
+
+
+  useEffect(() => {
+    fetchColleges();
+  }, []);
+
+
+  const handleDeletePOC = async (pocId) => {
+    if (!window.confirm("Delete this POC?")) return;
+
+    setLoading(true);
+    try {
+      await api.delete(`/college/delete/${pocId}`);
+      await fetchColleges();
+      toast.success("POC deleted");
+    } catch {
+      toast.error("Error deleting POC");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filtering logic
+  const filteredColleges = collegeData.filter((college) => {
+    const collegeMatch =
+      college.college_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      college.college_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const pocMatch = (college.pocs || []).some((poc) =>
+      poc.poc_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const stateMatch =
+      college.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      college.state.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return collegeMatch || pocMatch || stateMatch;
+  });
+
+  const deleteCollege = async (collegeId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this college and all its associated POCs and proposals?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const response = await api.delete(`/college/delete/${collegeId}`);
+
+      if (response.data.status === "success") {
+        toast.success("College deleted successfully");
+        fetchColleges(); // Refresh the list after deletion
+      } else {
+        toast.error(response.data.message || "Failed to delete college");
+      }
+    } catch (error) {
+      console.error("Delete college error:", error);
+      toast.error("Server error while deleting college");
+    }
+  };
+
 
   if (!allowed && !loadingg)
     return (
@@ -325,7 +387,7 @@ const Add = () => {
             />
           </div>
 
-          <div className="flex flex-col text-left">
+          {/* <div className="flex flex-col text-left">
             <label htmlFor="mail" className="text-sm font-medium mb-1">
               College Mail
             </label>
@@ -337,7 +399,7 @@ const Add = () => {
               onChange={handleChange}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
-          </div>
+          </div> */}
 
           <div className="flex flex-col text-left">
             <label htmlFor="contact" className="text-sm font-medium mb-1">
@@ -362,6 +424,109 @@ const Add = () => {
           {loading ? "Adding..." : "Add POC"}
         </button>
       </div>
+
+
+
+
+
+
+
+
+
+
+
+          <div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
+              <h3 className="text-sm font-semibold mb-4 text-[#4f378a]">
+                College Entries
+              </h3>
+              <div className="flex gap-4 w-full justify-center items-center mb-4">
+                <input
+                  type="text"
+                  placeholder="Search by college code, name or POC,State"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className=" border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm"
+                />
+      
+                <button
+                  onClick={() => exportTableToExcel(filteredColleges)}
+                  className="bg-[#364153] text-white px-4 py-2 rounded hover:bg-[#91619b]"
+                >
+                  Download Excel
+                </button>
+              </div>
+      
+              <table className="w-full text-sm border-collapse">
+                <thead className="text-gray-600 bg-gray-100 border-b text-left">
+                  <tr>
+                    <th className="p-2 text-left">College Code</th>
+                    <th className="p-2 text-left">Name</th>
+                    <th className="p-2 text-left">Location</th>
+                    <th className="p-2 text-left">State</th>
+                    <th className="p-2 text-left">POC Name</th>
+                    <th className="p-2 text-left">Designation</th>
+                    <th className="p-2 text-left">Contact</th>
+                    <th className="p-2 text-left">Email</th>
+      
+                    {/* <th className="p-2 text-left">Actions</th> */}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredColleges.map((college) => (
+                    <React.Fragment key={college.college_id}>
+                      <tr className="hover:bg-gray-50 border-t text-left">
+                        <td className="p-2 text-red-500 flex  items-center gap-1">
+                          {" "}
+                          <MinusCircle
+                            size={16}
+                            onClick={() => deleteCollege(college.college_id)}
+                          />{" "}
+                          {college.college_code}
+                        </td>
+                        <td className="p-2">{college.college_name}</td>
+                        <td className="p-2">{college.location}</td>
+                        <td className="p-2">{college.state}</td>
+                        <td colSpan="5" className="p-2">
+                          {!college.pocs || college.pocs.length === 0
+                            ? "No POCs"
+                            : ""}
+                        </td>
+                      </tr>
+                      {(college.pocs || []).map((poc) => (
+                        <tr
+                          key={poc.poc_id}
+                          className="hover:bg-gray-50 border-t text-left"
+                        >
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td className="p-2">{poc.poc_name}</td>
+                          <td className="p-2">{poc.poc_designation}</td>
+                          <td className="p-2">{poc.poc_contact}</td>
+                          <td className="p-2"> {poc.poc_email} <br />{" "}
+                            <span className="text-red-600">{poc.poc_red_email}</span>
+                          </td>
+                          <td className="p-2">
+                            <button
+                              onClick={() => handleDeletePOC(poc.poc_id)}
+                              className="text-red-500 hover:text-red-700"
+                              title="Delete POC"
+                            >
+                              <MinusCircle size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+
     </div>
   );
 };
