@@ -47,30 +47,38 @@ const ExamSearch = () => {
     }
   };
 
-  useEffect(() => {
-    let result = exams;
+ useEffect(() => {
+  let result = exams;
 
-    // Filter by Exam ID or Category (normal filter)
-    if (examFilter.trim()) {
-      const term = examFilter.trim().toLowerCase();
-      result = result.filter(
-        exam =>
-          exam.exam_id.toLowerCase().includes(term) ||
-          (exam.categories || []).some(cat => cat.toLowerCase().includes(term))
-      );
-    }
+  // Filter by Exam ID or Category (normal filter)
+  if (examFilter.trim()) {
+    const term = examFilter.trim().toLowerCase();
+    result = result.filter(
+      exam =>
+        exam.exam_id.toLowerCase().includes(term) ||
+        (exam.categories || []).some(cat => cat.toLowerCase().includes(term))
+    );
+  }
 
-    // Filter by College Name (negation)
-    if (collegeNegationFilter.trim()) {
-      const term = collegeNegationFilter.trim().toLowerCase();
-      result = result.filter(
-        exam =>
-          !(exam.colleges || []).some(college => college.toLowerCase().includes(term))
-      );
-    }
+  // Reorder by College Name (negation, but not removing)
+  if (collegeNegationFilter.trim()) {
+    const term = collegeNegationFilter.trim().toLowerCase();
+    const notIncluded = [];
+    const included = [];
+    result.forEach(exam => {
+      const colleges = (exam.colleges || []).map(c => c.toLowerCase());
+      if (colleges.some(college => college.includes(term))) {
+        included.push(exam);
+      } else {
+        notIncluded.push(exam);
+      }
+    });
+    result = [...notIncluded, ...included]; // Not included first, included last
+  }
 
-    setFilteredExams(result);
-  }, [examFilter, collegeNegationFilter, exams]);
+  setFilteredExams(result);
+}, [examFilter, collegeNegationFilter, exams]);
+
 
   if (!allowed && !permissionLoading) return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">

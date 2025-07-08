@@ -169,7 +169,7 @@ const Approval = () => {
             boxShadow: open ? "0 2px 8px #6750a433" : undefined,
           }}
         >
-          Add Review
+         Approve
         </button>
 
         <button
@@ -262,7 +262,7 @@ const Approval = () => {
                   className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="">Select Status</option>
-                  <option value="pending">pending</option>
+                  <option value="approved">approved</option>
                   <option value="rejected">rejected</option>
                 </select>
               </div>
@@ -277,73 +277,11 @@ const Approval = () => {
             </button>
           </div>
           {/* Reviews Table */}
-          <div className="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-[#4f378a]">
-                Reimbursement Reviews
-              </h2>
-              <button
-                onClick={fetchReviews}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Refresh Reviews
-              </button>
-            </div>
-            {loading ? (
-              <p className="text-center py-4">Loading reviews...</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <thead className="text-gray-600 bg-gray-100 border-b">
-                    <tr>
-                      <th className="p-2 text-left">Reimbursement ID</th>
-                      <th className="p-2 text-left">Amount</th>
-                      <th className="p-2 text-left">Approved By</th>
-                      <th className="p-2 text-left">Comments</th>
-                      <th className="p-2 text-left">Review Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reviews.map((review) => (
-                      <tr
-                        key={review.id}
-                        className="hover:bg-gray-50 border-t text-left"
-                      >
-                        <td className="p-2">{review.reimbursement_id}</td>
-                        <td className="p-2">₹{review.reimbursement_amount}</td>
-                        <td className="p-2">{review.approved_by}</td>
-                        <td
-                          className="p-2 max-w-xs truncate"
-                          title={review.review_comment}
-                        >
-                          {review.review_comment}
-                        </td>
-                        <td className="p-2">
-                          {review.created_at
-                            ? new Date(review.created_at).toLocaleDateString()
-                            : "N/A"}
-                        </td>
-                      </tr>
-                    ))}
-                    {reviews.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan="5"
-                          className="p-2 text-center text-gray-400"
-                        >
-                          No reimbursement reviews found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto mb-10">
+         
+
+
+
+           <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto mb-10">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-semibold text-[#4f378a]">
                 Reimbursement Entries
@@ -428,9 +366,9 @@ const Approval = () => {
                             Requested
                           </span>
                         )}
-                        {reimb.status === "pending" && (
+                        {reimb.status === "approved" && (
                           <span className="px-2 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-full">
-                            Pending
+                            approved
                           </span>
                         )}
                         {reimb.status === "paid" && (
@@ -455,6 +393,73 @@ const Approval = () => {
                   )}
                 </tbody>
               </table>
+            )}
+          </div>
+
+        </>
+      ) : (
+        <>
+          <div className="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-[#4f378a]">
+                Reimbursement Reviews
+              </h2>
+              <button
+                onClick={fetchReviews}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Refresh Reviews
+              </button>
+            </div>
+            {loading ? (
+              <p className="text-center py-4">Loading reviews...</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead className="text-gray-600 bg-gray-100 border-b">
+                    <tr>
+                      <th className="p-2 text-left">Reimbursement ID</th>
+                      <th className="p-2 text-left">Amount</th>
+                      <th className="p-2 text-left">Approved By</th>
+                      <th className="p-2 text-left">Comments</th>
+                      <th className="p-2 text-left">Review Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reviews.map((review) => (
+                      <tr
+                        key={review.id}
+                        className="hover:bg-gray-50 border-t text-left"
+                      >
+                        <td className="p-2">{review.reimbursement_id}</td>
+                        <td className="p-2">₹{review.reimbursement_amount}</td>
+                        <td className="p-2">{review.approved_by}</td>
+                        <td
+                          className="p-2 max-w-xs truncate"
+                          title={review.review_comment}
+                        >
+                          {review.review_comment}
+                        </td>
+                        <td className="p-2">
+                          {review.created_at
+                            ? new Date(review.created_at).toLocaleDateString()
+                            : "N/A"}
+                        </td>
+                      </tr>
+                    ))}
+                    {reviews.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan="5"
+                          className="p-2 text-center text-gray-400"
+                        >
+                          No reimbursement reviews found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </>

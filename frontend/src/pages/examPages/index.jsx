@@ -27,9 +27,9 @@ const Index = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#f7f6fd]">
+    <div className="w-[100vw] min-h-screen bg-[#f7f6fd]">
       <Navbar />
-      <div className="flex flex-col items-center pt-22">
+      <div className="flex w-[100vw] flex-col items-center pt-22">
         {/* Tab Bar */}
         <div className="flex flex-wrap gap-4 bg-white shadow rounded-2xl px-4 py-2 mb-8 border border-[#f3e6f1]">
           {TABS.map((tab) => (

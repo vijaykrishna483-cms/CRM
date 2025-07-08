@@ -84,7 +84,7 @@ const Activate = () => {
         return 'bg-yellow-100 text-yellow-800';
       case 'uploaded':
         return 'bg-blue-100 text-blue-800';
-      case 'sendMail':
+      case 'Mail Sent':
         return 'bg-purple-100 text-purple-800';
       case 'active':
         return 'bg-green-100 text-green-700';
@@ -117,7 +117,7 @@ const Activate = () => {
               </thead>
               <tbody>
 {filesWithCodes
-  .filter(file => file.status === 'sendMail' || file.status === 'active')
+  .filter(file => file.status === 'Mail Sent' || file.status === 'active')
   .map((file, index) => (                    <tr
                     key={file.id}
                     className={

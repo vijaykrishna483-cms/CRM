@@ -313,9 +313,7 @@ if (!allowed && !permissionLoading) return (
   if (permissionLoading) return <div>Loading...</div>;  
   return (
     <div className="w-full min-h-screen bg-white px-6 sm:px-10 ">
-      <h1 className="text-2xl font-bold text-center mb-10 text-[#4f378a]">
-        Proposal Management Portal
-      </h1>
+  
 
       {/* Add Proposal Form */}
 {/* 
@@ -538,7 +536,7 @@ if (!allowed && !permissionLoading) return (
             </div>
           </div>
 
-          <ProposalView  showDetails={false}/>
+          <ProposalView  showDetails={true}/>
         </>
       ) : (
         <>

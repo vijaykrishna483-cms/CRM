@@ -10,12 +10,12 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    vertical_id: "",
-    position_id: "",
-    page_id: "",
-  });
+  vertical_name: "",
+  position_name: "",
+  page_id: "",
+});
+
   const [formMsg, setFormMsg] = useState("");
-  const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
 
@@ -50,22 +50,36 @@ const Admin = () => {
   };
 
   // Handle form submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setFormMsg("");
-    try {
-      const res = await api.post("/auth/access/add", form);
-      setFormMsg(res.data.message);
-      // Refresh the list
-      const updated = await api.get("/auth/access/getall");
-      setRoleAccess(updated.data.data);
-      setForm({ vertical_id: "", position_id: "", page_id: "" });
-    } catch (err) {
-      setFormMsg(
-        err.response?.data?.message || "Failed to add role access entry"
-      );
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setFormMsg("");
+  try {
+    // Map names to objects
+    const vertical = verticals.find(v => v.name === form.vertical_name);
+    const position = positions.find(p => p.name === form.position_name);
+
+    const payload = {
+      vertical_id: vertical?.id || "",
+      position_id: position?.id || "",
+      page_id: form.page_id,
+    };
+
+    const res = await api.post("/auth/access/add", payload);
+    setFormMsg(res.data.message);
+
+    // Refresh the list
+    const updated = await api.get("/auth/access/getall");
+    setRoleAccess(updated.data.data);
+
+    // Reset form fields
+    setForm({ vertical_name: "", position_name: "", page_id: "" });
+  } catch (err) {
+    setFormMsg(
+      err.response?.data?.message || "Failed to add role access entry"
+    );
+  }
+};
+
 
   const deleteRoleAccess = async (id) => {
     try {
@@ -79,16 +93,17 @@ const Admin = () => {
     }
   };
 
-  // SEARCH FILTER
-  const filteredRoleAccess = roleAccess.filter(entry => {
-    const query = search.toLowerCase();
-    return (
-      entry.vertical_name?.toLowerCase().includes(query) ||
-      entry.position_name?.toLowerCase().includes(query) ||
-      entry.page_name?.toLowerCase().includes(query) ||
-      entry.component?.toLowerCase().includes(query)
-    );
-  });
+// Filtering logic based on form selection
+const filteredRoleAccess = roleAccess.filter(entry => {
+  const verticalMatch = form.vertical_name ? entry.vertical_name === form.vertical_name : true;
+  const positionMatch = form.position_name ? entry.position_name === form.position_name : true;
+  return verticalMatch && positionMatch;
+});
+
+
+
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#e7f6f2] via-[#6750a4]/70 to-[#6750a4]/100 py-10 px-2">
@@ -169,40 +184,45 @@ const Admin = () => {
               <label className="text-sm font-semibold text-[#6750a4]">
                 Vertical
               </label>
-              <select
-                name="vertical_id"
-                value={form.vertical_id}
-                onChange={handleChange}
-                required
-                className="border rounded-lg px-3 py-2 w-48 focus:border-[#6750a4] focus:ring-2 focus:ring-[#6750a4] bg-gray-50"
-              >
-                <option value="">Select Vertical</option>
-                {verticals.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name}
-                  </option>
-                ))}
-              </select>
+             {/* Vertical Select */}
+<select
+  name="vertical_name"
+  value={form.vertical_name}
+  onChange={handleChange}
+  required
+  className="border rounded-lg px-3 py-2 w-48 focus:border-[#6750a4] focus:ring-2 focus:ring-[#6750a4] bg-gray-50"
+>
+  <option value="">Select Vertical</option>
+  {verticals.map((v) => (
+    <option key={v.id} value={v.name}>
+      {v.name}
+    </option>
+  ))}
+</select>
+
+{/* Position Select */}
+
             </div>
             {/* Position Select */}
             <div className="flex flex-col gap-1">
               <label className="text-sm font-semibold text-[#6750a4]">
                 Position
               </label>
-              <select
-                name="position_id"
-                value={form.position_id}
-                onChange={handleChange}
-                required
-                className="border rounded-lg px-3 py-2 w-48 focus:border-[#6750a4] focus:ring-2 focus:ring-[#6750a4] bg-gray-50"
-              >
-                <option value="">Select Position</option>
-                {positions.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+             <select
+  name="position_name"
+  value={form.position_name}
+  onChange={handleChange}
+  required
+  className="border rounded-lg px-3 py-2 w-48 focus:border-[#6750a4] focus:ring-2 focus:ring-[#6750a4] bg-gray-50"
+>
+  <option value="">Select Position</option>
+  {positions.map((p) => (
+    <option key={p.id} value={p.name}>
+      {p.name}
+    </option>
+  ))}
+</select>
+
             </div>
             {/* Page Select */}
             <div className="flex flex-col gap-1">
@@ -244,36 +264,8 @@ const Admin = () => {
           )}
         </form>
 
-        {/* SEARCH BAR */}
-    <div className="mb-6 flex items-center justify-between max-w-md w-full relative">
-  <input
-    type="text"
-    placeholder="Search by vertical, position, page, or access..."
-    value={search}
-    onChange={e => setSearch(e.target.value)}
-    className="pl-10 pr-4 py-2 w-full rounded-lg border border-[#6750a4] bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#6750a4] transition"
-  />
-  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6750a4]">
-    {/* Search Icon (Heroicons or SVG) */}
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  </span>
-  {search && (
-    <button
-      type="button"
-      onClick={() => setSearch("")}
-      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 focus:outline-none"
-      aria-label="Clear search"
-    >
-      {/* X Icon */}
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-  )}
-</div>
+       
+   
 
 
         {/* List of Role Access Entries */}

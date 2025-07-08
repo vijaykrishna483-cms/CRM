@@ -2,10 +2,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import api from "../../../libs/apiCall";
 import { toast } from "react-toastify";
 import { MdDelete } from "react-icons/md";
-import usePageAccess from '../../../components/useAccessPage';
+import usePageAccess from "../../../components/useAccessPage";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { exportProposalTableToExcel } from "../Excels/ExcelProposal";
 
-const ProposalView = ({showDetails }) => {
-  const { allowed, loading: permissionLoading } = usePageAccess("proposalplanviewdownload");
+const ProposalView = ({ showDetails }) => {
+  const { allowed, loading: permissionLoading } = usePageAccess(
+    "proposalplanviewdownload"
+  );
+
+  const [statusSearch, setStatusSearch] = useState("");
 
   const [proposals, setProposals] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,7 +47,7 @@ const ProposalView = ({showDetails }) => {
 
   const collegeNameMap = useMemo(() => {
     const map = {};
-    collegeData.forEach(college => {
+    collegeData.forEach((college) => {
       map[college.college_code] = college.college_name;
     });
     return map;
@@ -73,6 +80,34 @@ const ProposalView = ({showDetails }) => {
     }
   };
 
+  const [followUpId, setFollowUpId] = useState(null); // proposal_id being followed up
+  const [employeeIdInput, setEmployeeIdInput] = useState(""); // input value
+  const [followUpLoading, setFollowUpLoading] = useState(false);
+
+  // Handler for follow up status change
+  const handleFollowUp = async (proposal_id) => {
+    if (!employeeIdInput.trim()) {
+      toast.error("Please enter Employee ID.");
+      return;
+    }
+    setFollowUpLoading(true);
+    try {
+      // Optionally, send employeeIdInput to backend as well
+      await api.put(`/college/proposal/${proposal_id}`, {
+        status: "Follow up",
+        employee_id: employeeIdInput.trim(), // only if your backend supports it
+      });
+      toast.success("Status changed to Follow up!");
+      setFollowUpId(null);
+      setEmployeeIdInput("");
+      fetchProposals();
+    } catch (err) {
+      toast.error("Failed to update status.");
+    } finally {
+      setFollowUpLoading(false);
+    }
+  };
+
   const fetchServicesForProposal = async (proposalId) => {
     setServiceLoading(true);
     try {
@@ -99,7 +134,35 @@ const ProposalView = ({showDetails }) => {
       fromDate: proposal.from_date ? proposal.from_date.slice(0, 10) : "",
       toDate: proposal.to_date ? proposal.to_date.slice(0, 10) : "",
       // status: proposal.status, // status is NOT editable
+      employee_id: employeeIdInput,
     });
+  };
+
+  const deleteClick = async (proposal) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete proposal "${proposal.proposal_code}"?`
+      )
+    ) {
+      return;
+    }
+    try {
+      // Optionally, you may want to show a loading state here
+      const res = await api.delete(`/college/proposal/${proposal.proposal_id}`);
+      if (res.data.status === "success") {
+        // Optionally show a toast or alert
+        toast.success("Proposal deleted successfully!");
+        // Refresh proposals list (replace fetchProposals with your actual fetch function)
+        fetchProposals && fetchProposals();
+      } else {
+        toast.error(res.data.message || "Failed to delete proposal.");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "An error occurred while deleting the proposal."
+      );
+    }
   };
 
   const handleEditChange = (e) => {
@@ -130,12 +193,15 @@ const ProposalView = ({showDetails }) => {
   };
 
   const handleDeleteService = async (proposalId, planId) => {
-    if (!window.confirm("Are you sure you want to remove this service?")) return;
+    if (!window.confirm("Are you sure you want to remove this service?"))
+      return;
     try {
       await api.delete(`/college/proposal/${proposalId}/service/${planId}`);
       setProposalServices((prev) => ({
         ...prev,
-        [proposalId]: (prev[proposalId] || []).filter((s) => s.plan_id !== planId),
+        [proposalId]: (prev[proposalId] || []).filter(
+          (s) => s.plan_id !== planId
+        ),
       }));
       toast.success("Service removed successfully!");
     } catch (err) {
@@ -144,12 +210,33 @@ const ProposalView = ({showDetails }) => {
   };
 
   const filteredProposals = proposals.filter((proposal) => {
+    // Main search (college code, name, proposal code, plans)
     const collegeMatch =
       proposal.college_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (collegeNameMap[proposal.college_code] || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const proposalMatch =
-      proposal.proposal_code.toLowerCase().includes(searchTerm.toLowerCase());
-    return collegeMatch || proposalMatch;
+      (collegeNameMap[proposal.college_code] || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    const proposalMatch = proposal.proposal_code
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    // Plan name match
+    const plansArr = (proposalServices[proposal.proposal_id] || []).map(
+      (plan) => plan.plan_name.toLowerCase()
+    );
+    const planMatch = plansArr.some((planName) =>
+      planName.includes(searchTerm.toLowerCase())
+    );
+
+    // Status filter (if statusSearch is not empty)
+    const statusMatch = statusSearch
+      ? proposal.status &&
+        proposal.status.toLowerCase().includes(statusSearch.toLowerCase())
+      : true;
+
+    // Combine all filters
+    return (collegeMatch || proposalMatch || planMatch) && statusMatch;
   });
 
   useEffect(() => {
@@ -190,39 +277,50 @@ const ProposalView = ({showDetails }) => {
     }
   };
 
-  if (!allowed && !permissionLoading) return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center bg-white px-8 py-10 ">
-        <svg
-          className="w-14 h-14 text-red-500 mb-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fee2e2" />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15 9l-6 6m0-6l6 6"
-            stroke="red"
-            strokeWidth="2"
-          />
-        </svg>
-        <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
-        <p className="text-gray-600 text-center mb-4">
-          You do not have permission to view this page.<br />
-          Please contact the administrator if you believe this is a mistake.
-        </p>
-        <button
-          className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
-          onClick={() => window.location.href = "/"}
-        >
-          Go to Home
-        </button>
+  if (!allowed && !permissionLoading)
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center bg-white px-8 py-10 ">
+          <svg
+            className="w-14 h-14 text-red-500 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="#fee2e2"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15 9l-6 6m0-6l6 6"
+              stroke="red"
+              strokeWidth="2"
+            />
+          </svg>
+          <h2 className="text-2xl font-bold text-[#6750a4] mb-2">
+            Access Denied
+          </h2>
+          <p className="text-gray-600 text-center mb-4">
+            You do not have permission to view this page.
+            <br />
+            Please contact the administrator if you believe this is a mistake.
+          </p>
+          <button
+            className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
+            onClick={() => (window.location.href = "/")}
+          >
+            Go to Home
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
   if (permissionLoading) return <div>Loading...</div>;
 
   return (
@@ -232,13 +330,34 @@ const ProposalView = ({showDetails }) => {
           Proposal Entries
         </h3>
 
-        <input
-          type="text"
-          placeholder="Search by college name, code, or proposal code"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className=" border border-gray-300 mb-4 rounded-lg px-3 py-2 text-sm w-full max-w-sm"
-        />
+        <div className="flex gap-4 w-full justify-center items-center mb-4 flex-wrap">
+          <input
+            type="text"
+            placeholder="Search by college name,proposal code, or plan"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border border-gray-300 mb-4 rounded-lg px-3 py-2 text-sm w-full max-w-sm"
+          />
+          <input
+            type="text"
+            placeholder="Filter by status "
+            value={statusSearch}
+            onChange={(e) => setStatusSearch(e.target.value)}
+            className="border border-gray-300 mb-4 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
+          />
+          <button
+            onClick={() =>
+              exportProposalTableToExcel(
+                filteredProposals,
+                proposalServices,
+                collegeNameMap
+              )
+            }
+            className="bg-[#364153] text-white px-4 py-2  mb-4 rounded hover:bg-[#91619b]"
+          >
+            Download Excel
+          </button>
+        </div>
 
         <table className="w-full text-sm border-collapse">
           <thead className="text-gray-600 bg-gray-100 border-b">
@@ -252,7 +371,7 @@ const ProposalView = ({showDetails }) => {
               <th className="p-2 text-left">Quoted Price</th>
               <th className="p-2 text-left">From</th>
               <th className="p-2 text-left">To</th>
-            {showDetails && (      <th className="p-2 text-left">Actions</th> )}
+              {showDetails && <th className="p-2 text-left">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -267,8 +386,11 @@ const ProposalView = ({showDetails }) => {
                       className="border px-2 py-1 rounded"
                     >
                       <option value="">Select College</option>
-                      {collegeData.map(college => (
-                        <option key={college.college_code} value={college.college_code}>
+                      {collegeData.map((college) => (
+                        <option
+                          key={college.college_code}
+                          value={college.college_code}
+                        >
                           {college.college_name}
                         </option>
                       ))}
@@ -284,16 +406,16 @@ const ProposalView = ({showDetails }) => {
                   </td>
                   <td className="p-2">
                     <button
-                      onClick={() => fetchServicesForProposal(proposal.proposal_id)}
+                      onClick={() =>
+                        fetchServicesForProposal(proposal.proposal_id)
+                      }
                       className="text-xs text-blue-600 underline"
                     >
                       Refresh Services
                     </button>
                   </td>
                   {/* Status: display as plain text, not editable */}
-                  <td className="p-2">
-                    {proposal.status}
-                  </td>
+                  <td className="p-2">{proposal.status}</td>
                   <td className="p-2">
                     <input
                       name="issueDate"
@@ -358,7 +480,8 @@ const ProposalView = ({showDetails }) => {
                   className="hover:bg-gray-50 border-t text-left"
                 >
                   <td className="p-2">
-                    {collegeNameMap[proposal.college_code] || proposal.college_code}
+                    {collegeNameMap[proposal.college_code] ||
+                      proposal.college_code}
                   </td>
                   <td className="p-2">{proposal.proposal_code}</td>
                   <td className="p-2">
@@ -372,24 +495,32 @@ const ProposalView = ({showDetails }) => {
                             <span className="flex-grow">
                               {service.plan_name}
                             </span>
-                            <button
-                              onClick={() =>
-                                handleDeleteService(
-                                  proposal.proposal_id,
-                                  service.plan_id
-                                )
-                              }
-                              className="ml-2 text-red-500 hover:text-red-700"
-                              title="Remove service text-sm"
-                            >
-                              <MdDelete />
-                            </button>
+
+                            {showDetails && (
+                              <button
+                                onClick={() =>
+                                  handleDeleteService(
+                                    proposal.proposal_id,
+                                    service.plan_id
+                                  )
+                                }
+                                className="ml-2 text-red-500 hover:text-red-700"
+                                title="Remove service text-sm"
+                              >
+                                <MdDelete />
+                              </button>
+                            )}
                           </li>
                         )
                       )}
                     </div>
                   </td>
-                  <td className="p-2">{proposal.status}</td>
+                  <td className="p-2">
+                    {proposal.status}
+    <span className="text-red-500">  {proposal.status=="Follow up" ? <> {proposal.employee_id}</>:<> </>}</span>
+
+                  </td>
+
                   <td className="p-2">
                     {proposal.issue_date
                       ? proposal.issue_date.slice(0, 10)
@@ -398,34 +529,79 @@ const ProposalView = ({showDetails }) => {
                   <td className="p-2">{proposal.duration}</td>
                   <td className="p-2">{proposal.quoted_price}</td>
                   <td className="p-2">
-                    {new Date(proposal.from_date).toLocaleDateString(
-                      "en-US",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}
+                    {new Date(proposal.from_date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </td>
                   <td className="p-2">
-                    {new Date(proposal.to_date).toLocaleDateString(
-                      "en-US",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}
+                    {new Date(proposal.to_date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </td>
-                 {showDetails && (   <td className="p-2">
-                    <button
-                      onClick={() => startEdit(proposal)}
-                      className="text-blue-600"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                  )} 
+
+                  {showDetails && (
+                    <td className="p-2 flex flex-col gap-2">
+                      <button
+                        onClick={() => startEdit(proposal)}
+                        className="text-blue-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteClick(proposal)}
+                        className="text-red-600"
+                      >
+                        Delete
+                      </button>
+                      {/* Add Follow up option */}
+                   {proposal.status === "Mail Sent" && (
+  <div className="mt-2">
+    {followUpId === proposal.proposal_id ? (
+      <div className="flex flex-col gap-2">
+        <input
+          type="text"
+          placeholder="Enter Employee ID"
+          value={employeeIdInput}
+          onChange={(e) => setEmployeeIdInput(e.target.value)}
+          className="border px-2 py-1 rounded text-xs"
+          disabled={followUpLoading}
+        />
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleFollowUp(proposal.proposal_id)}
+            className="bg-purple-600 text-white px-3 py-1 rounded text-xs"
+            disabled={followUpLoading}
+          >
+            {followUpLoading ? "Saving..." : "Confirm"}
+          </button>
+          <button
+            onClick={() => {
+              setFollowUpId(null);
+              setEmployeeIdInput("");
+            }}
+            className="text-gray-500 text-xs"
+            disabled={followUpLoading}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ) : (
+      <button
+        onClick={() => setFollowUpId(proposal.proposal_id)}
+        className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-xs"
+      >
+        Mark as Follow up
+      </button>
+    )}
+  </div>
+)}
+                    </td>
+                  )}
                 </tr>
               )
             )}

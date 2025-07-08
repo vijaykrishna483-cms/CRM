@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../libs/apiCall';
 import { toast } from 'react-toastify';
-import usePageAccess from '../../components/useAccessPage';
-import TrainerBankAdd from './Components/TrainerBankAdd';
-import TrainerBankView from './Components/TrainerBankView';
-const TrainerBank = () => {
-
-      const { allowed, loading: permissionLoading } = usePageAccess("trainerbankdetails");
+import usePageAccess from '../../../components/useAccessPage';
+import api from '../../../libs/apiCall';
 
 
-
+const TrainerBankView = () => {
+  const { allowed, loading: permissionLoading } = usePageAccess("trainerbankdetailsview");
   const [bankInfo, setBankInfo] = useState({
     trainer_id: '',
     bank_account_number: '',
@@ -101,7 +97,7 @@ const TrainerBank = () => {
   };
 
   const[open,setOpen]=useState(true);
-      if (!allowed && !permissionLoading) return (
+ if (!allowed && !permissionLoading) return (
   <div className="min-h-[60vh] flex flex-col items-center justify-center">
     <div className="flex flex-col items-center bg-white px-8 py-10 ">
       <svg
@@ -139,38 +135,57 @@ const TrainerBank = () => {
   
   return (
     <div className="w-full min-h-screen bg-white px-6 sm:px-10 ">
-      <h1 className="text-2xl font-bold text-center mb-10 text-[#4f378a]">Trainer Bank Details</h1>
-
-    <div className="flex flex-wrap gap-4 bg-transparent justify-center rounded-2xl px-4 py-2 mb-8">
-        <button
-          onClick={() => { setOpen(true) }}
-          className={`px-6 py-2 rounded-xl transition-all duration-200 font-medium text-base
-            ${open ? "bg-[#6750a4] text-white shadow font-semibold scale-105" : "bg-[#f3e6f1] text-[#6750a4] hover:bg-[#e9d4ff] hover:text-[#6750a4]"}
-          `}
-          style={{
-            minWidth: "140px",
-            boxShadow: open ? "0 2px 8px #6750a433" : undefined,
-          }}
-        >
-          <>Add</>
-        </button>
-        <button
-          onClick={() => { setOpen(false) }}
-          className={`px-6 py-2 rounded-xl transition-all duration-200 font-medium text-base
-            ${open ? "bg-[#f3e6f1] text-[#6750a4] hover:bg-[#e9d4ff] hover:text-[#6750a4]" : "bg-[#6750a4] text-white shadow font-semibold scale-105"}
-          `}
-          style={{
-            minWidth: "140px",
-            boxShadow: !open ? "0 2px 8px #6750a433" : undefined,
-          }}
-        >
-          View
-        </button>
+      {/* Bank Details Table */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
+        <h3 className="text-sm font-semibold mb-4 text-[#4f378a]">Bank Details Entries</h3>
+        
+        {loading ? (
+          <p className="text-center py-4">Loading bank details...</p>
+        ) : (
+          <table className="w-full text-sm border-collapse">
+            <thead className="text-gray-600 bg-gray-100 border-b">
+              <tr>
+                <th className="p-2 text-left">Trainer ID</th>
+                <th className="p-2 text-left">Trainer Name</th>
+                <th className="p-2 text-left">Account Number</th>
+                <th className="p-2 text-left">Bank Name</th>
+                <th className="p-2 text-left">IFSC</th>
+                {/* <th className="p-2 text-left">Actions</th> */}
+              </tr>
+            </thead>
+            <tbody>
+              {bankDetails.map((bank) => (
+                <tr key={bank.trainer_id} className="hover:bg-gray-50 border-t text-left">
+                  <td className="p-2">{bank.trainer_id}</td>
+                  <td className="p-2">
+                    {trainerNames[bank.trainer_id] || 'N/A'}
+                  </td>
+                  <td className="p-2">{bank.bank_account_number}</td>
+                  <td className="p-2">{bank.bank_name}</td>
+                  <td className="p-2">{bank.branch_ifsc}</td>
+                  {/* <td className="p-2">
+                    <button 
+                      onClick={() => handleEdit(bank)}
+                      className="text-blue-500 hover:text-blue-700 mr-2"
+                    >
+                      Edit
+                    </button>
+                  </td> */}
+                </tr>
+              ))}
+              {bankDetails.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="p-2 text-center text-gray-400">
+                    No bank details found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
-
-     {open? <><TrainerBankAdd/> </>: <> <TrainerBankView/></>}
     </div>
   );
 };
 
-export default TrainerBank;
+export default TrainerBankView;

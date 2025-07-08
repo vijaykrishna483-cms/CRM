@@ -51,7 +51,7 @@ export async function getReimbursements(req, res) {
 }
 
 // Allowed status values
-const validStatuses = ['requested', 'pending', 'paid', 'rejected'];
+const validStatuses = ['requested', 'approved', 'paid', 'rejected'];
 
 export async function updateReimbursementStatus(req, res) {
   const { reimbursement_id } = req.params; // This is the VARCHAR from route

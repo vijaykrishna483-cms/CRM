@@ -1,7 +1,7 @@
 import  React,{ useState, useEffect } from "react";
 import { PlusCircle, MinusCircle, View } from "lucide-react";
 import { toast } from "react-toastify";
-import { exportTableToExcel } from "../Excel";
+import { exportTableToExcel } from "../Excels/ExcelCollege";
 import api from "../../../libs/apiCall";
 import usePageAccess from "../../../components/useAccessPage";
 

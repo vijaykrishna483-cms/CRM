@@ -51,11 +51,11 @@ const[open, setOpen] = useState(false);
       {open ? (
         <>
       <ProposalEdit/>
-          {/* Proposals Table */}
+     
         </>
       ) : (
         <>
-          <ProposalView  showDetails={true}/>
+          <ProposalView  showDetails={false}/>
         </>
       )}
     </div>

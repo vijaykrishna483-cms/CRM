@@ -61,7 +61,7 @@ const Accountant = () => {
   // Helper to get color classes for select based on status
   const getStatusSelectClass = (status) => {
     switch (status) {
-      case 'pending':
+      case 'approved':
         return 'bg-yellow-50 text-yellow-800 border-yellow-300';
       case 'paid':
         return 'bg-green-50 text-green-800 border-green-300';
@@ -167,7 +167,7 @@ const Accountant = () => {
                         disabled={loading}
                       >
                         <option value="">Select Status</option>
-                        <option value="pending">pending</option>
+                        <option value="approved">approved</option>
                         <option value="paid">paid</option>
                         <option value="rejected">rejected</option>
                       </select>

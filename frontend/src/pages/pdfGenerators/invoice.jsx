@@ -98,6 +98,7 @@ const DocxForm = () => {
     amount: "",
     date: "",
     amountInWords: "",
+    location:"",
   });
   const [employeeData, setEmployeeData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -138,6 +139,7 @@ const DocxForm = () => {
         panId: selectedEmployee.pan_id,
         amount: salary.toFixed(2),
         amountInWords: numberToWords(salary),
+        location:selectedEmployee.location || ""
       });
     }
   };
@@ -162,6 +164,7 @@ const DocxForm = () => {
       address_line1: formData.address1,
       address_line2: formData.address2,
       address_line3: formData.address3,
+      location:formData.location,
     };
     try {
       const res = await api.post("/pdf/invoice", payload, {
@@ -228,11 +231,11 @@ const DocxForm = () => {
   if (permissionLoading) return <div>Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-[#f7f6fd] bg-[#fff">
+    <div className="min-h-screen bg-[#f7f6fd] bg-[#fff ">
       <div className="fixed w-[100vw] z-[100]">
         <Navbar />
       </div>
-      <div className="max-w-3xl mx-auto px-2">
+      <div className="max-w-3xl mx-auto px-2 pt-[10vh]">
         <div className="p-1 md:p-2 relative overflow-hidden">
           {/* Header Section */}
           <div className="relative z-10 p-6 ">
@@ -381,12 +384,12 @@ const DocxForm = () => {
               {/* Address Line 3 */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-[#4f378a] mb-1">
-                  Address Line 3
+                  Location
                 </label>
                 <input
-                  name="address3"
-                  placeholder="Address Line 3"
-                  value={formData.address3}
+                  name="location"
+                  placeholder="State"
+                  value={formData.location}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
                 />

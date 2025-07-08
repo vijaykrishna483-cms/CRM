@@ -5,7 +5,7 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 
 export async function generateDoc(req, res) {
-  const { employeeName, designation, address1,address2,address3, address,salary,month,panId,amount,date,amountInWords} = req.body;
+  const { employeeName, designation, address1,address2,address3, address,salary,month,panId,amount,date,amountInWords,location} = req.body;
 
   try {
     const content = fs.readFileSync(
@@ -16,7 +16,7 @@ export async function generateDoc(req, res) {
     const zip = new PizZip(content);
     const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
-    doc.setData({employeeName, designation, address1,address2,address3, address,salary,month,panId,amount,date,amountInWords });
+    doc.setData({employeeName, designation, address1,address2,address3, address,salary,month,panId,amount,date,amountInWords,location });
 
     doc.render(); // Throws if template tags are missing
 

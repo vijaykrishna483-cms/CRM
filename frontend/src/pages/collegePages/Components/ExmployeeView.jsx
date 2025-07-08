@@ -6,7 +6,8 @@ const EmployeeView = ({
   searchTerm,
   setSearchTerm,
   handleEdit,
-  handleDelete
+  handleDelete,
+  showDetails ,
 }) =>  {
   // Hook must be called here, not inside return!
   const { allowed, loading: permissionLoading } = usePageAccess("employeedataviewer");
@@ -57,33 +58,35 @@ const EmployeeView = ({
       onChange={e => setSearchTerm(e.target.value)}
       className="mb-4 w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-lg text-sm"
     />
-    <table className="w-full text-sm border-collapse">
-      <thead className="text-gray-600 bg-gray-100 border-b">
-        <tr>
-          <th className="p-2 text-left">ID</th>
-          <th className="p-2 text-left">Name</th>
-          <th className="p-2 text-left">Vertical</th>
-          <th className="p-2 text-left">Position</th>
-          <th className="p-2 text-left">Personal Contact</th>
-          <th className="p-2 text-left">Office Contact</th>
-          <th className="p-2 text-left">Personal Email</th>
-          <th className="p-2 text-left">Office Email</th>
-          <th className="p-2 text-left">Salary</th>
-          <th className="p-2 text-left">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filteredEmployees.map(emp => (
-          <tr key={emp.id} className="hover:bg-gray-50 border-t">
-            <td className="p-2">{emp.employee_id}</td>
-            <td className="p-2">{emp.employee_name}</td>
-            <td className="p-2">{emp.designation}</td>
-            <td className="p-2">{emp.position}</td>
-            <td className="p-2">{emp.personal_contact}</td>
-            <td className="p-2">{emp.office_contact}</td>
-            <td className="p-2">{emp.personal_email}</td>
-            <td className="p-2">{emp.office_email}</td>
-            <td className="p-2">{emp.salary}</td>
+   <div className="overflow-x-auto">
+  <table className="min-w-full text-sm border-collapse whitespace-nowrap">
+    <thead className="text-gray-600 bg-gray-100 border-b">
+      <tr>
+        <th className="p-2 text-left">ID</th>
+        <th className="p-2 text-left">Name</th>
+        <th className="p-2 text-left">Vertical</th>
+        <th className="p-2 text-left">Position</th>
+        <th className="p-2 text-left">Personal Contact</th>
+        <th className="p-2 text-left">Office Contact</th>
+        <th className="p-2 text-left">Personal Email</th>
+        <th className="p-2 text-left">Office Email</th>
+        <th className="p-2 text-left">Salary</th>
+        {showDetails && <th className="p-2 text-left">Actions</th>}
+      </tr>
+    </thead>
+    <tbody>
+      {filteredEmployees.map((emp) => (
+        <tr key={emp.id} className="hover:bg-gray-50 border-t">
+          <td className="p-2">{emp.employee_id}</td>
+          <td className="p-2">{emp.employee_name}</td>
+          <td className="p-2">{emp.designation}</td>
+          <td className="p-2">{emp.position}</td>
+          <td className="p-2">{emp.personal_contact}</td>
+          <td className="p-2">{emp.office_contact}</td>
+          <td className="p-2">{emp.personal_email}</td>
+          <td className="p-2">{emp.office_email}</td>
+          <td className="p-2">{emp.salary}</td>
+          {showDetails && (
             <td className="p-2">
               <button
                 onClick={() => handleEdit(emp)}
@@ -98,17 +101,20 @@ const EmployeeView = ({
                 Delete
               </button>
             </td>
-          </tr>
-        ))}
-        {filteredEmployees.length === 0 && (
-          <tr>
-            <td colSpan="10" className="p-2 text-center text-gray-400">
-              No Employees Found
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+          )}
+        </tr>
+      ))}
+      {filteredEmployees.length === 0 && (
+        <tr>
+          <td colSpan="10" className="p-2 text-center text-gray-400">
+            No Employees Found
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
   </div>
 ); }
 

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../../libs/apiCall';
 import { toast } from 'react-toastify';
 import usePageAccess from '../../components/useAccessPage';
+import Select from 'react-select';
+
 
 const Allocation = () => {
   const [proposals, setProposals] = useState([]);
@@ -19,7 +21,16 @@ const Allocation = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(true);
 
+
   const { allowed, loading: permissionLoading } = usePageAccess("trainerallocation");
+
+  
+const options = allServices.map(service => ({
+  value: service,
+  label: service
+}));
+
+
 
   // 1. Fetch proposals, colleges, trainers, allocations, ratings
   useEffect(() => {
@@ -149,19 +160,19 @@ const Allocation = () => {
     );
     setFilteredTrainers(results);
   };
+const handleServiceFilter = (selectedOption) => {
+  const service = selectedOption ? selectedOption.value : "";
+  setServiceFilter(service);
+  if (!service) {
+    setFilteredTrainers(trainers);
+    return;
+  }
+  const results = trainers.filter(trainer =>
+    trainer.services?.some(s => s.service_name === service)
+  );
+  setFilteredTrainers(results);
+};
 
-  const handleServiceFilter = (e) => {
-    const service = e.target.value;
-    setServiceFilter(service);
-    if (!service) {
-      setFilteredTrainers(trainers);
-      return;
-    }
-    const results = trainers.filter(trainer =>
-      trainer.services?.some(s => s.service_name === service)
-    );
-    setFilteredTrainers(results);
-  };
 
   // 5. Add trainer to proposal
   const handleAddTrainer = async (trainerId) => {
@@ -193,6 +204,9 @@ const Allocation = () => {
   const removeTrainer = (trainerId) => {
     setVisibleTrainers(prev => prev.filter(trainer => trainer.trainer_id !== trainerId));
   };
+  const refreshTrainers=()=>{
+    setVisibleTrainers(filteredTrainers)
+  }
 
   if (!allowed && !permissionLoading) return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">
@@ -291,16 +305,15 @@ const Allocation = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4  text-left">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Service</label>
-                <select
-                  value={serviceFilter}
-                  onChange={handleServiceFilter}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="">All Services</option>
-                  {allServices.map(service => (
-                    <option key={service} value={service}>{service}</option>
-                  ))}
-                </select>
+             <Select
+  className="w-full text-sm"
+  options={options}
+  value={options.find(opt => opt.value === serviceFilter) || null}
+  onChange={handleServiceFilter}
+  isClearable
+  placeholder="All Services"
+/>
+
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
@@ -329,7 +342,7 @@ const Allocation = () => {
                 {serviceFilter && ` offering ${serviceFilter}`}
               </h3>
               <button
-                onClick={fetchTrainers}
+                onClick={refreshTrainers}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
                 Refresh Trainers
@@ -397,8 +410,20 @@ const Allocation = () => {
         </>
       ) : (
         <>
+              <div className="mb-4 flex justify-end">
+                  <input
+                    type="text"
+                    placeholder="Search by trainer name or proposal code"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
+                  />
+                </div>
           <div className="bg-white mb-10 p-4 rounded-xl shadow-sm border overflow-x-auto h-[400px] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
+          
+
+
               <h2 className="text-lg font-semibold text-[#4f378a]">All Trainer Allocations</h2>
               <button
                 onClick={fetchAllocations}
@@ -411,15 +436,7 @@ const Allocation = () => {
               <p className="text-center py-4">Loading allocations...</p>
             ) : (
               <>
-                <div className="mb-4 flex justify-end">
-                  <input
-                    type="text"
-                    placeholder="Search by trainer name or proposal code"
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs"
-                  />
-                </div>
+              
                 <table className="w-full text-sm border-collapse">
                   <thead className="text-gray-600 bg-gray-100 border-b">
                     <tr>

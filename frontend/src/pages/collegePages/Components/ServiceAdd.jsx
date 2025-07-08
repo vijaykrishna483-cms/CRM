@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import usePageAccess from "../../../components/useAccessPage";
 import { toast } from "react-toastify";
 import api from "../../../libs/apiCall";
+import { useEffect } from "react";
 
 const ServiceAdd = () => {
   const navigate = useNavigate();
@@ -49,6 +50,56 @@ const ServiceAdd = () => {
       setLoading(false);
     }
   };
+
+
+  
+  const [serviceData, setServiceData] = useState([]);
+  const [filter, setFilter] = useState("");
+
+  const fetchServices = async () => {
+    try {
+      const servicesRes = await api.get(`/college/getservices`);
+      const services = servicesRes.data.data || [];
+      setServiceData(services);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      toast.error("Failed to fetch services.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+      fetchServices();
+    // eslint-disable-next-line
+  }, []);
+
+  const filteredServices = serviceData.filter(
+    (service) =>
+      service.service_name.toLowerCase().includes(filter.toLowerCase()) ||
+      service.service_code.toLowerCase().includes(filter.toLowerCase())
+  );
+
+const deleteService = async (serviceId) => {
+  try {
+    const response = await api.delete(`/college/services/${serviceId}`); // Or `/api/services/${serviceId}` if needed
+
+    const { status, message } = response.data;
+
+    if (status === "success") {
+      toast.success("Service deleted successfully!");
+      fetchServices(); // Refresh the service list after deletion
+    } else {
+      toast.error(message || "Failed to delete service.");
+    }
+  } catch (error) {
+    console.error("Error deleting service:", error);
+    const msg = error.response?.data?.message || "Server error occurred.";
+    toast.error(msg);
+  }
+};
+
+
 
   if (permissionLoading) return <div>Loading...</div>;
 
@@ -136,6 +187,63 @@ const ServiceAdd = () => {
           {loading ? "Adding..." : "Add Service"}
         </button>
       </div>
+
+
+
+
+       <div>
+      <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
+        <h3 className="text-xl font-semibold mb-4 text-[#4f378a]">Services</h3>
+        <div className="flex items-center mb-4">
+          <input
+            type="text"
+            placeholder="Filter by name or code"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-64"
+          />
+        </div>
+        <table className="w-full text-sm border-collapse">
+          <thead className="text-gray-600 bg-gray-100 border-b">
+            <tr>
+              <th className="p-2 text-left">Service Code</th>
+              <th className="p-2 text-left">Service</th>
+                            <th className="p-2 text-left">Actions</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {filteredServices.map((service) => (
+              <tr
+                className="hover:bg-gray-50 border-t"
+                key={service.service_id}
+              >
+                <td className="p-2 text-red-500 text-left">
+                  {service.service_code}
+                </td>
+                <td className="p-2 text-left">{service.service_name}</td>
+            
+               <td onClick={() => deleteService(service.service_id)}  className="p-2 text-left cursor-pointer text-red-500 ">
+                  Delete
+                </td>
+            
+              </tr>
+            ))}
+            {filteredServices.length === 0 && (
+              <tr>
+                <td colSpan={2} className="p-2 text-center text-gray-500">
+                  No services found.
+                </td>
+              </tr>
+            )}
+
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
     </div>
   );
 };

@@ -21,6 +21,7 @@ export async function addEmployee(req, res) {
       office_contact,
       personal_email,
       office_email,
+      location,
       salary
     } = req.body;
 
@@ -28,9 +29,9 @@ const query = `
   INSERT INTO employees (
     employee_id, employee_name, designation,
     aadhar_number, pan_id, personal_contact, address_line1,
-    address_line2, address_line3, office_contact, personal_email, office_email, salary, position
+    address_line2, address_line3, office_contact, personal_email, office_email, salary, position,location
   )
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
   RETURNING id
 `;
 
@@ -38,7 +39,7 @@ const query = `
     const result = await pool.query(query, [
       employee_id, employee_name, designation,
       aadhar_number, pan_id, personal_contact, address_line1,
-      address_line2, address_line3, office_contact, personal_email, office_email, salary, position
+      address_line2, address_line3, office_contact, personal_email, office_email, salary, position,location
     ]);
 
     res.status(201).json({

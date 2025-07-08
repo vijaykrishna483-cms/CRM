@@ -317,6 +317,37 @@ export const getServices = async (req, res) => {
   }
 };
 
+export const deleteService = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if service exists
+    const exists = await pool.query("SELECT * FROM services WHERE service_id = $1", [id]);
+
+    if (exists.rows.length === 0) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Service not found",
+      });
+    }
+
+    // Delete the service
+    await pool.query("DELETE FROM services WHERE service_id = $1", [id]);
+
+    return res.status(200).json({
+      status: "success",
+      message: "Service deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting service:", error);
+    return res.status(500).json({
+      status: "failed",
+      message: "Server error",
+    });
+  }
+};
+
+
 export const updateProposalServiceName = async (req, res) => {
   const { proposalId } = req.params;
   const { oldServiceName, newServiceName } = req.body;

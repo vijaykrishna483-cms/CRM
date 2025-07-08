@@ -15,11 +15,10 @@ const FeedbackView = () => {
       const res = await api.get("/trainer/allreviews");
       setReviews(res.data || []);
     } catch {
-      // Handle error as needed
+    
     }
   };
 
-  // Group reviews by trainer_id
   const grouped = useMemo(() => {
     const map = {};
     reviews.forEach((r) => {
@@ -53,7 +52,7 @@ const FeedbackView = () => {
           trainer.trainer_name?.toLowerCase().includes(term) ||
           trainer.trainer_id?.toLowerCase().includes(term)
         ) {
-          // If trainer matches, show all their reviews
+      
           return trainer;
         }
         if (filteredReviews.length > 0) {
@@ -64,7 +63,6 @@ const FeedbackView = () => {
       .filter(Boolean);
   }, [grouped, searchTerm]);
 
-  // Helper to calculate average rating
   const getAverage = (reviews) => {
     if (!reviews.length) return "-";
     const sum = reviews.reduce((acc, r) => acc + Number(r.trainer_star_rating), 0);
@@ -91,7 +89,7 @@ const FeedbackView = () => {
           {filtered.map((trainer) => (
             <div
               key={trainer.trainer_id}
-              className="bg-gray-50 border rounded-xl shadow-sm p-5 flex flex-col"
+              className="bg-gray-50 border h-[250px] overflow-hidden rounded-xl shadow-sm p-5 flex flex-col"
             >
               <div className="flex items-center justify-between mb-2">
                 <div>

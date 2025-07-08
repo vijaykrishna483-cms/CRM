@@ -91,6 +91,41 @@ export const getAllProposals = async (req, res) => {
   }
 };
 
+export const deleteProposal = async (req, res) => {
+  try {
+    const { proposalId } = req.params;
+    if (!proposalId) {
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Missing proposalId parameter',
+      });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM proposals WHERE proposal_id = $1 RETURNING *',
+      [proposalId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        status: 'failed',
+        message: 'Proposal not found',
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Proposal deleted successfully',
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Error deleting proposal:', error);
+    res.status(500).json({
+      status: 'failed',
+      message: 'Server error',
+    });
+  }
+};
 
 // utils/toSnakeCase.js
 function toSnakeCase(str) {
@@ -116,10 +151,11 @@ export const updateProposal = async (req, res) => {
     }
 
     // Only allow these fields to be updated
-    const allowedFields = [
-      'collegeCode', 'proposalCode', 'issueDate',
-      'quotedPrice', 'duration', 'fromDate', 'toDate'
-    ];
+const allowedFields = [
+  'collegeCode', 'proposalCode', 'issueDate',
+  'quotedPrice', 'duration', 'fromDate', 'toDate',
+  'status' ,'employee_id' // ← add this
+];
 
     const fields = [];
     const values = [];

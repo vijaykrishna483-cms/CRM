@@ -10,7 +10,8 @@ CREATE TABLE employees (
     office_contact VARCHAR(15),                    -- Office phone number (optional)
     personal_email VARCHAR(100),                   -- Personal email
     office_email VARCHAR(100),                     -- Office email
-    salary NUMERIC(12, 2)                          -- Salary (e.g., 10000.00)
+    salary NUMERIC(12, 2),
+    location VARCHAR(100),                  
 );
 
 
@@ -43,7 +44,7 @@ CREATE TABLE reimbursements (
     location VARCHAR(100),
     program VARCHAR(200),
     status VARCHAR(20) NOT NULL DEFAULT 'requested'
-         CHECK (status IN ('requested', 'pending', 'paid', 'rejected'));
+CHECK (status IN ('requested', 'approved', 'paid', 'rejected'));
     CONSTRAINT fk_employee
         FOREIGN KEY (employee_id)
         REFERENCES employees(employee_id)

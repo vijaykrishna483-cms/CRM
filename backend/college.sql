@@ -38,10 +38,12 @@ CREATE TABLE proposals (
     last_updated DATE,
     quoted_price NUMERIC(12,2),
     duration INTEGER, -- in days
-    from_date DATE,
-    to_date DATE,
-    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'success'));
+    from_date DATE,   -- Optional
+    to_date DATE,     -- Optional
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'uploaded', 'Mail Sent', 'Follow up', 'active', 'success')),
+    employee_id VARCHAR(20) REFERENCES employees(employee_id) -- New column
 );
+
 
 
 -- 4. Services Table

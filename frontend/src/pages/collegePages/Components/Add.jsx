@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import usePageAccess from "../../../components/useAccessPage";
 import api from "../../../libs/apiCall";
 import { MinusCircle } from "lucide-react";
+import { exportTableToExcel } from "../Excels/ExcelCollege";
 
 const Add = () => {
   const { allowed, loading: loadingg } = usePageAccess("collegedataedition");
@@ -159,7 +160,9 @@ const Add = () => {
 
     setLoading(true);
     try {
-      await api.delete(`/college/delete/${pocId}`);
+      console.log("Deleting POC with ID:", pocId);
+
+      await api.delete(`/college/poc/delete/${pocId}`);
       await fetchColleges();
       toast.success("POC deleted");
     } catch {
@@ -435,8 +438,8 @@ const Add = () => {
 
 
 
-          <div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
+          <div className="overflow-x-auto">
+      <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto w-[95%]">
               <h3 className="text-sm font-semibold mb-4 text-[#4f378a]">
                 College Entries
               </h3>
@@ -457,72 +460,75 @@ const Add = () => {
                 </button>
               </div>
       
-              <table className="w-full text-sm border-collapse">
-                <thead className="text-gray-600 bg-gray-100 border-b text-left">
-                  <tr>
-                    <th className="p-2 text-left">College Code</th>
-                    <th className="p-2 text-left">Name</th>
-                    <th className="p-2 text-left">Location</th>
-                    <th className="p-2 text-left">State</th>
-                    <th className="p-2 text-left">POC Name</th>
-                    <th className="p-2 text-left">Designation</th>
-                    <th className="p-2 text-left">Contact</th>
-                    <th className="p-2 text-left">Email</th>
-      
-                    {/* <th className="p-2 text-left">Actions</th> */}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredColleges.map((college) => (
-                    <React.Fragment key={college.college_id}>
-                      <tr className="hover:bg-gray-50 border-t text-left">
-                        <td className="p-2 text-red-500 flex  items-center gap-1">
-                          {" "}
-                          <MinusCircle
-                            size={16}
-                            onClick={() => deleteCollege(college.college_id)}
-                          />{" "}
-                          {college.college_code}
-                        </td>
-                        <td className="p-2">{college.college_name}</td>
-                        <td className="p-2">{college.location}</td>
-                        <td className="p-2">{college.state}</td>
-                        <td colSpan="5" className="p-2">
-                          {!college.pocs || college.pocs.length === 0
-                            ? "No POCs"
-                            : ""}
-                        </td>
-                      </tr>
-                      {(college.pocs || []).map((poc) => (
-                        <tr
-                          key={poc.poc_id}
-                          className="hover:bg-gray-50 border-t text-left"
-                        >
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td className="p-2">{poc.poc_name}</td>
-                          <td className="p-2">{poc.poc_designation}</td>
-                          <td className="p-2">{poc.poc_contact}</td>
-                          <td className="p-2"> {poc.poc_email} <br />{" "}
-                            <span className="text-red-600">{poc.poc_red_email}</span>
-                          </td>
-                          <td className="p-2">
-                            <button
-                              onClick={() => handleDeletePOC(poc.poc_id)}
-                              className="text-red-500 hover:text-red-700"
-                              title="Delete POC"
-                            >
-                              <MinusCircle size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
+             <div className="overflow-x-auto">
+  <table className="w-full text-sm border-collapse">
+    <thead className="text-gray-600 bg-gray-100 border-b text-left">
+      <tr>
+        <th className="p-4 text-left w-32">College Code</th>
+        <th className="p-4 text-left w-48">Name</th>
+        <th className="p-4 text-left w-40">Location</th>
+        <th className="p-4 text-left w-28">State</th>
+        <th className="p-4 text-left w-44">POC Name</th>
+        <th className="p-4 text-left w-36">Designation</th>
+        <th className="p-4 text-left w-32">Contact</th>
+        <th className="p-4 text-left w-56">Email</th>
+        <th className="p-4 text-left w-28">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredColleges.map((college) => (
+        <React.Fragment key={college.college_id}>
+          <tr className="hover:bg-gray-50 border-t text-left">
+            <td className="p-4 text-red-500 flex items-center gap-1">
+              <MinusCircle
+                size={16}
+                onClick={() => deleteCollege(college.college_id)}
+              />
+              {college.college_code}
+            </td>
+            <td className="p-4">{college.college_name}</td>
+            <td className="p-4">{college.location}</td>
+            <td className="p-4">{college.state}</td>
+            <td colSpan="5" className="p-4">
+              {!college.pocs || college.pocs.length === 0
+                ? "No POCs"
+                : ""}
+            </td>
+          </tr>
+          {(college.pocs || []).map((poc) => (
+            <tr
+              key={poc.poc_id}
+              className="hover:bg-gray-50 border-t text-left"
+            >
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td className="p-4">{poc.poc_name}</td>
+              <td className="p-4">{poc.poc_designation}</td>
+              <td className="p-4">{poc.poc_contact}</td>
+              <td className="p-4">
+                {poc.poc_email}
+                <br />
+                <span className="text-red-600">{poc.poc_red_email}</span>
+              </td>
+              <td className="p-4">
+                <button
+                  onClick={() => handleDeletePOC(poc.poc_id)}
+                  className="text-red-500 hover:text-red-700"
+                  title="Delete POC"
+                >
+                  <MinusCircle size={16} />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </React.Fragment>
+      ))}
+    </tbody>
+  </table>
+</div>
+
             </div>
           </div>
 

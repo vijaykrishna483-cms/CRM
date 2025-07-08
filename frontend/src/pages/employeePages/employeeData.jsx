@@ -129,24 +129,38 @@ const EmployeeData = () => {
           View
         </button>
       </div>
+{open ? (
+  <div>
+    <EmployeeAddEdit
+      employeeInfo={employeeInfo}
+      handleChange={handleChange}
+      handleAddOrUpdate={handleAddOrUpdate}
+      loading={loading}
+      editId={editId}
+    />
 
-      {open && (
-        <EmployeeAddEdit
-          employeeInfo={employeeInfo}
-          handleChange={handleChange}
-          handleAddOrUpdate={handleAddOrUpdate}
-          loading={loading}
-          editId={editId}
-        />
-      )}
+    <EmployeeView
+      filteredEmployees={filteredEmployees}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      handleEdit={handleEdit}
+      handleDelete={handleDelete}
+      showDetails={true}
+    />
+  </div>
+) : (
+  <div>
+    <EmployeeView
+      filteredEmployees={filteredEmployees}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      handleEdit={handleEdit}
+      handleDelete={handleDelete}
+      showDetails={false}
+    />
+  </div>
+)}
 
-      <EmployeeView
-        filteredEmployees={filteredEmployees}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-      />
     </div>
   );
 };

@@ -289,7 +289,7 @@ const Toe = () => {
           {/* GST and Final Total */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-[#4f378a] mb-1">GST (9%)</label>
+              <label className="block text-sm font-semibold text-[#4f378a] mb-1">GST (18%)</label>
               <input
                 name="gst"
                 value={formData.gst}

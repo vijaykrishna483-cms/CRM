@@ -302,6 +302,34 @@ const ProposalPlan = () => {
             </p>
           </div>
 
+{/* Selected Services Display */}
+{planInfo.services.length > 0 && (
+  <div className="flex flex-wrap gap-2 mt-2">
+    {planInfo.services.map(serviceId => {
+      const service = availableServices.find(s => s.service_id === serviceId);
+      if (!service) return null;
+      return (
+        <span
+          key={serviceId}
+          className="bg-purple-200 text-purple-900 text-xs px-2 py-1 rounded flex items-center gap-1"
+        >
+          {service.service_name}
+          <button
+            type="button"
+            onClick={() => handleServiceCheckbox(serviceId)}
+            className="ml-1 text-purple-700 hover:text-purple-900 font-bold"
+            title="Remove"
+          >
+            ×
+          </button>
+        </span>
+      );
+    })}
+  </div>
+)}
+
+
+
           <button
             onClick={handleAddPlan}
             className="mt-4 px-5 py-2 bg-purple-100 hover:bg-purple-200 rounded-full font-medium text-sm text-gray-700"

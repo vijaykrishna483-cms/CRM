@@ -227,28 +227,33 @@ const FeedbackAdd = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Rating
             </label>
-            <div className="flex items-center space-x-1">
-              {[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => handleRatingChange(value)}
-                  className={`text-2xl ${
-                    value <= reviewInfo.trainer_star_rating
-                      ? "text-yellow-400"
-                      : value - 0.5 === reviewInfo.trainer_star_rating
-                      ? "text-yellow-300"
-                      : "text-gray-300"
-                  }`}
-                  aria-label={`${value} star${value !== 1 ? "s" : ""}`}
-                >
-                  {Number.isInteger(value) ? "★" : "☆"}
-                </button>
-              ))}
-              <span className="ml-2 text-sm text-gray-500">
-                {reviewInfo.trainer_star_rating} of 5
-              </span>
-            </div>
+         <div className="flex items-center space-x-1">
+  {[1, 2, 3, 4, 5].map((i) => (
+    <button
+      key={i}
+      type="button"
+      onClick={() =>
+        handleRatingChange(
+          reviewInfo.trainer_star_rating === i - 0.5 ? i : i - 0.5
+        )
+      }
+      onDoubleClick={() => handleRatingChange(i)}
+      className="text-2xl text-yellow-400 transition duration-150 hover:scale-110"
+      aria-label={`${reviewInfo.trainer_star_rating === i - 0.5 ? i : i - 0.5} star`}
+    >
+      {reviewInfo.trainer_star_rating >= i
+        ? "★"
+        : reviewInfo.trainer_star_rating >= i - 0.5
+        ? "⯨"
+        : "☆"}
+    </button>
+  ))}
+  <span className="ml-2 text-sm text-gray-500">
+    {reviewInfo.trainer_star_rating} of 5
+  </span>
+</div>
+
+
           </div>
           {/* Comments */}
           <div className="md:col-span-2">

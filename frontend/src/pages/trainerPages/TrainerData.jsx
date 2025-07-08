@@ -286,68 +286,67 @@ const TrainerData = () => {
         {loading ? (
           <p className="text-center py-4">Loading trainers...</p>
         ) : (
-          <table className="w-full text-sm border-collapse">
-            <thead className="text-gray-600 bg-gray-100 border-b">
-              <tr>
-                <th className="p-2 text-left">ID</th>
-                <th className="p-2 text-left">Name</th>
-                <th className="p-2 text-left">Services</th>
-                <th className="p-2 text-left">Contact</th>
-                <th className="p-2 text-left">Email</th>
-                <th className="p-2 text-left">Employment Type</th>
-                <th className="p-2 text-left">Status</th>
-                <th className="p-2 text-left">Charge</th>
-                <th className="p-2 text-left">State</th>
-                {allowed && <th className="p-2 text-left">Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {trainers.map((trainer) => (
-                <tr
-                  key={trainer.trainer_id}
-                  className="hover:bg-gray-50 border-t text-left"
-                >
-                  <td className="p-2">{trainer.trainer_id}</td>
-                  <td className="p-2">{trainer.trainer_name}</td>
-                  <td className="p-2 max-w-xs">
-                    <div className="flex flex-wrap gap-1">
-                      {trainer.services?.map((service, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                        >
-                          {service.service_name}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="p-2">{trainer.contact_number}</td>
-                  <td className="p-2">{trainer.email}</td>
-                  <td className="p-2">{trainer.employment_type}</td>
-                  <td className="p-2">{trainer.status}</td>
-                  <td className="p-2">₹{trainer.charge}</td>
-                  <td className="p-2">{trainer.location}</td>
-                  {allowed && (
-                    <td className="p-2">
-                      <button
-                        onClick={() => handleEdit(trainer)}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-              {trainers.length === 0 && (
-                <tr>
-                  <td colSpan={allowed ? "10" : "9"} className="p-2 text-center text-gray-400">
-                    No trainers found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+         <table className="w-full text-sm table-fixed border-collapse">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left w-[8%] whitespace-nowrap">ID</th>
+      <th className="p-2 text-left w-[12%] whitespace-nowrap">Name</th>
+      <th className="p-2 text-left w-[15%] whitespace-nowrap">Services</th>
+      <th className="p-2 text-left w-[12%] whitespace-nowrap">Contact</th>
+      <th className="p-2 text-left w-[15%] whitespace-nowrap">Email</th>
+      <th className="p-2 text-left w-[10%] whitespace-nowrap">Employment Type</th>
+      <th className="p-2 text-left w-[8%] whitespace-nowrap">Status</th>
+      <th className="p-2 text-left w-[10%] whitespace-nowrap">Charge</th>
+      <th className="p-2 text-left w-[10%] whitespace-nowrap">State</th>
+      {allowed && <th className="p-2 text-left w-[10%] whitespace-nowrap">Actions</th>}
+    </tr>
+  </thead>
+  <tbody>
+    {trainers.map((trainer) => (
+      <tr key={trainer.trainer_id} className="hover:bg-gray-50 border-t text-left">
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.trainer_id}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.trainer_name}</td>
+       <td className="p-2">
+  <div className="flex flex-wrap gap-1">
+    {trainer.services?.map((service, idx) => (
+      <span
+        key={idx}
+        className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded whitespace-nowrap"
+      >
+        {service.service_name}
+      </span>
+    ))}
+  </div>
+</td>
+
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.contact_number}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.email}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.employment_type}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.status}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">₹{trainer.charge}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.location}</td>
+        {allowed && (
+          <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">
+            <button
+              onClick={() => handleEdit(trainer)}
+              className="text-blue-500 hover:text-blue-700 whitespace-nowrap"
+            >
+              Edit
+            </button>
+          </td>
+        )}
+      </tr>
+    ))}
+    {trainers.length === 0 && (
+      <tr>
+        <td colSpan={allowed ? "10" : "9"} className="p-2 text-center text-gray-400">
+          No trainers found
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
         )}
       </div>
     </div>

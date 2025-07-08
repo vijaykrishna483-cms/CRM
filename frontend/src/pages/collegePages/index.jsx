@@ -44,7 +44,7 @@ const Index = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#f7f6fd]">
+    <div className="w-[100vw] min-h-screen bg-[#f7f6fd]">
       <Navbar />
       <div className="flex flex-col items-center pt-22">
         {/* Tab Bar */}
@@ -70,7 +70,7 @@ const Index = () => {
           ))}
         </div>
         {/* Rendered Content */}
-        <div className="w-full max-w-5xl mx-auto bg-white rounded-2xl shadow p-8 min-h-[400px]">
+        <div className="w-[100vw]  mx-auto bg-white rounded-2xl shadow p-8 min-h-[400px]">
           {renderContent()}
         </div>
       </div>

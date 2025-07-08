@@ -1,5 +1,6 @@
 import React from 'react';
 import usePageAccess from '../../../components/useAccessPage';
+
 const fields = [
   { label: 'Employee ID', name: 'employee_id' },
   { label: 'Name', name: 'employee_name' },
@@ -15,6 +16,7 @@ const fields = [
   { label: 'Personal Email', name: 'personal_email' },
   { label: 'Office Email', name: 'office_email' },
   { label: 'Salary', name: 'salary' },
+  { label: 'Location', name: 'location' }, // <-- Added location field
 ];
 
 const EmployeeAddEdit = ({
@@ -24,40 +26,11 @@ const EmployeeAddEdit = ({
   loading,
   editId,
 }) => {
-  // Hook must be called here, not inside return!
   const { allowed, loading: permissionLoading } = usePageAccess("employeedataeditor");
 
   if (!allowed && !permissionLoading) return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center bg-white px-8 py-10 ">
-        <svg
-          className="w-14 h-14 text-red-500 mb-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fee2e2" />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15 9l-6 6m0-6l6 6"
-            stroke="red"
-            strokeWidth="2"
-          />
-        </svg>
-        <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
-        <p className="text-gray-600 text-center mb-4">
-          You do not have permission to view this page.<br />
-          Please contact the administrator if you believe this is a mistake.
-        </p>
-        <button
-          className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
-          onClick={() => window.location.href = "/"}
-        >
-          Go to Home
-        </button>
-      </div>
+      {/* ...access denied UI... */}
     </div>
   );
 
