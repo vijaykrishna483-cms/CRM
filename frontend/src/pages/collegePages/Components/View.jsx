@@ -1,5 +1,4 @@
-import  React,{ useState, useEffect } from "react";
-import { PlusCircle, MinusCircle, View } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { exportTableToExcel } from "../Excels/ExcelCollege";
 import api from "../../../libs/apiCall";
@@ -10,17 +9,17 @@ const Vieww = () => {
 
   const [collegeData, setCollegeData] = useState([]);
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     fetchColleges();
+    // eslint-disable-next-line
   }, []);
 
   const fetchColleges = async () => {
     setLoading(true);
     try {
       const collegesRes = await api.get(`/college/getall`);
-
       const colleges = collegesRes.data.data || [];
-
       const collegesWithPocs = await Promise.all(
         colleges.map(async (college) => {
           try {
@@ -36,26 +35,10 @@ const Vieww = () => {
           }
         })
       );
-
       setCollegeData(collegesWithPocs);
     } catch (error) {
       console.error("Error fetching colleges:", error);
       toast.error("Failed to fetch colleges.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeletePOC = async (pocId) => {
-    if (!window.confirm("Delete this POC?")) return;
-
-    setLoading(true);
-    try {
-      await api.delete(`/college/delete/${pocId}`);
-      await fetchColleges();
-      toast.success("POC deleted");
-    } catch {
-      toast.error("Error deleting POC");
     } finally {
       setLoading(false);
     }
@@ -72,33 +55,11 @@ const Vieww = () => {
       poc.poc_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     const stateMatch =
-      college.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
       college.state.toLowerCase().includes(searchTerm.toLowerCase());
 
     return collegeMatch || pocMatch || stateMatch;
   });
 
-  const deleteCollege = async (collegeId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this college and all its associated POCs and proposals?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      const response = await api.delete(`/college/delete/${collegeId}`);
-
-      if (response.data.status === "success") {
-        toast.success("College deleted successfully");
-        fetchColleges(); // Refresh the list after deletion
-      } else {
-        toast.error(response.data.message || "Failed to delete college");
-      }
-    } catch (error) {
-      console.error("Delete college error:", error);
-      toast.error("Server error while deleting college");
-    }
-  };
   if (!allowed && !loadingg)
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center">
@@ -157,9 +118,8 @@ const Vieww = () => {
             placeholder="Search by college code, name or POC,State"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className=" border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm"
           />
-
           <button
             onClick={() => exportTableToExcel(filteredColleges)}
             className="bg-[#364153] text-white px-4 py-2 rounded hover:bg-[#91619b]"
@@ -168,53 +128,51 @@ const Vieww = () => {
           </button>
         </div>
 
-      <table className="w-full text-sm border-collapse">
-  <thead className="text-gray-600 bg-gray-100 border-b border-gray-300 text-left">
-    <tr>
-      <th className="p-2 border border-gray-300">College Code</th>
-      <th className="p-2 border border-gray-300">Name</th>
-      <th className="p-2 border border-gray-300">Location</th>
-      <th className="p-2 border border-gray-300">State</th>
-      <th className="p-2 border border-gray-300">POC Name</th>
-      <th className="p-2 border border-gray-300">Designation</th>
-      <th className="p-2 border border-gray-300">Contact</th>
-      <th className="p-2 border border-gray-300">Email</th>
-    </tr>
-  </thead>
-  <tbody>
-    {filteredColleges.map((college) => (
-      <React.Fragment key={college.college_id}>
-        <tr className="hover:bg-gray-50 border-t border-gray-300 text-left">
-          <td className="p-2 border border-gray-300 text-red-500 flex items-center gap-1">
-            {college.college_code}
-          </td>
-          <td className="p-2 border border-gray-300">{college.college_name}</td>
-          <td className="p-2 border border-gray-300">{college.location}</td>
-          <td className="p-2 border border-gray-300">{college.state}</td>
-          <td colSpan="5" className="p-2 border border-gray-300">
-            {!college.pocs || college.pocs.length === 0 ? "No POCs" : ""}
-          </td>
-        </tr>
-        {(college.pocs || []).map((poc) => (
-          <tr key={poc.poc_id} className="hover:bg-gray-50 border-t border-gray-300 text-left">
-            <td className="border border-gray-300"></td>
-            <td className="border border-gray-300"></td>
-            <td className="border border-gray-300"></td>
-            <td className="border border-gray-300"></td>
-            <td className="p-2 border border-gray-300">{poc.poc_name}</td>
-            <td className="p-2 border border-gray-300">{poc.poc_designation}</td>
-            <td className="p-2 border border-gray-300">{poc.poc_contact}</td>
-            <td className="p-2 border border-gray-300">
-              {poc.poc_email}
-              {/* <span className="text-red-600">{poc.poc_red_email}</span> */}
-            </td>
-          </tr>
-        ))}
-      </React.Fragment>
-    ))}
-  </tbody>
-</table>
-
+        <div className="w-full overflow-x-auto">
+          <table className="min-w-[1200px] w-full text-sm border-collapse">
+            <thead className="text-gray-600 bg-gray-100 border-b border-gray-300 text-left">
+              <tr>
+                <th className="p-2 border border-gray-300 whitespace-nowrap min-w-[120px]">College Code</th>
+                <th className="p-2 border border-gray-300 whitespace-nowrap min-w-[180px]">Name</th>
+                <th className="p-2 border border-gray-300 whitespace-nowrap min-w-[120px]">Location</th>
+                <th className="p-2 border border-gray-300 whitespace-nowrap min-w-[120px]">State</th>
+                <th className="p-2 border border-gray-300 whitespace-nowrap min-w-[140px]">POC Name</th>
+                <th className="p-2 border border-gray-300 whitespace-nowrap min-w-[140px]">Designation</th>
+                <th className="p-2 border border-gray-300 whitespace-nowrap min-w-[140px]">Contact</th>
+                <th className="p-2 border border-gray-300 whitespace-nowrap min-w-[180px]">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredColleges.map((college) => (
+                <React.Fragment key={college.college_id}>
+                  <tr className="hover:bg-gray-50 border-t border-gray-300 text-left">
+                    <td className="p-2 border border-gray-300 text-red-500 flex items-center gap-1 whitespace-nowrap min-w-[120px]">
+                      {college.college_code}
+                    </td>
+                    <td className="p-2 border border-gray-300 whitespace-nowrap min-w-[180px]">{college.college_name}</td>
+                    <td className="p-2 border border-gray-300 whitespace-nowrap min-w-[120px]">{college.location}</td>
+                    <td className="p-2 border border-gray-300 whitespace-nowrap min-w-[120px]">{college.state}</td>
+                    <td colSpan="5" className="p-2 border border-gray-300 whitespace-nowrap">
+                      {!college.pocs || college.pocs.length === 0 ? "No POCs" : ""}
+                    </td>
+                  </tr>
+                  {(college.pocs || []).map((poc) => (
+                    <tr key={poc.poc_id} className="hover:bg-gray-50 border-t border-gray-300 text-left">
+                      <td className="border border-gray-300"></td>
+                      <td className="border border-gray-300"></td>
+                      <td className="border border-gray-300"></td>
+                      <td className="border border-gray-300"></td>
+                      <td className="p-2 border border-gray-300 whitespace-nowrap min-w-[140px]">{poc.poc_name}</td>
+                      <td className="p-2 border border-gray-300 whitespace-nowrap min-w-[140px]">{poc.poc_designation}</td>
+                      <td className="p-2 border border-gray-300 whitespace-nowrap min-w-[140px]">{poc.poc_contact}</td>
+                      <td className="p-2 border border-gray-300 whitespace-nowrap min-w-[180px]">{poc.poc_email}</td>
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

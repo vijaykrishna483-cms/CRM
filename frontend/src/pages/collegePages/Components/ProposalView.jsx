@@ -359,254 +359,252 @@ const ProposalView = ({ showDetails }) => {
           </button>
         </div>
 
-        <table className="w-full text-sm border-collapse">
-          <thead className="text-gray-600 bg-gray-100 border-b">
-            <tr>
-              <th className="p-2 text-left">College Name</th>
-              <th className="p-2 text-left">Proposal Code</th>
-              <th className="p-2 text-left">Plans</th>
-              <th className="p-2 text-left">Status</th>
-              <th className="p-2 text-left">Status Date</th>
-              <th className="p-2 text-left">Duration</th>
-              <th className="p-2 text-left">Quoted Price</th>
-              <th className="p-2 text-left">From</th>
-              <th className="p-2 text-left">To</th>
-              {showDetails && <th className="p-2 text-left">Actions</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProposals.map((proposal) =>
-              editingId === proposal.proposal_id ? (
-                <tr key={proposal.proposal_id} className="bg-yellow-50">
-                  <td className="p-2">
-                    <select
-                      name="collegeCode"
-                      value={editForm.collegeCode}
-                      onChange={handleEditChange}
-                      className="border px-2 py-1 rounded"
-                    >
-                      <option value="">Select College</option>
-                      {collegeData.map((college) => (
-                        <option
-                          key={college.college_code}
-                          value={college.college_code}
-                        >
-                          {college.college_name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="p-2">
-                    <input
-                      name="proposalCode"
-                      value={editForm.proposalCode}
-                      onChange={handleEditChange}
-                      className="border px-2 py-1 rounded"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <button
-                      onClick={() =>
-                        fetchServicesForProposal(proposal.proposal_id)
-                      }
-                      className="text-xs text-blue-600 underline"
-                    >
-                      Refresh Services
-                    </button>
-                  </td>
-                  {/* Status: display as plain text, not editable */}
-                  <td className="p-2">{proposal.status}</td>
-                  <td className="p-2">
-                    <input
-                      name="issueDate"
-                      type="date"
-                      value={editForm.issueDate}
-                      onChange={handleEditChange}
-                      className="border px-2 py-1 rounded"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      name="duration"
-                      value={editForm.duration}
-                      onChange={handleEditChange}
-                      className="border px-2 py-1 rounded"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      name="quotedPrice"
-                      value={editForm.quotedPrice}
-                      onChange={handleEditChange}
-                      className="border px-2 py-1 rounded"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      name="fromDate"
-                      type="date"
-                      value={editForm.fromDate}
-                      onChange={handleEditChange}
-                      className="border px-2 py-1 rounded"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <input
-                      name="toDate"
-                      type="date"
-                      value={editForm.toDate}
-                      onChange={handleEditChange}
-                      className="border px-2 py-1 rounded"
-                    />
-                  </td>
-                  <td className="p-2">
-                    <button
-                      onClick={handleUpdateProposal}
-                      className="text-green-600 mr-2"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      className="text-gray-500"
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </tr>
-              ) : (
-                <tr
-                  key={proposal.proposal_id}
-                  className="hover:bg-gray-50 border-t text-left"
+      <table className="w-full text-sm border-collapse border border-gray-300">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left border border-gray-300">College Name</th>
+      <th className="p-2 text-left border border-gray-300">Proposal Code</th>
+      <th className="p-2 text-left border border-gray-300">Plans</th>
+      <th className="p-2 text-left border border-gray-300">Status</th>
+      <th className="p-2 text-left border border-gray-300">Status Date</th>
+      <th className="p-2 text-left border border-gray-300">Duration</th>
+      <th className="p-2 text-left border border-gray-300">Quoted Price</th>
+      <th className="p-2 text-left border border-gray-300">From</th>
+      <th className="p-2 text-left border border-gray-300">To</th>
+      {showDetails && <th className="p-2 text-left border border-gray-300">Actions</th>}
+    </tr>
+  </thead>
+  <tbody>
+    {filteredProposals.map((proposal) =>
+      editingId === proposal.proposal_id ? (
+        <tr key={proposal.proposal_id} className="bg-yellow-50">
+          <td className="p-2 border border-gray-300">
+            <select
+              name="collegeCode"
+              value={editForm.collegeCode}
+              onChange={handleEditChange}
+              className="border px-2 py-1 rounded"
+            >
+              <option value="">Select College</option>
+              {collegeData.map((college) => (
+                <option
+                  key={college.college_code}
+                  value={college.college_code}
                 >
-                  <td className="p-2">
-                    {collegeNameMap[proposal.college_code] ||
-                      proposal.college_code}
-                  </td>
-                  <td className="p-2">{proposal.proposal_code}</td>
-                  <td className="p-2">
-                    <div className="max-w-xs text-left">
-                      {(proposalServices[proposal.proposal_id] || []).map(
-                        (service) => (
-                          <li
-                            key={service.plan_id}
-                            className="truncate flex justify-between items-center"
-                          >
-                            <span className="flex-grow">
-                              {service.plan_name}
-                            </span>
-
-                            {showDetails && (
-                              <button
-                                onClick={() =>
-                                  handleDeleteService(
-                                    proposal.proposal_id,
-                                    service.plan_id
-                                  )
-                                }
-                                className="ml-2 text-red-500 hover:text-red-700"
-                                title="Remove service text-sm"
-                              >
-                                <MdDelete />
-                              </button>
-                            )}
-                          </li>
-                        )
-                      )}
+                  {college.college_name}
+                </option>
+              ))}
+            </select>
+          </td>
+          <td className="p-2 border border-gray-300">
+            <input
+              name="proposalCode"
+              value={editForm.proposalCode}
+              onChange={handleEditChange}
+              className="border px-2 py-1 rounded"
+            />
+          </td>
+          <td className="p-2 border border-gray-300">
+            <button
+              onClick={() =>
+                fetchServicesForProposal(proposal.proposal_id)
+              }
+              className="text-xs text-blue-600 underline"
+            >
+              Refresh Services
+            </button>
+          </td>
+          <td className="p-2 border border-gray-300">{proposal.status}</td>
+          <td className="p-2 border border-gray-300">
+            <input
+              name="issueDate"
+              type="date"
+              value={editForm.issueDate}
+              onChange={handleEditChange}
+              className="border px-2 py-1 rounded"
+            />
+          </td>
+          <td className="p-2 border border-gray-300">
+            <input
+              name="duration"
+              value={editForm.duration}
+              onChange={handleEditChange}
+              className="border px-2 py-1 rounded"
+            />
+          </td>
+          <td className="p-2 border border-gray-300">
+            <input
+              name="quotedPrice"
+              value={editForm.quotedPrice}
+              onChange={handleEditChange}
+              className="border px-2 py-1 rounded"
+            />
+          </td>
+          <td className="p-2 border border-gray-300">
+            <input
+              name="fromDate"
+              type="date"
+              value={editForm.fromDate}
+              onChange={handleEditChange}
+              className="border px-2 py-1 rounded"
+            />
+          </td>
+          <td className="p-2 border border-gray-300">
+            <input
+              name="toDate"
+              type="date"
+              value={editForm.toDate}
+              onChange={handleEditChange}
+              className="border px-2 py-1 rounded"
+            />
+          </td>
+          <td className="p-2 border border-gray-300">
+            <button
+              onClick={handleUpdateProposal}
+              className="text-green-600 mr-2"
+            >
+              Save
+            </button>
+            <button
+              onClick={handleCancelEdit}
+              className="text-gray-500"
+            >
+              Cancel
+            </button>
+          </td>
+        </tr>
+      ) : (
+        <tr
+          key={proposal.proposal_id}
+          className="hover:bg-gray-50 border-t text-left"
+        >
+          <td className="p-2 border border-gray-300">
+            {collegeNameMap[proposal.college_code] ||
+              proposal.college_code}
+          </td>
+          <td className="p-2 border border-gray-300">{proposal.proposal_code}</td>
+          <td className="p-2 border border-gray-300">
+            <div className="max-w-xs text-left">
+              {(proposalServices[proposal.proposal_id] || []).map(
+                (service) => (
+                  <li
+                    key={service.plan_id}
+                    className="truncate flex justify-between items-center"
+                  >
+                    <span className="flex-grow">
+                      {service.plan_name}
+                    </span>
+                    {showDetails && (
+                      <button
+                        onClick={() =>
+                          handleDeleteService(
+                            proposal.proposal_id,
+                            service.plan_id
+                          )
+                        }
+                        className="ml-2 text-red-500 hover:text-red-700"
+                        title="Remove service text-sm"
+                      >
+                        <MdDelete />
+                      </button>
+                    )}
+                  </li>
+                )
+              )}
+            </div>
+          </td>
+          <td className="p-2 border border-gray-300">
+            {proposal.status}
+            <span className="text-red-500">
+              {proposal.status == "Follow up" ? <> {proposal.employee_id}</> : <> </>}
+            </span>
+          </td>
+          <td className="p-2 border border-gray-300">
+            {proposal.issue_date
+              ? proposal.issue_date.slice(0, 10)
+              : ""}
+          </td>
+          <td className="p-2 border border-gray-300">{proposal.duration}</td>
+          <td className="p-2 border border-gray-300">{proposal.quoted_price}</td>
+          <td className="p-2 border border-gray-300">
+            {new Date(proposal.from_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </td>
+          <td className="p-2 border border-gray-300">
+            {new Date(proposal.to_date).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </td>
+          {showDetails && (
+            <td className="p-2 flex flex-col gap-2 border border-gray-300">
+              <button
+                onClick={() => startEdit(proposal)}
+                className="text-blue-600"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => deleteClick(proposal)}
+                className="text-red-600"
+              >
+                Delete
+              </button>
+              {/* Add Follow up option */}
+              {proposal.status === "Mail Sent" && (
+                <div className="mt-2">
+                  {followUpId === proposal.proposal_id ? (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter Employee ID"
+                        value={employeeIdInput}
+                        onChange={(e) => setEmployeeIdInput(e.target.value)}
+                        className="border px-2 py-1 rounded text-xs"
+                        disabled={followUpLoading}
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleFollowUp(proposal.proposal_id)}
+                          className="bg-purple-600 text-white px-3 py-1 rounded text-xs"
+                          disabled={followUpLoading}
+                        >
+                          {followUpLoading ? "Saving..." : "Confirm"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setFollowUpId(null);
+                            setEmployeeIdInput("");
+                          }}
+                          className="text-gray-500 text-xs"
+                          disabled={followUpLoading}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                  </td>
-                  <td className="p-2">
-                    {proposal.status}
-    <span className="text-red-500">  {proposal.status=="Follow up" ? <> {proposal.employee_id}</>:<> </>}</span>
-
-                  </td>
-
-                  <td className="p-2">
-                    {proposal.issue_date
-                      ? proposal.issue_date.slice(0, 10)
-                      : ""}
-                  </td>
-                  <td className="p-2">{proposal.duration}</td>
-                  <td className="p-2">{proposal.quoted_price}</td>
-                  <td className="p-2">
-                    {new Date(proposal.from_date).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </td>
-                  <td className="p-2">
-                    {new Date(proposal.to_date).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </td>
-
-                  {showDetails && (
-                    <td className="p-2 flex flex-col gap-2">
-                      <button
-                        onClick={() => startEdit(proposal)}
-                        className="text-blue-600"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteClick(proposal)}
-                        className="text-red-600"
-                      >
-                        Delete
-                      </button>
-                      {/* Add Follow up option */}
-                   {proposal.status === "Mail Sent" && (
-  <div className="mt-2">
-    {followUpId === proposal.proposal_id ? (
-      <div className="flex flex-col gap-2">
-        <input
-          type="text"
-          placeholder="Enter Employee ID"
-          value={employeeIdInput}
-          onChange={(e) => setEmployeeIdInput(e.target.value)}
-          className="border px-2 py-1 rounded text-xs"
-          disabled={followUpLoading}
-        />
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleFollowUp(proposal.proposal_id)}
-            className="bg-purple-600 text-white px-3 py-1 rounded text-xs"
-            disabled={followUpLoading}
-          >
-            {followUpLoading ? "Saving..." : "Confirm"}
-          </button>
-          <button
-            onClick={() => {
-              setFollowUpId(null);
-              setEmployeeIdInput("");
-            }}
-            className="text-gray-500 text-xs"
-            disabled={followUpLoading}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    ) : (
-      <button
-        onClick={() => setFollowUpId(proposal.proposal_id)}
-        className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-xs"
-      >
-        Mark as Follow up
-      </button>
-    )}
-  </div>
-)}
-                    </td>
+                  ) : (
+                    <button
+                      onClick={() => setFollowUpId(proposal.proposal_id)}
+                      className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-xs"
+                    >
+                      Mark as Follow up
+                    </button>
                   )}
-                </tr>
-              )
-            )}
-          </tbody>
-        </table>
+                </div>
+              )}
+            </td>
+          )}
+        </tr>
+      )
+    )}
+  </tbody>
+</table>
+
       </div>
     </div>
   );

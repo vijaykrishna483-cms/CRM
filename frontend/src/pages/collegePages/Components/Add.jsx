@@ -434,100 +434,92 @@ const Add = () => {
 
 
 
+<div className="overflow-x-auto">
+  <div className="bg-white p-4 rounded-xl shadow-sm border w-[95%] mx-auto">
+    <h3 className="text-sm font-semibold mb-4 text-[#4f378a]">
+      College Entries
+    </h3>
+    <div className="flex gap-4 w-full justify-center items-center mb-4">
+      <input
+        type="text"
+        placeholder="Search by college code, name or POC,State"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm"
+      />
+      <button
+        onClick={() => exportTableToExcel(filteredColleges)}
+        className="bg-[#364153] text-white px-4 py-2 rounded hover:bg-[#91619b]"
+      >
+        Download Excel
+      </button>
+    </div>
 
-
-
-
-          <div className="overflow-x-auto">
-      <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto w-[95%]">
-              <h3 className="text-sm font-semibold mb-4 text-[#4f378a]">
-                College Entries
-              </h3>
-              <div className="flex gap-4 w-full justify-center items-center mb-4">
-                <input
-                  type="text"
-                  placeholder="Search by college code, name or POC,State"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className=" border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm"
-                />
-      
-                <button
-                  onClick={() => exportTableToExcel(filteredColleges)}
-                  className="bg-[#364153] text-white px-4 py-2 rounded hover:bg-[#91619b]"
-                >
-                  Download Excel
-                </button>
-              </div>
-      
-             <div className="overflow-x-auto">
-  <table className="w-full text-sm border-collapse border border-gray-300">
-  <thead className="text-gray-600 bg-gray-100 border-b text-left">
-    <tr>
-      <th className="p-4 text-left w-32 border border-gray-300">College Code</th>
-      <th className="p-4 text-left w-48 border border-gray-300">Name</th>
-      <th className="p-4 text-left w-40 border border-gray-300">Location</th>
-      <th className="p-4 text-left w-28 border border-gray-300">State</th>
-      <th className="p-4 text-left w-44 border border-gray-300">POC Name</th>
-      <th className="p-4 text-left w-36 border border-gray-300">Designation</th>
-      <th className="p-4 text-left w-32 border border-gray-300">Contact</th>
-      <th className="p-4 text-left w-56 border border-gray-300">Email</th>
-      <th className="p-4 text-left w-28 border border-gray-300">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {filteredColleges.map((college) => (
-      <React.Fragment key={college.college_id}>
-        <tr className="hover:bg-gray-50 border-t text-left">
-          <td className="p-4 text-red-500 flex items-center gap-1 border border-gray-300">
-            <MinusCircle
-              size={16}
-              onClick={() => deleteCollege(college.college_id)}
-            />
-            {college.college_code}
-          </td>
-          <td className="p-4 border border-gray-300">{college.college_name}</td>
-          <td className="p-4 border border-gray-300">{college.location}</td>
-          <td className="p-4 border border-gray-300">{college.state}</td>
-          <td colSpan="5" className="p-4 border border-gray-300">
-            {!college.pocs || college.pocs.length === 0 ? "No POCs" : ""}
-          </td>
-        </tr>
-        {(college.pocs || []).map((poc) => (
-          <tr key={poc.poc_id} className="hover:bg-gray-50 border-t text-left">
-            <td className="border border-gray-300"></td>
-            <td className="border border-gray-300"></td>
-            <td className="border border-gray-300"></td>
-            <td className="border border-gray-300"></td>
-            <td className="p-4 border border-gray-300">{poc.poc_name}</td>
-            <td className="p-4 border border-gray-300">{poc.poc_designation}</td>
-            <td className="p-4 border border-gray-300">{poc.poc_contact}</td>
-            <td className="p-4 border border-gray-300">
-              {poc.poc_email}
-              <br />
-              <span className="text-red-600">{poc.poc_red_email}</span>
-            </td>
-            <td className="p-4 border border-gray-300">
-              <button
-                onClick={() => handleDeletePOC(poc.poc_id)}
-                className="text-red-500 hover:text-red-700"
-                title="Delete POC"
-              >
-                <MinusCircle size={16} />
-              </button>
-            </td>
+    <div className="overflow-x-auto">
+      <table className="min-w-[1400px] w-full text-sm border-collapse border border-gray-300">
+        <thead className="text-gray-600 bg-gray-100 border-b text-left">
+          <tr>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[130px]">College Code</th>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[200px]">Name</th>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[150px]">Location</th>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[120px]">State</th>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[170px]">POC Name</th>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[150px]">Designation</th>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[130px]">Contact</th>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[220px]">Email</th>
+            <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[100px]">Actions</th>
           </tr>
-        ))}
-      </React.Fragment>
-    ))}
-  </tbody>
-</table>
-
+        </thead>
+        <tbody>
+          {filteredColleges.map((college) => (
+            <React.Fragment key={college.college_id}>
+              <tr className="hover:bg-gray-50 border-t text-left">
+                <td className="p-4 text-red-500 flex items-center gap-1 border border-gray-300 whitespace-nowrap min-w-[130px]">
+                  <MinusCircle
+                    size={16}
+                    onClick={() => deleteCollege(college.college_id)}
+                  />
+                  {college.college_code}
+                </td>
+                <td className="p-4 border border-gray-300 whitespace-nowrap min-w-[200px]">{college.college_name}</td>
+                <td className="p-4 border border-gray-300 whitespace-nowrap min-w-[150px]">{college.location}</td>
+                <td className="p-4 border border-gray-300 whitespace-nowrap min-w-[120px]">{college.state}</td>
+                <td colSpan="5" className="p-4 border border-gray-300 whitespace-nowrap">
+                  {!college.pocs || college.pocs.length === 0 ? "No POCs" : ""}
+                </td>
+              </tr>
+              {(college.pocs || []).map((poc) => (
+                <tr key={poc.poc_id} className="hover:bg-gray-50 border-t text-left">
+                  <td className="border border-gray-300"></td>
+                  <td className="border border-gray-300"></td>
+                  <td className="border border-gray-300"></td>
+                  <td className="border border-gray-300"></td>
+                  <td className="p-4 border border-gray-300 whitespace-nowrap min-w-[170px]">{poc.poc_name}</td>
+                  <td className="p-4 border border-gray-300 whitespace-nowrap min-w-[150px]">{poc.poc_designation}</td>
+                  <td className="p-4 border border-gray-300 whitespace-nowrap min-w-[130px]">{poc.poc_contact}</td>
+                  <td className="p-4 border border-gray-300 whitespace-nowrap min-w-[220px]">
+                    {poc.poc_email}
+                    <br />
+                    <span className="text-red-600">{poc.poc_red_email}</span>
+                  </td>
+                  <td className="p-4 border border-gray-300 whitespace-nowrap min-w-[100px]">
+                    <button
+                      onClick={() => handleDeletePOC(poc.poc_id)}
+                      className="text-red-500 hover:text-red-700"
+                      title="Delete POC"
+                    >
+                      <MinusCircle size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </React.Fragment>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
-
-            </div>
-          </div>
-
 
     </div>
   );
