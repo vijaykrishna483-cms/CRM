@@ -329,7 +329,6 @@ const ProposalPlan = () => {
 )}
 
 
-
           <button
             onClick={handleAddPlan}
             className="mt-4 px-5 py-2 bg-purple-100 hover:bg-purple-200 rounded-full font-medium text-sm text-gray-700"
@@ -337,7 +336,8 @@ const ProposalPlan = () => {
           >
             {loading ? 'Adding...' : 'Add Plan'}
           </button>
-        </div>
+        </div> 
+
       ) : (
         <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
           <div className="flex justify-between items-center mb-4">
@@ -367,54 +367,54 @@ const ProposalPlan = () => {
             </div>
           </div>
 
-          <table className="w-full text-sm border-collapse">
-            <thead className="text-gray-600 bg-gray-100 border-b">
-              <tr>
-                <th className="p-2 text-left">Plan Code</th>
-                <th className="p-2 text-left">Plan Name</th>
-                <th className="p-2 text-left">Duration (days)</th>
-                <th className="p-2 text-left">Services</th>
-                <th className="p-2 text-left">Zipfile</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPlans.map(plan => (
-                <tr key={plan.plan_id} className="hover:bg-gray-50 border-t">
-                  <td className="p-2 text-red-500 text-left">{plan.plan_code}</td>
-                  <td className="p-2 text-left">{plan.plan_name}</td>
-                  <td className="p-2 text-left">{plan.duration}</td>
-                  <td className="p-2 text-left">
-                    {plan.services && plan.services.length > 0 ? (
-                      <div className="flex flex-wrap gap-1 max-w-xs">
-                        {plan.services.map(service => (
-                          <span
-                            key={service.service_id}
-                            className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded"
-                          >
-                            {service.service_name}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">No services</span>
-                    )}
-                  </td>
-                  <td className="p-2 text-left">
-                    {plan.zipfile_link ? (
-                      <a
-                        href={plan.zipfile_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline text-sm"
-                      >
-                        Download
-                      </a>
-                    ) : 'N/A'}
-                  </td>
-                </tr>
+       <table className="w-full text-sm border-collapse border border-gray-300">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left border border-gray-300">Plan Code</th>
+      <th className="p-2 text-left border border-gray-300">Plan Name</th>
+      <th className="p-2 text-left border border-gray-300">Duration (days)</th>
+      <th className="p-2 text-left border border-gray-300">Services</th>
+      <th className="p-2 text-left border border-gray-300">Zipfile</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredPlans.map(plan => (
+      <tr key={plan.plan_id} className="hover:bg-gray-50 border-t">
+        <td className="p-2 text-red-500 text-left border border-gray-300">{plan.plan_code}</td>
+        <td className="p-2 text-left border border-gray-300">{plan.plan_name}</td>
+        <td className="p-2 text-left border border-gray-300">{plan.duration}</td>
+        <td className="p-2 text-left border border-gray-300">
+          {plan.services && plan.services.length > 0 ? (
+            <div className="flex flex-wrap gap-1 max-w-xs">
+              {plan.services.map(service => (
+                <span
+                  key={service.service_id}
+                  className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded"
+                >
+                  {service.service_name}
+                </span>
               ))}
-            </tbody>
-          </table>
+            </div>
+          ) : (
+            <span className="text-gray-400">No services</span>
+          )}
+        </td>
+        <td className="p-2 text-left border border-gray-300">
+          {plan.zipfile_link ? (
+            <a
+              href={plan.zipfile_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline text-sm"
+            >
+              Download
+            </a>
+          ) : 'N/A'}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
           {filteredPlans.length === 0 && (
             <div className="text-center py-4 text-gray-500">

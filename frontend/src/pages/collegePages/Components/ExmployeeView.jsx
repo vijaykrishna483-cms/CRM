@@ -59,60 +59,61 @@ const EmployeeView = ({
       className="mb-4 w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-lg text-sm"
     />
    <div className="overflow-x-auto">
-  <table className="min-w-full text-sm border-collapse whitespace-nowrap">
-    <thead className="text-gray-600 bg-gray-100 border-b">
-      <tr>
-        <th className="p-2 text-left">ID</th>
-        <th className="p-2 text-left">Name</th>
-        <th className="p-2 text-left">Vertical</th>
-        <th className="p-2 text-left">Position</th>
-        <th className="p-2 text-left">Personal Contact</th>
-        <th className="p-2 text-left">Office Contact</th>
-        <th className="p-2 text-left">Personal Email</th>
-        <th className="p-2 text-left">Office Email</th>
-        <th className="p-2 text-left">Salary</th>
-        {showDetails && <th className="p-2 text-left">Actions</th>}
-      </tr>
-    </thead>
-    <tbody>
-      {filteredEmployees.map((emp) => (
-        <tr key={emp.id} className="hover:bg-gray-50 border-t">
-          <td className="p-2">{emp.employee_id}</td>
-          <td className="p-2">{emp.employee_name}</td>
-          <td className="p-2">{emp.designation}</td>
-          <td className="p-2">{emp.position}</td>
-          <td className="p-2">{emp.personal_contact}</td>
-          <td className="p-2">{emp.office_contact}</td>
-          <td className="p-2">{emp.personal_email}</td>
-          <td className="p-2">{emp.office_email}</td>
-          <td className="p-2">{emp.salary}</td>
-          {showDetails && (
-            <td className="p-2">
-              <button
-                onClick={() => handleEdit(emp)}
-                className="text-blue-500 hover:text-blue-700 mr-2"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(emp.id)}
-                className="text-red-500 hover:text-red-700"
-              >
-                Delete
-              </button>
-            </td>
-          )}
-        </tr>
-      ))}
-      {filteredEmployees.length === 0 && (
-        <tr>
-          <td colSpan="10" className="p-2 text-center text-gray-400">
-            No Employees Found
+  <table className="min-w-full text-sm border-collapse whitespace-nowrap border border-gray-300">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left border border-gray-300">ID</th>
+      <th className="p-2 text-left border border-gray-300">Name</th>
+      <th className="p-2 text-left border border-gray-300">Vertical</th>
+      <th className="p-2 text-left border border-gray-300">Position</th>
+      <th className="p-2 text-left border border-gray-300">Personal Contact</th>
+      <th className="p-2 text-left border border-gray-300">Office Contact</th>
+      <th className="p-2 text-left border border-gray-300">Personal Email</th>
+      <th className="p-2 text-left border border-gray-300">Office Email</th>
+      <th className="p-2 text-left border border-gray-300">Salary</th>
+      {showDetails && <th className="p-2 text-left border border-gray-300">Actions</th>}
+    </tr>
+  </thead>
+  <tbody>
+    {filteredEmployees.map((emp) => (
+      <tr key={emp.id} className="hover:bg-gray-50 border-t">
+        <td className="p-2 border border-gray-300">{emp.employee_id}</td>
+        <td className="p-2 border border-gray-300">{emp.employee_name}</td>
+        <td className="p-2 border border-gray-300">{emp.designation}</td>
+        <td className="p-2 border border-gray-300">{emp.position}</td>
+        <td className="p-2 border border-gray-300">{emp.personal_contact}</td>
+        <td className="p-2 border border-gray-300">{emp.office_contact}</td>
+        <td className="p-2 border border-gray-300">{emp.personal_email}</td>
+        <td className="p-2 border border-gray-300">{emp.office_email}</td>
+        <td className="p-2 border border-gray-300">{emp.salary}</td>
+        {showDetails && (
+          <td className="p-2 border border-gray-300">
+            <button
+              onClick={() => handleEdit(emp)}
+              className="text-blue-500 hover:text-blue-700 mr-2"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => handleDelete(emp.id)}
+              className="text-red-500 hover:text-red-700"
+            >
+              Delete
+            </button>
           </td>
-        </tr>
-      )}
-    </tbody>
-  </table>
+        )}
+      </tr>
+    ))}
+    {filteredEmployees.length === 0 && (
+      <tr>
+        <td colSpan="10" className="p-2 text-center text-gray-400 border border-gray-300">
+          No Employees Found
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
 </div>
 
   </div>

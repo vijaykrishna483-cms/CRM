@@ -1,13 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import axios from 'axios';
 import usePageAccess from '../../components/useAccessPage';
 import api from '../../libs/apiCall';
+import Select from 'react-select';
+
+const selectOptions = [
+  { value: '', label: 'Select' },
+  { value: 'By College', label: 'By College' },
+  { value: 'By SMART', label: 'By SMART' },
+  { value: 'By Self', label: 'By Self' }
+];
 
 const Toe = () => {
-    const { allowed, loading: permissionLoading } = usePageAccess("toegenerator");
+  const { allowed, loading: permissionLoading } = usePageAccess("toegenerator");
 
+  // College and POC data
+  const [colleges, setColleges] = useState([]);
+  const [collegeOptions, setCollegeOptions] = useState([]);
+  const [selectedCollege, setSelectedCollege] = useState(null);
+  const [pocOptions, setPocOptions] = useState([]);
+  const [selectedPoc, setSelectedPoc] = useState(null);
+
+  // Form state
   const [formData, setFormData] = useState({
     date: '',
     collegeName: '',
@@ -42,28 +57,112 @@ const Toe = () => {
     landlinesmart: ''
   });
 
-  const selectOptions = [
-    { value: '', label: 'Select' },
-    { value: 'By College', label: 'By College' },
-    { value: 'By SMART', label: 'By SMART' },
-    { value: 'By Self', label: 'By Self' }
-  ];
+  // Fetch colleges and POCs on mount
+  useEffect(() => {
+    fetchColleges();
+  }, []);
 
+  const fetchColleges = async () => {
+    try {
+      const collegesRes = await api.get(`/college/getall`);
+      const colleges = collegesRes.data.data || [];
+      // Fetch POCs for each college
+      const collegesWithPocs = await Promise.all(
+        colleges.map(async (college) => {
+          try {
+            const pocsRes = await api.get(`/college/${college.college_id}/getpocs`);
+            return {
+              ...college,
+              pocs: pocsRes.data.data || [],
+            };
+          } catch {
+            return { ...college, pocs: [] };
+          }
+        })
+      );
+      setColleges(collegesWithPocs);
+      setCollegeOptions(
+        collegesWithPocs.map(col => ({
+          value: col.college_id,
+          label: `${col.college_code} - ${col.college_name}`
+        }))
+      );
+    } catch (error) {
+      setColleges([]);
+      setCollegeOptions([]);
+    }
+  };
+
+  // When college changes, update address and POC options
+  useEffect(() => {
+    if (!selectedCollege) {
+      setFormData(f => ({ ...f, collegeName: '', address: '', spocName: '', spocdesignation: '', spocemail: '', spocmobile: '' }));
+      setPocOptions([]);
+      setSelectedPoc(null);
+      return;
+    }
+    const college = colleges.find(col => col.college_id === selectedCollege.value);
+    setFormData(f => ({
+      ...f,
+      collegeName: college.college_name || '',
+      address: college.location || ''
+    }));
+    setPocOptions(
+      (college.pocs || []).map(poc => ({
+        value: poc.poc_id,
+        label: poc.poc_name,
+        poc
+      }))
+    );
+    setSelectedPoc(null);
+    setFormData(f => ({
+      ...f,
+      spocName: '',
+      spocdesignation: '',
+      spocemail: '',
+      spocmobile: ''
+    }));
+  // eslint-disable-next-line
+  }, [selectedCollege]);
+
+  // When POC changes, auto-fill SPOC fields
+  useEffect(() => {
+    if (!selectedPoc) {
+      setFormData(f => ({
+        ...f,
+        spocName: '',
+        spocdesignation: '',
+        spocemail: '',
+        spocmobile: ''
+      }));
+      return;
+    }
+    const poc = pocOptions.find(p => p.value === selectedPoc.value)?.poc;
+    if (poc) {
+      setFormData(f => ({
+        ...f,
+        spocName: poc.poc_name || '',
+        spocdesignation: poc.poc_designation || '',
+        spocemail: poc.poc_email || '',
+        spocmobile: poc.poc_contact || ''
+      }));
+    }
+  // eslint-disable-next-line
+  }, [selectedPoc]);
+
+  // Handle form changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-
-
-
-   const handleSubmit = async () => {
+  // Submit logic
+  const handleSubmit = async () => {
     const payload = { ...formData };
     try {
       const res = await api.post('/pdf/toe', payload, {
         responseType: 'blob'
       });
-
       const blob = new Blob([res.data], { type: res.headers['content-type'] });
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
@@ -73,45 +172,43 @@ const Toe = () => {
       link.remove();
     } catch (err) {
       console.error('Error generating DOCX:', err);
-      // toast.error('Failed to generate document.');
     }
   };
-      if (!allowed && !permissionLoading) return (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center">
-    <div className="flex flex-col items-center bg-white px-8 py-10 ">
-      <svg
-        className="w-14 h-14 text-red-500 mb-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fee2e2" />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15 9l-6 6m0-6l6 6"
-          stroke="red"
-          strokeWidth="2"
-        />
-      </svg>
-      <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
-      <p className="text-gray-600 text-center mb-4">
-        You do not have permission to view this page.<br />
-        Please contact the administrator if you believe this is a mistake.
-      </p>
-      <button
-        className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
-        onClick={() => window.location.href = "/"}
-      >
-        Go to Home
-      </button>
-    </div>
-  </div>
-);
-  if (permissionLoading) return <div>Loading...</div>;  
 
-  
+  if (!allowed && !permissionLoading) return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center bg-white px-8 py-10 ">
+        <svg
+          className="w-14 h-14 text-red-500 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#fee2e2" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15 9l-6 6m0-6l6 6"
+            stroke="red"
+            strokeWidth="2"
+          />
+        </svg>
+        <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
+        <p className="text-gray-600 text-center mb-4">
+          You do not have permission to view this page.<br />
+          Please contact the administrator if you believe this is a mistake.
+        </p>
+        <button
+          className="mt-2 px-5 py-2 rounded-lg bg-[#6750a4] text-white font-semibold hover:bg-[#01291f] transition"
+          onClick={() => window.location.href = "/"}
+        >
+          Go to Home
+        </button>
+      </div>
+    </div>
+  );
+  if (permissionLoading) return <div>Loading...</div>;
 
   return (
     <>
@@ -126,6 +223,18 @@ const Toe = () => {
           </div>
           <form className="relative z-10 p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {/* College select */}
+              <div>
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">College</label>
+                <Select
+                  options={collegeOptions}
+                  value={selectedCollege}
+                  onChange={setSelectedCollege}
+                  placeholder="Select College"
+                  isClearable
+                  classNamePrefix="react-select"
+                />
+              </div>
               {/* Date */}
               <div>
                 <label className="block text-sm font-semibold text-[#4f378a] mb-1">Date</label>
@@ -134,17 +243,6 @@ const Toe = () => {
                   type="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white/80 focus:ring-2 focus:ring-[#7c3aed]"
-                />
-              </div>
-              {/* College Name */}
-              <div>
-                <label className="block text-sm font-semibold text-[#4f378a] mb-1">College Name</label>
-                <input
-                  name="collegeName"
-                  value={formData.collegeName}
-                  onChange={handleChange}
-                  placeholder="College Name"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white/80 focus:ring-2 focus:ring-[#7c3aed]"
                 />
               </div>
@@ -157,6 +255,7 @@ const Toe = () => {
                   onChange={handleChange}
                   placeholder="Address"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white/80 focus:ring-2 focus:ring-[#7c3aed]"
+                  readOnly
                 />
               </div>
               {/* Programme Name */}
@@ -380,15 +479,17 @@ const Toe = () => {
                   ))}
                 </select>
               </div>
-              {/* SPOC Name */}
+              {/* POC select */}
               <div>
                 <label className="block text-sm font-semibold text-[#4f378a] mb-1">SPOC Name</label>
-                <input
-                  name="spocName"
-                  value={formData.spocName}
-                  onChange={handleChange}
-                  placeholder="SPOC Name"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white/80 focus:ring-2 focus:ring-[#7c3aed]"
+                <Select
+                  options={pocOptions}
+                  value={selectedPoc}
+                  onChange={setSelectedPoc}
+                  placeholder="Select SPOC"
+                  isClearable
+                  classNamePrefix="react-select"
+                  isDisabled={pocOptions.length === 0}
                 />
               </div>
               {/* SPOC Designation */}
@@ -400,6 +501,7 @@ const Toe = () => {
                   onChange={handleChange}
                   placeholder="SPOC Designation"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white/80 focus:ring-2 focus:ring-[#7c3aed]"
+                  readOnly
                 />
               </div>
               {/* SPOC Email */}
@@ -411,6 +513,7 @@ const Toe = () => {
                   onChange={handleChange}
                   placeholder="SPOC Email"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white/80 focus:ring-2 focus:ring-[#7c3aed]"
+                  readOnly
                 />
               </div>
               {/* SPOC Mobile */}
@@ -422,6 +525,7 @@ const Toe = () => {
                   onChange={handleChange}
                   placeholder="SPOC Mobile"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white/80 focus:ring-2 focus:ring-[#7c3aed]"
+                  readOnly
                 />
               </div>
               {/* SMART SPOC */}
@@ -479,27 +583,19 @@ const Toe = () => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white/80 focus:ring-2 focus:ring-[#7c3aed]"
                 />
               </div>
-
-
-           
             </div>
-            {/* Add submit or export logic as needed */}
           </form>
-   <div className='w-full flex justify-center items-center mt-6 mb-8'>
-
-
-
-              <button
+          <div className='w-full flex justify-center items-center mt-6 mb-8'>
+            <button
               onClick={(e) => {
                 e.preventDefault();
                 handleSubmit();
               }}
               className="bg-gradient-to-r from-[#88139a] to-[#88139a] hover:from-[#88139a] hover:to-[#88139a] text-white font-semibold py-3 px-12 rounded-lg shadow-md transition duration-300 transform hover:scale-105"
             >
-              Generate Tof
+              Generate TOE
             </button>
-
-               </div>
+          </div>
           <div className="relative z-10 bg-gray-50 p-4 text-center text-sm text-gray-500 border-t rounded-b-2xl">
             Fill all fields
           </div>

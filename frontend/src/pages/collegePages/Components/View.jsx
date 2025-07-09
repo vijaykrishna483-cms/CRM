@@ -168,72 +168,53 @@ const Vieww = () => {
           </button>
         </div>
 
-        <table className="w-full text-sm border-collapse">
-          <thead className="text-gray-600 bg-gray-100 border-b text-left">
-            <tr>
-              <th className="p-2 text-left">College Code</th>
-              <th className="p-2 text-left">Name</th>
-              <th className="p-2 text-left">Location</th>
-              <th className="p-2 text-left">State</th>
-              <th className="p-2 text-left">POC Name</th>
-              <th className="p-2 text-left">Designation</th>
-              <th className="p-2 text-left">Contact</th>
-              <th className="p-2 text-left">Email</th>
+      <table className="w-full text-sm border-collapse">
+  <thead className="text-gray-600 bg-gray-100 border-b border-gray-300 text-left">
+    <tr>
+      <th className="p-2 border border-gray-300">College Code</th>
+      <th className="p-2 border border-gray-300">Name</th>
+      <th className="p-2 border border-gray-300">Location</th>
+      <th className="p-2 border border-gray-300">State</th>
+      <th className="p-2 border border-gray-300">POC Name</th>
+      <th className="p-2 border border-gray-300">Designation</th>
+      <th className="p-2 border border-gray-300">Contact</th>
+      <th className="p-2 border border-gray-300">Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredColleges.map((college) => (
+      <React.Fragment key={college.college_id}>
+        <tr className="hover:bg-gray-50 border-t border-gray-300 text-left">
+          <td className="p-2 border border-gray-300 text-red-500 flex items-center gap-1">
+            {college.college_code}
+          </td>
+          <td className="p-2 border border-gray-300">{college.college_name}</td>
+          <td className="p-2 border border-gray-300">{college.location}</td>
+          <td className="p-2 border border-gray-300">{college.state}</td>
+          <td colSpan="5" className="p-2 border border-gray-300">
+            {!college.pocs || college.pocs.length === 0 ? "No POCs" : ""}
+          </td>
+        </tr>
+        {(college.pocs || []).map((poc) => (
+          <tr key={poc.poc_id} className="hover:bg-gray-50 border-t border-gray-300 text-left">
+            <td className="border border-gray-300"></td>
+            <td className="border border-gray-300"></td>
+            <td className="border border-gray-300"></td>
+            <td className="border border-gray-300"></td>
+            <td className="p-2 border border-gray-300">{poc.poc_name}</td>
+            <td className="p-2 border border-gray-300">{poc.poc_designation}</td>
+            <td className="p-2 border border-gray-300">{poc.poc_contact}</td>
+            <td className="p-2 border border-gray-300">
+              {poc.poc_email}
+              {/* <span className="text-red-600">{poc.poc_red_email}</span> */}
+            </td>
+          </tr>
+        ))}
+      </React.Fragment>
+    ))}
+  </tbody>
+</table>
 
-              {/* <th className="p-2 text-left">Actions</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredColleges.map((college) => (
-              <React.Fragment key={college.college_id}>
-                <tr className="hover:bg-gray-50 border-t text-left">
-                  <td className="p-2 text-red-500 flex  items-center gap-1">
-                    {" "}
-                    {/* <MinusCircle
-                      size={16}
-                      onClick={() => deleteCollege(college.college_id)}
-                    />{" "} */}
-                    {college.college_code}
-                  </td>
-                  <td className="p-2">{college.college_name}</td>
-                  <td className="p-2">{college.location}</td>
-                  <td className="p-2">{college.state}</td>
-                  <td colSpan="5" className="p-2">
-                    {!college.pocs || college.pocs.length === 0
-                      ? "No POCs"
-                      : ""}
-                  </td>
-                </tr>
-                {(college.pocs || []).map((poc) => (
-                  <tr
-                    key={poc.poc_id}
-                    className="hover:bg-gray-50 border-t text-left"
-                  >
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td className="p-2">{poc.poc_name}</td>
-                    <td className="p-2">{poc.poc_designation}</td>
-                    <td className="p-2">{poc.poc_contact}</td>
-                    <td className="p-2"> {poc.poc_email} <br />{" "}
-                      {/* <span className="text-red-600">{poc.poc_red_email}</span> */}
-                    </td>
-                    {/* <td className="p-2">
-                      <button
-                        onClick={() => handleDeletePOC(poc.poc_id)}
-                        className="text-red-500 hover:text-red-700"
-                        title="Delete POC"
-                      >
-                        <MinusCircle size={16} />
-                      </button>
-                    </td> */}
-                  </tr>
-                ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );

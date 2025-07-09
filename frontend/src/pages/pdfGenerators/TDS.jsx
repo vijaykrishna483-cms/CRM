@@ -6,6 +6,7 @@ import Footer from '../../components/Footer';
 function ZipUploader() {
   const [tableData, setTableData] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const fileInputRef = useRef(null);
 
   const handleUpload = async (e) => {
@@ -29,6 +30,20 @@ function ZipUploader() {
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
+
+  // Dummy mail functions
+  const handleSendMail = (row) => {
+    alert(`Dummy: Sending mail to ${row.email} (PAN: ${row.pan})`);
+  };
+
+  const handleSendAllMails = () => {
+    alert('Dummy: Sending all mails!');
+  };
+
+  // Filter table data by PAN
+  const filteredData = tableData.filter(row =>
+    row.pan?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -55,25 +70,59 @@ function ZipUploader() {
           </div>
 
           {tableData.length > 0 && (
-            <div className="mt-10 overflow-x-auto border rounded-lg">
-              <table className="min-w-full bg-white border-collapse">
-                <thead className="bg-indigo-600 text-white">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-sm font-semibold">File Name</th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold">PAN</th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold">Email</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {tableData.map((row, i) => (
-                    <tr key={i} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 text-sm text-gray-700">{row.fileName}</td>
-                      <td className="px-4 py-2 text-sm text-gray-700">{row.pan}</td>
-                      <td className="px-4 py-2 text-sm text-gray-700">{row.email}</td>
+            <div className="mt-10">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                <input
+                  type="text"
+                  placeholder="Search by PAN"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full md:w-1/2"
+                />
+                <button
+                  onClick={handleSendAllMails}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow text-sm font-medium transition"
+                >
+                  Send All Mails
+                </button>
+              </div>
+              <div className="overflow-x-auto border rounded-lg">
+                <table className="min-w-full bg-white border-collapse">
+                  <thead className="bg-indigo-600 text-white">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-sm font-semibold">File Name</th>
+                      <th className="px-4 py-2 text-left text-sm font-semibold">PAN</th>
+                      <th className="px-4 py-2 text-left text-sm font-semibold">Email</th>
+                      <th className="px-4 py-2 text-center text-sm font-semibold">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredData.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="px-4 py-4 text-center text-gray-500">
+                          No results found.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredData.map((row, i) => (
+                        <tr key={i} className="hover:bg-gray-50">
+                          <td className="px-4 py-2 text-sm text-gray-700">{row.fileName}</td>
+                          <td className="px-4 py-2 text-sm text-gray-700">{row.pan}</td>
+                          <td className="px-4 py-2 text-sm text-gray-700">{row.email}</td>
+                          <td className="px-4 py-2 text-center">
+                            <button
+                              onClick={() => handleSendMail(row)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded shadow text-xs font-medium transition"
+                            >
+                              Send Mail
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

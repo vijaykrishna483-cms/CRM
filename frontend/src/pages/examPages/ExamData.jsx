@@ -266,55 +266,56 @@ const ExamData = () => {
         {loading ? (
           <p className="text-center py-4">Loading exams...</p>
         ) : (
-          <table className="w-full text-sm border-collapse">
-            <thead className="text-gray-600 bg-gray-100 border-b">
-              <tr>
-                <th className="p-2 text-left">Exam ID</th>
-                <th className="p-2 text-left">Duration</th>
-                <th className="p-2 text-left">Questions</th>
-                <th className="p-2 text-left">Exam File</th>
-                <th className="p-2 text-left">Categories</th>
-                <th className="p-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {exams.map((exam) => (
-                <tr key={exam.exam_id} className="hover:bg-gray-50 border-t">
-                  <td className="p-2">{exam.exam_id}</td>
-                  <td className="p-2">{exam.exam_duration} min</td>
-                  <td className="p-2">{exam.number_of_questions}</td>
-                  <td className="p-2">{exam.exam_file}</td>
-                  <td className="p-2 max-w-xs">
-                    <div className="flex flex-wrap gap-1">
-                      {exam.categories?.map((category, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                        >
-                          {category}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="p-2">
-                    <button
-                      onClick={() => handleDelete(exam.exam_id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {exams.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="p-2 text-center text-gray-400">
-                    No exams found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+         <table className="w-full text-sm border-collapse border border-gray-300">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left border border-gray-300">Exam ID</th>
+      <th className="p-2 text-left border border-gray-300">Duration</th>
+      <th className="p-2 text-left border border-gray-300">Questions</th>
+      <th className="p-2 text-left border border-gray-300">Exam File</th>
+      <th className="p-2 text-left border border-gray-300">Categories</th>
+      <th className="p-2 text-left border border-gray-300">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {exams.map((exam) => (
+      <tr key={exam.exam_id} className="hover:bg-gray-50 border-t">
+        <td className="p-2 border border-gray-300">{exam.exam_id}</td>
+        <td className="p-2 border border-gray-300">{exam.exam_duration} min</td>
+        <td className="p-2 border border-gray-300">{exam.number_of_questions}</td>
+        <td className="p-2 border border-gray-300">{exam.exam_file}</td>
+        <td className="p-2 max-w-xs border border-gray-300">
+          <div className="flex flex-wrap gap-1">
+            {exam.categories?.map((category, index) => (
+              <span
+                key={index}
+                className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+              >
+                {category}
+              </span>
+            ))}
+          </div>
+        </td>
+        <td className="p-2 border border-gray-300">
+          <button
+            onClick={() => handleDelete(exam.exam_id)}
+            className="text-red-500 hover:text-red-700"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    ))}
+    {exams.length === 0 && (
+      <tr>
+        <td colSpan="6" className="p-2 text-center text-gray-400 border border-gray-300">
+          No exams found
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
         )}
       </div>
     </div>

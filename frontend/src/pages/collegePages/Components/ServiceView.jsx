@@ -95,34 +95,39 @@ const ServiceView = () => {
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-64"
           />
         </div>
-        <table className="w-full text-sm border-collapse">
-          <thead className="text-gray-600 bg-gray-100 border-b">
-            <tr>
-              <th className="p-2 text-left">Service Code</th>
-              <th className="p-2 text-left">Service</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredServices.map((service) => (
-              <tr
-                className="hover:bg-gray-50 border-t"
-                key={service.service_id}
-              >
-                <td className="p-2 text-red-500 text-left">
-                  {service.service_code}
-                </td>
-                <td className="p-2 text-left">{service.service_name}</td>
-              </tr>
-            ))}
-            {filteredServices.length === 0 && (
-              <tr>
-                <td colSpan={2} className="p-2 text-center text-gray-500">
-                  No services found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+  
+  <table className="w-full text-sm border-collapse border border-gray-300">
+    <thead className="text-gray-600 bg-gray-100 border-b">
+      <tr>
+        <th className="p-2 text-left border border-gray-300">Service Code</th>
+        <th className="p-2 text-left border border-gray-300">Service</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredServices.map((service) => (
+        <tr
+          className="hover:bg-gray-50 border-t"
+          key={service.service_id}
+        >
+          <td className="p-2 text-red-500 text-left border border-gray-300">
+            {service.service_code}
+          </td>
+          <td className="p-2 text-left border border-gray-300">
+            {service.service_name}
+          </td>
+        </tr>
+      ))}
+      {filteredServices.length === 0 && (
+        <tr>
+          <td colSpan={2} className="p-2 text-center text-gray-500 border border-gray-300">
+            No services found.
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+
+
       </div>
     </div>
   );

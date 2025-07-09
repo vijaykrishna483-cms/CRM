@@ -131,66 +131,67 @@ const Accountant = () => {
         </div>
         
         <div className="overflow-x-auto rounded-lg border text-left">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-100 text-left text-gray-600">
-              <tr>
-                <th className="p-3">Reimb ID</th>
-                {/* <th className="p-3">Employee ID</th> */}
-                <th className="p-3">Amount</th>
-                <th className="p-3">Approved By</th>
-                <th className="p-3">Comment</th>
-                <th className="p-3">Review Date</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reimbursements.map((row) => {
-                const currentStatus = statusMap[row.reimbursement_id] || '';
-                return (
-                  <tr key={row.id} className="border-t hover:bg-gray-50">
-                    <td className="p-3">{row.reimbursement_id}</td>
-                    <td className="p-3">₹{row.reimbursement_amount}</td>
-                    <td className="p-3">{row.approved_by}</td>
-                    <td className="p-3 max-w-xs">{row.review_comment}</td>
-                    <td className="p-3">
-                      {row.created_at ? new Date(row.created_at).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td className="p-3">
-                      <select
-                        name="status"
-                        value={currentStatus}
-                        onChange={(e) => {
-                          const newStatus = e.target.value;
-                          statusUpdate(row.reimbursement_id, newStatus);
-                        }}
-                        className={`border rounded-lg px-3 py-2 text-sm transition-colors duration-200 ${getStatusSelectClass(currentStatus)}`}
-                        disabled={loading}
-                      >
-                        <option value="">Select Status</option>
-                        <option value="approved">approved</option>
-                        <option value="paid">paid</option>
-                        <option value="rejected">rejected</option>
-                      </select>
-                    </td>
-                  </tr>
-                )
-              })}
-              {reimbursements.length === 0 && !loading && (
-                <tr>
-                  <td colSpan="7" className="p-3 text-center text-gray-400">
-                    No reimbursement reviews found
-                  </td>
-                </tr>
-              )}
-              {loading && (
-                <tr>
-                  <td colSpan="7" className="p-3 text-center">
-                    Loading reimbursement data...
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+         <table className="min-w-full text-sm border-collapse border border-gray-300">
+  <thead className="bg-gray-100 text-left text-gray-600">
+    <tr>
+      <th className="p-3 border border-gray-300">Reimb ID</th>
+      {/* <th className="p-3 border border-gray-300">Employee ID</th> */}
+      <th className="p-3 border border-gray-300">Amount</th>
+      <th className="p-3 border border-gray-300">Approved By</th>
+      <th className="p-3 border border-gray-300">Comment</th>
+      <th className="p-3 border border-gray-300">Review Date</th>
+      <th className="p-3 border border-gray-300">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {reimbursements.map((row) => {
+      const currentStatus = statusMap[row.reimbursement_id] || '';
+      return (
+        <tr key={row.id} className="border-t hover:bg-gray-50">
+          <td className="p-3 border border-gray-300">{row.reimbursement_id}</td>
+          <td className="p-3 border border-gray-300">₹{row.reimbursement_amount}</td>
+          <td className="p-3 border border-gray-300">{row.approved_by}</td>
+          <td className="p-3 max-w-xs border border-gray-300">{row.review_comment}</td>
+          <td className="p-3 border border-gray-300">
+            {row.created_at ? new Date(row.created_at).toLocaleDateString() : 'N/A'}
+          </td>
+          <td className="p-3 border border-gray-300">
+            <select
+              name="status"
+              value={currentStatus}
+              onChange={(e) => {
+                const newStatus = e.target.value;
+                statusUpdate(row.reimbursement_id, newStatus);
+              }}
+              className={`border rounded-lg px-3 py-2 text-sm transition-colors duration-200 ${getStatusSelectClass(currentStatus)}`}
+              disabled={loading}
+            >
+              <option value="">Select Status</option>
+              <option value="approved">approved</option>
+              <option value="paid">paid</option>
+              <option value="rejected">rejected</option>
+            </select>
+          </td>
+        </tr>
+      )
+    })}
+    {reimbursements.length === 0 && !loading && (
+      <tr>
+        <td colSpan="7" className="p-3 text-center text-gray-400 border border-gray-300">
+          No reimbursement reviews found
+        </td>
+      </tr>
+    )}
+    {loading && (
+      <tr>
+        <td colSpan="7" className="p-3 text-center border border-gray-300">
+          Loading reimbursement data...
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
         </div>
       </div>
     </div>

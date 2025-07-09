@@ -46,14 +46,21 @@ const TrainerData = () => {
     }
   };
 
+
+
+    const [availableServices, setAvailableServices] = useState([]);
+  
+
   const fetchServices = async () => {
     try {
-      const res = await api.get("/college/getservices");
-      setServices(res.data?.data || []);
-    } catch {
-      console.error("Couldn't fetch services");
+      const servicesRes = await api.get(`/college/getservices`);
+      setAvailableServices(servicesRes.data.data || []);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      toast.error('Failed to fetch services.');
     }
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,8 +95,8 @@ const TrainerData = () => {
       setLoading(false);
     }
   };
-
-  const handleEdit = (trainer) => {
+  const [serviceSearch, setServiceSearch] = useState('');
+    const handleEdit = (trainer) => {
     setTrainerInfo({
       trainer_id: trainer.trainer_id,
       trainer_name: trainer.trainer_name,
@@ -110,6 +117,13 @@ const TrainerData = () => {
     setShowForm(true);
   };
 
+    const filteredAvailableServices = availableServices.filter(service =>
+    service.service_name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+    service.service_code.toLowerCase().includes(serviceSearch.toLowerCase())
+  );
+
+
+  
   const resetForm = () => {
     setTrainerInfo({
       trainer_id: "",
@@ -230,29 +244,70 @@ const TrainerData = () => {
             </div>
           </div>
 
-          <div className="mt-6">
-            <h3 className="text-md font-medium mb-3 text-[#4f378a]">
-              Select Services
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {services.map((service) => (
-                <div
-                  key={service.service_id}
-                  onClick={() => handleServiceChange(service.service_id)}
-                  className={`px-4 py-2 rounded-full cursor-pointer text-sm ${
-                    trainerInfo.service_ids.includes(service.service_id)
-                      ? "bg-purple-500 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  {service.service_name}
-                </div>
-              ))}
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Selected: {trainerInfo.service_ids.length} services
-            </p>
-          </div>
+
+<div className="flex flex-col text-left mt-6">
+  <label htmlFor="services" className="mb-1 text-sm font-medium text-gray-700">
+    Services
+  </label>
+  <input
+    type="text"
+    placeholder="Search services..."
+    value={serviceSearch}
+    onChange={e => setServiceSearch(e.target.value)}
+    className="border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2"
+  />
+  <div className="max-h-40 overflow-y-auto border rounded-lg p-2 bg-white">
+    {filteredAvailableServices.length === 0 ? (
+      <div className="text-xs text-gray-400">No services found</div>
+    ) : (
+      filteredAvailableServices.map(service => (
+        <label key={service.service_id} className="flex items-center mb-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={trainerInfo.service_ids.includes(service.service_id)}
+            onChange={() => handleServiceChange(service.service_id)}
+            className="mr-2"
+          />
+          <span>
+            {service.service_name}
+            <span className="text-gray-400 text-xs"> ({service.service_code})</span>
+          </span>
+        </label>
+      ))
+    )}
+  </div>
+  <p className="text-xs text-gray-500 mt-1">
+    {trainerInfo.service_ids.length} service(s) selected
+  </p>
+  {/* Selected Services as Chips */}
+  {trainerInfo.service_ids.length > 0 && (
+    <div className="flex flex-wrap gap-2 mt-2">
+      {trainerInfo.service_ids.map(serviceId => {
+        const service = availableServices.find(s => s.service_id === serviceId);
+        if (!service) return null;
+        return (
+          <span
+            key={serviceId}
+            className="bg-purple-200 text-purple-900 text-xs px-2 py-1 rounded flex items-center gap-1"
+          >
+            {service.service_name}
+            <button
+              type="button"
+              onClick={() => handleServiceChange(serviceId)}
+              className="ml-1 text-purple-700 hover:text-purple-900 font-bold"
+              title="Remove"
+            >
+              ×
+            </button>
+          </span>
+        );
+      })}
+    </div>
+  )}
+</div>
+
+
+      
 
           <button
             onClick={handleAddOrUpdate}
@@ -286,47 +341,46 @@ const TrainerData = () => {
         {loading ? (
           <p className="text-center py-4">Loading trainers...</p>
         ) : (
-         <table className="w-full text-sm table-fixed border-collapse">
+        <table className="w-full text-sm table-fixed border-collapse border border-gray-300">
   <thead className="text-gray-600 bg-gray-100 border-b">
     <tr>
-      <th className="p-2 text-left w-[8%] whitespace-nowrap">ID</th>
-      <th className="p-2 text-left w-[12%] whitespace-nowrap">Name</th>
-      <th className="p-2 text-left w-[15%] whitespace-nowrap">Services</th>
-      <th className="p-2 text-left w-[12%] whitespace-nowrap">Contact</th>
-      <th className="p-2 text-left w-[15%] whitespace-nowrap">Email</th>
-      <th className="p-2 text-left w-[10%] whitespace-nowrap">Employment Type</th>
-      <th className="p-2 text-left w-[8%] whitespace-nowrap">Status</th>
-      <th className="p-2 text-left w-[10%] whitespace-nowrap">Charge</th>
-      <th className="p-2 text-left w-[10%] whitespace-nowrap">State</th>
-      {allowed && <th className="p-2 text-left w-[10%] whitespace-nowrap">Actions</th>}
+      <th className="p-2 text-left w-[8%] whitespace-nowrap border border-gray-300">ID</th>
+      <th className="p-2 text-left w-[12%] whitespace-nowrap border border-gray-300">Name</th>
+      <th className="p-2 text-left w-[15%] whitespace-nowrap border border-gray-300">Services</th>
+      <th className="p-2 text-left w-[12%] whitespace-nowrap border border-gray-300">Contact</th>
+      <th className="p-2 text-left w-[15%] whitespace-nowrap border border-gray-300">Email</th>
+      <th className="p-2 text-left w-[10%] whitespace-nowrap border border-gray-300">Emp. Type</th>
+      <th className="p-2 text-left w-[8%] whitespace-nowrap border border-gray-300">Status</th>
+      <th className="p-2 text-left w-[10%] whitespace-nowrap border border-gray-300">Charge</th>
+      <th className="p-2 text-left w-[10%] whitespace-nowrap border border-gray-300">State</th>
+      {allowed && <th className="p-2 text-left w-[10%] whitespace-nowrap border border-gray-300">Actions</th>}
     </tr>
   </thead>
   <tbody>
     {trainers.map((trainer) => (
       <tr key={trainer.trainer_id} className="hover:bg-gray-50 border-t text-left">
-        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.trainer_id}</td>
-        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.trainer_name}</td>
-       <td className="p-2">
-  <div className="flex flex-wrap gap-1">
-    {trainer.services?.map((service, idx) => (
-      <span
-        key={idx}
-        className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded whitespace-nowrap"
-      >
-        {service.service_name}
-      </span>
-    ))}
-  </div>
-</td>
-
-        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.contact_number}</td>
-        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.email}</td>
-        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.employment_type}</td>
-        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.status}</td>
-        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">₹{trainer.charge}</td>
-        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">{trainer.location}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">{trainer.trainer_id}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">{trainer.trainer_name}</td>
+        <td className="p-2 border border-gray-300">
+          <div className="flex flex-wrap gap-1">
+            {trainer.services?.map((service, idx) => (
+              <span
+                key={idx}
+                className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded whitespace-nowrap"
+              >
+                {service.service_name}
+              </span>
+            ))}
+          </div>
+        </td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">{trainer.contact_number}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">{trainer.email}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">{trainer.employment_type}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">{trainer.status}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">₹{trainer.charge}</td>
+        <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">{trainer.location}</td>
         {allowed && (
-          <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis">
+          <td className="p-2 whitespace-nowrap overflow-hidden text-ellipsis border border-gray-300">
             <button
               onClick={() => handleEdit(trainer)}
               className="text-blue-500 hover:text-blue-700 whitespace-nowrap"
@@ -339,13 +393,14 @@ const TrainerData = () => {
     ))}
     {trainers.length === 0 && (
       <tr>
-        <td colSpan={allowed ? "10" : "9"} className="p-2 text-center text-gray-400">
+        <td colSpan={allowed ? "10" : "9"} className="p-2 text-center text-gray-400 border border-gray-300">
           No trainers found
         </td>
       </tr>
     )}
   </tbody>
 </table>
+
 
         )}
       </div>

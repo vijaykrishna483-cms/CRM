@@ -52,50 +52,51 @@ const BankView = ({
     {loading ? (
       <p className="text-center py-4">Loading bank details...</p>
     ) : (
-      <table className="w-full text-sm border-collapse">
-        <thead className="text-gray-600 bg-gray-100 border-b">
-          <tr>
-            <th className="p-2 text-left">Employee ID</th>
-            <th className="p-2 text-left">Employee Name</th>
-            <th className="p-2 text-left">Account Number</th>
-            <th className="p-2 text-left">Bank Name</th>
-            <th className="p-2 text-left">IFSC</th>
-            <th className="p-2 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bankData.map((bank) => (
-            <tr key={bank.id} className="hover:bg-gray-50 border-t text-left">
-              <td className="p-2">{bank.employee_id}</td>
-              <td className="p-2">{bank.employee_name}</td>
-              <td className="p-2">{bank.bank_account_number}</td>
-              <td className="p-2">{bank.bank_name}</td>
-              <td className="p-2">{bank.branch_ifsc}</td>
-              <td className="p-2">
-                <button
-                  onClick={() => handleEdit(bank)}
-                  className="text-blue-500 hover:text-blue-700 mr-2"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(bank.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-          {bankData.length === 0 && (
-            <tr>
-              <td colSpan="6" className="p-2 text-center text-gray-400">
-                No bank details found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+    <table className="w-full text-sm border-collapse border border-gray-300">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left border border-gray-300">Employee ID</th>
+      <th className="p-2 text-left border border-gray-300">Employee Name</th>
+      <th className="p-2 text-left border border-gray-300">Account Number</th>
+      <th className="p-2 text-left border border-gray-300">Bank Name</th>
+      <th className="p-2 text-left border border-gray-300">IFSC</th>
+      <th className="p-2 text-left border border-gray-300">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {bankData.map((bank) => (
+      <tr key={bank.id} className="hover:bg-gray-50 border-t text-left">
+        <td className="p-2 border border-gray-300">{bank.employee_id}</td>
+        <td className="p-2 border border-gray-300">{bank.employee_name}</td>
+        <td className="p-2 border border-gray-300">{bank.bank_account_number}</td>
+        <td className="p-2 border border-gray-300">{bank.bank_name}</td>
+        <td className="p-2 border border-gray-300">{bank.branch_ifsc}</td>
+        <td className="p-2 border border-gray-300">
+          <button
+            onClick={() => handleEdit(bank)}
+            className="text-blue-500 hover:text-blue-700 mr-2"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(bank.id)}
+            className="text-red-500 hover:text-red-700"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    ))}
+    {bankData.length === 0 && (
+      <tr>
+        <td colSpan="6" className="p-2 text-center text-gray-400 border border-gray-300">
+          No bank details found
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
     )}
   </div>
 ); 

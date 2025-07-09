@@ -258,7 +258,7 @@ const Upload = () => {
               </thead>
               <tbody>
                 {filesWithCodes
-                  // .filter((file) => file.status === "uploaded")
+                  .filter((file) => file.status === "uploaded" || file.status=="pending")
                   .map((file, index) => (
                     <tr
                       key={file.id}

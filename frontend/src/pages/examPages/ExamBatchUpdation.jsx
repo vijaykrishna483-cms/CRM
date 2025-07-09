@@ -197,57 +197,60 @@ const ExamBatchUpdation = () => {
         {loading ? (
           <p className="text-center py-4">Loading mappings...</p>
         ) : (
-          <table className="w-full text-sm border-collapse">
-            <thead className="text-gray-600 bg-gray-100 border-b">
-              <tr>
-                <th className="p-2 text-left">Exam ID</th>
-                <th className="p-2 text-left">College Code</th>
-                <th className="p-2 text-left">College Name</th>
-                <th className="p-2 text-left">Batch</th>
-                <th className="p-2 text-left">Date of Issue</th>
-                <th className="p-2 text-left">Categories</th>
-                <th className="p-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mappings.map(mapping => (
-                <tr key={mapping.id} className="hover:bg-gray-50 border-t">
-                  <td className="p-2">{mapping.exam_id}</td>
-                  <td className="p-2">{mapping.college_code}</td>
-                  <td className="p-2">{mapping.college_name}</td>
-                  <td className="p-2">{mapping.college_batch}</td>
-                  <td className="p-2">{mapping.date_of_issue ? new Date(mapping.date_of_issue).toLocaleDateString() : '-'}</td>
-                  <td className="p-2 max-w-xs">
-                    <div className="flex flex-wrap gap-1">
-                      {(mapping.exam_categories || []).map((cat, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="p-2">
-                    <button
-                      onClick={() => handleDelete(mapping.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {mappings.length === 0 && (
-                <tr>
-                  <td colSpan="7" className="p-2 text-center text-gray-400">
-                    No mappings found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+         <table className="w-full text-sm border-collapse border border-gray-300">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left border border-gray-300">Exam ID</th>
+      <th className="p-2 text-left border border-gray-300">College Code</th>
+      <th className="p-2 text-left border border-gray-300">College Name</th>
+      <th className="p-2 text-left border border-gray-300">Batch</th>
+      <th className="p-2 text-left border border-gray-300">Date of Issue</th>
+      <th className="p-2 text-left border border-gray-300">Categories</th>
+      <th className="p-2 text-left border border-gray-300">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {mappings.map(mapping => (
+      <tr key={mapping.id} className="hover:bg-gray-50 border-t">
+        <td className="p-2 border border-gray-300">{mapping.exam_id}</td>
+        <td className="p-2 border border-gray-300">{mapping.college_code}</td>
+        <td className="p-2 border border-gray-300">{mapping.college_name}</td>
+        <td className="p-2 border border-gray-300">{mapping.college_batch}</td>
+        <td className="p-2 border border-gray-300">
+          {mapping.date_of_issue ? new Date(mapping.date_of_issue).toLocaleDateString() : '-'}
+        </td>
+        <td className="p-2 max-w-xs border border-gray-300">
+          <div className="flex flex-wrap gap-1">
+            {(mapping.exam_categories || []).map((cat, idx) => (
+              <span
+                key={idx}
+                className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+        </td>
+        <td className="p-2 border border-gray-300">
+          <button
+            onClick={() => handleDelete(mapping.id)}
+            className="text-red-500 hover:text-red-700"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    ))}
+    {mappings.length === 0 && (
+      <tr>
+        <td colSpan="7" className="p-2 text-center text-gray-400 border border-gray-300">
+          No mappings found
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
         )}
       </div>
     </div>

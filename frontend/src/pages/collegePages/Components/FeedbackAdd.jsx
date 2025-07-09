@@ -110,6 +110,33 @@ const FeedbackAdd = () => {
       setLoading(false);
     }
   };
+  const HalfStar = () => (
+  <svg
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    className="inline w-[1em] h-[1em] text-yellow-400"
+    style={{ verticalAlign: 'middle', display: 'inline-block' }}
+  >
+    <defs>
+      <linearGradient id="half-grad">
+        <stop offset="50%" stopColor="currentColor" />
+        <stop offset="50%" stopColor="transparent" stopOpacity="1" />
+      </linearGradient>
+    </defs>
+    <path
+      d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.561-.955L10 0l2.951 5.955 6.561.955-4.756 4.635 1.122 6.545z"
+      fill="url(#half-grad)"
+      stroke="currentColor"
+      strokeWidth="1"
+    />
+    <path
+      d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.561-.955L10 0l2.951 5.955 6.561.955-4.756 4.635 1.122 6.545z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+    />
+  </svg>
+);
 
   if (!allowed && !permissionLoading)
     return (
@@ -227,7 +254,9 @@ const FeedbackAdd = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Rating
             </label>
-         <div className="flex items-center space-x-1">
+      
+
+<div className="flex items-center space-x-1">
   {[1, 2, 3, 4, 5].map((i) => (
     <button
       key={i}
@@ -239,12 +268,14 @@ const FeedbackAdd = () => {
       }
       onDoubleClick={() => handleRatingChange(i)}
       className="text-2xl text-yellow-400 transition duration-150 hover:scale-110"
-      aria-label={`${reviewInfo.trainer_star_rating === i - 0.5 ? i : i - 0.5} star`}
+      aria-label={`${
+        reviewInfo.trainer_star_rating === i - 0.5 ? i : i - 0.5
+      } star`}
     >
       {reviewInfo.trainer_star_rating >= i
         ? "★"
         : reviewInfo.trainer_star_rating >= i - 0.5
-        ? "⯨"
+        ? <HalfStar />
         : "☆"}
     </button>
   ))}
@@ -252,6 +283,7 @@ const FeedbackAdd = () => {
     {reviewInfo.trainer_star_rating} of 5
   </span>
 </div>
+
 
 
           </div>

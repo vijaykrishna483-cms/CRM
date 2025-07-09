@@ -296,103 +296,102 @@ const Approval = () => {
             {loading ? (
               <p className="text-center py-4">Loading reimbursements...</p>
             ) : (
-              <table className="w-full text-sm border-collapse">
-                <thead className="text-gray-600 bg-gray-100 border-b">
-                  <tr>
-                    <th className="p-2 text-left">Date</th>
-                    <th className="p-2 text-left">Employee ID</th>
-                    <th className="p-2 text-left">Employee Name</th> {/* New column */}
-                    <th className="p-2 text-left">Reimbursement ID</th>
-                    <th className="p-2 text-left">Duration</th>
-                    <th className="p-2 text-left">Location</th>
-                    <th className="p-2 text-left">Program</th>
-                    <th className="p-2 text-left">Word Link</th>
-                    <th className="p-2 text-left">Excel Link</th>
-                    <th className="p-2 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reimbursements.map((reimb) => (
-                    <tr
-                      key={reimb.id}
-                      className="hover:bg-gray-50 border-t text-left"
-                    >
-                      <td className="p-2">
-                        {reimb.date
-                          ? new Date(reimb.date).toLocaleDateString()
-                          : ""}
-                      </td>
-                      <td className="p-2">{reimb.employee_id}</td>
-                      <td className="p-2">{employeeNameMap[reimb.employee_id] || "N/A"}</td>
-                      <td className="p-2">{reimb.reimbursement_id}</td>
-                      <td className="p-2">{reimb.duration} days</td>
-                      <td className="p-2">{reimb.location}</td>
-                      <td className="p-2">{reimb.program}</td>
-                      <td className="p-2">
-                        {reimb.word_link ? (
-                          <a
-                            href={reimb.word_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 text-xs"
-                          >
-                            View Word
-                          </a>
-                        ) : (
-                          <span className="text-gray-400 text-xs">
-                            No document
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-2">
-                        {reimb.excel_link ? (
-                          <a
-                            href={reimb.excel_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 text-xs"
-                          >
-                            View Excel
-                          </a>
-                        ) : (
-                          <span className="text-gray-400 text-xs">
-                            No document
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-2">
-                        {reimb.status === "requested" && (
-                          <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
-                            Requested
-                          </span>
-                        )}
-                        {reimb.status === "approved" && (
-                          <span className="px-2 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-full">
-                            approved
-                          </span>
-                        )}
-                        {reimb.status === "paid" && (
-                          <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                            Paid
-                          </span>
-                        )}
-                        {reimb.status === "rejected" && (
-                          <span className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">
-                            Rejected
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                  {reimbursements.length === 0 && (
-                    <tr>
-                      <td colSpan="10" className="p-2 text-center text-gray-400">
-                        No reimbursements found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+             <table className="w-full text-sm border-collapse border border-gray-300">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left border border-gray-300">Date</th>
+      <th className="p-2 text-left border border-gray-300">Employee ID</th>
+      <th className="p-2 text-left border border-gray-300">Employee Name</th>
+      <th className="p-2 text-left border border-gray-300">Reimbursement ID</th>
+      <th className="p-2 text-left border border-gray-300">Duration</th>
+      <th className="p-2 text-left border border-gray-300">Location</th>
+      <th className="p-2 text-left border border-gray-300">Program</th>
+      <th className="p-2 text-left border border-gray-300">Word Link</th>
+      <th className="p-2 text-left border border-gray-300">Excel Link</th>
+      <th className="p-2 text-left border border-gray-300">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {reimbursements.map((reimb) => (
+      <tr
+        key={reimb.id}
+        className="hover:bg-gray-50 border-t text-left"
+      >
+        <td className="p-2 border border-gray-300">
+          {reimb.date ? new Date(reimb.date).toLocaleDateString() : ""}
+        </td>
+        <td className="p-2 border border-gray-300">{reimb.employee_id}</td>
+        <td className="p-2 border border-gray-300">{employeeNameMap[reimb.employee_id] || "N/A"}</td>
+        <td className="p-2 border border-gray-300">{reimb.reimbursement_id}</td>
+        <td className="p-2 border border-gray-300">{reimb.duration} days</td>
+        <td className="p-2 border border-gray-300">{reimb.location}</td>
+        <td className="p-2 border border-gray-300">{reimb.program}</td>
+        <td className="p-2 border border-gray-300">
+          {reimb.word_link ? (
+            <a
+              href={reimb.word_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 text-xs"
+            >
+              View Word
+            </a>
+          ) : (
+            <span className="text-gray-400 text-xs">
+              No document
+            </span>
+          )}
+        </td>
+        <td className="p-2 border border-gray-300">
+          {reimb.excel_link ? (
+            <a
+              href={reimb.excel_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 text-xs"
+            >
+              View Excel
+            </a>
+          ) : (
+            <span className="text-gray-400 text-xs">
+              No document
+            </span>
+          )}
+        </td>
+        <td className="p-2 border border-gray-300">
+          {reimb.status === "requested" && (
+            <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+              Requested
+            </span>
+          )}
+          {reimb.status === "approved" && (
+            <span className="px-2 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-full">
+              approved
+            </span>
+          )}
+          {reimb.status === "paid" && (
+            <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+              Paid
+            </span>
+          )}
+          {reimb.status === "rejected" && (
+            <span className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">
+              Rejected
+            </span>
+          )}
+        </td>
+      </tr>
+    ))}
+    {reimbursements.length === 0 && (
+      <tr>
+        <td colSpan="10" className="p-2 text-center text-gray-400 border border-gray-300">
+          No reimbursements found
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
             )}
           </div>
 
@@ -415,50 +414,51 @@ const Approval = () => {
               <p className="text-center py-4">Loading reviews...</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <thead className="text-gray-600 bg-gray-100 border-b">
-                    <tr>
-                      <th className="p-2 text-left">Reimbursement ID</th>
-                      <th className="p-2 text-left">Amount</th>
-                      <th className="p-2 text-left">Approved By</th>
-                      <th className="p-2 text-left">Comments</th>
-                      <th className="p-2 text-left">Review Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reviews.map((review) => (
-                      <tr
-                        key={review.id}
-                        className="hover:bg-gray-50 border-t text-left"
-                      >
-                        <td className="p-2">{review.reimbursement_id}</td>
-                        <td className="p-2">₹{review.reimbursement_amount}</td>
-                        <td className="p-2">{review.approved_by}</td>
-                        <td
-                          className="p-2 max-w-xs truncate"
-                          title={review.review_comment}
-                        >
-                          {review.review_comment}
-                        </td>
-                        <td className="p-2">
-                          {review.created_at
-                            ? new Date(review.created_at).toLocaleDateString()
-                            : "N/A"}
-                        </td>
-                      </tr>
-                    ))}
-                    {reviews.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan="5"
-                          className="p-2 text-center text-gray-400"
-                        >
-                          No reimbursement reviews found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+             <table className="w-full text-sm border-collapse border border-gray-300">
+  <thead className="text-gray-600 bg-gray-100 border-b">
+    <tr>
+      <th className="p-2 text-left border border-gray-300">Reimbursement ID</th>
+      <th className="p-2 text-left border border-gray-300">Amount</th>
+      <th className="p-2 text-left border border-gray-300">Approved By</th>
+      <th className="p-2 text-left border border-gray-300">Comments</th>
+      <th className="p-2 text-left border border-gray-300">Review Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {reviews.map((review) => (
+      <tr
+        key={review.id}
+        className="hover:bg-gray-50 border-t text-left"
+      >
+        <td className="p-2 border border-gray-300">{review.reimbursement_id}</td>
+        <td className="p-2 border border-gray-300">₹{review.reimbursement_amount}</td>
+        <td className="p-2 border border-gray-300">{review.approved_by}</td>
+        <td
+          className="p-2 max-w-xs truncate border border-gray-300"
+          title={review.review_comment}
+        >
+          {review.review_comment}
+        </td>
+        <td className="p-2 border border-gray-300">
+          {review.created_at
+            ? new Date(review.created_at).toLocaleDateString()
+            : "N/A"}
+        </td>
+      </tr>
+    ))}
+    {reviews.length === 0 && (
+      <tr>
+        <td
+          colSpan="5"
+          className="p-2 text-center text-gray-400 border border-gray-300"
+        >
+          No reimbursement reviews found
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
               </div>
             )}
           </div>

@@ -437,60 +437,61 @@ const handleServiceFilter = (selectedOption) => {
             ) : (
               <>
               
-                <table className="w-full text-sm border-collapse">
-                  <thead className="text-gray-600 bg-gray-100 border-b">
-                    <tr>
-                      <th className="p-2 text-left">Proposal Code</th>
-                      <th className="p-2 text-left">College Name</th>
-                      <th className="p-2 text-left">Trainer ID</th>
-                      <th className="p-2 text-left">Trainer Name</th>
-                      <th className="p-2 text-left">State</th>
-                      <th className="p-2 text-left">Status</th>
-                      <th className="p-2 text-left">Contact</th>
-                      <th className="p-2 text-left">Email</th>
-                      <th className="p-2 text-left">Charge</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(groupedAllocations).map(([proposalCode, group]) => (
-                      <React.Fragment key={proposalCode}>
-                        <tr className="bg-gray-200 font-semibold text-left">
-                          <td className="p-2" colSpan={10}>
-                            Proposal Code: {proposalCode} ({group.length} allocations)
-                          </td>
-                        </tr>
-                        {group.map(allocation => (
-                          <tr key={`${allocation.proposal_id}-${allocation.trainer_id}`} className="hover:bg-gray-50 border-t text-left">
-                            <td className="p-2">{allocation.proposal_code}</td>
-                            <td className="p-2">{proposalToCollegeName[allocation.proposal_code] || 'Unknown College'}</td>
-                            <td className="p-2">{allocation.trainer_id}</td>
-                            <td className="p-2">{allocation.trainer_name}</td>
-                            <td className="p-2">{allocation.location}</td>
-                            <td className="p-2">
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                allocation.status === 'Active'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {allocation.status}
-                              </span>
-                            </td>
-                            <td className="p-2">{allocation.contact_number}</td>
-                            <td className="p-2">{allocation.email}</td>
-                            <td className="p-2">₹{allocation.charge}</td>
-                          </tr>
-                        ))}
-                      </React.Fragment>
-                    ))}
-                    {filteredAllocations.length === 0 && (
-                      <tr>
-                        <td colSpan="10" className="p-2 text-center text-gray-400">
-                          No allocations found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+  <table className="w-full text-sm border-collapse border border-gray-300">
+    <thead className="text-gray-600 bg-gray-100 border-b">
+      <tr>
+        <th className="p-2 text-left border border-gray-300">Proposal Code</th>
+        <th className="p-2 text-left border border-gray-300">College Name</th>
+        <th className="p-2 text-left border border-gray-300">Trainer ID</th>
+        <th className="p-2 text-left border border-gray-300">Trainer Name</th>
+        <th className="p-2 text-left border border-gray-300">State</th>
+        <th className="p-2 text-left border border-gray-300">Status</th>
+        <th className="p-2 text-left border border-gray-300">Contact</th>
+        <th className="p-2 text-left border border-gray-300">Email</th>
+        <th className="p-2 text-left border border-gray-300">Charge</th>
+      </tr>
+    </thead>
+    <tbody>
+      {Object.entries(groupedAllocations).map(([proposalCode, group]) => (
+        <React.Fragment key={proposalCode}>
+          <tr className="bg-gray-200 font-semibold text-left">
+            <td className="p-2 border border-gray-300" colSpan={10}>
+              Proposal Code: {proposalCode} ({group.length} allocations)
+            </td>
+          </tr>
+          {group.map(allocation => (
+            <tr key={`${allocation.proposal_id}-${allocation.trainer_id}`} className="hover:bg-gray-50 border-t text-left">
+              <td className="p-2 border border-gray-300">{allocation.proposal_code}</td>
+              <td className="p-2 border border-gray-300">{proposalToCollegeName[allocation.proposal_code] || 'Unknown College'}</td>
+              <td className="p-2 border border-gray-300">{allocation.trainer_id}</td>
+              <td className="p-2 border border-gray-300">{allocation.trainer_name}</td>
+              <td className="p-2 border border-gray-300">{allocation.location}</td>
+              <td className="p-2 border border-gray-300">
+                <span className={`px-2 py-1 text-xs rounded-full ${
+                  allocation.status === 'Active'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {allocation.status}
+                </span>
+              </td>
+              <td className="p-2 border border-gray-300">{allocation.contact_number}</td>
+              <td className="p-2 border border-gray-300">{allocation.email}</td>
+              <td className="p-2 border border-gray-300">₹{allocation.charge}</td>
+            </tr>
+          ))}
+        </React.Fragment>
+      ))}
+      {filteredAllocations.length === 0 && (
+        <tr>
+          <td colSpan="10" className="p-2 text-center text-gray-400 border border-gray-300">
+            No allocations found
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+
               </>
             )}
           </div>

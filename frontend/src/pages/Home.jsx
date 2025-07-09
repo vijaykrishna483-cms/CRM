@@ -38,16 +38,16 @@ const Home = () => {
       path: "/exam"
     },
     {
-      title: "Proposal / Course Plan Generator",
-      desc: "Generate College Proposals",
+      title: "TEF",
+      desc: "Generate TEF Mails",
       img: "https://images.unsplash.com/photo-1603804449683-25636751db96?q=80&w=1074&auto=format&fit=crop",
-      path: "/proposal"
+      path: "/tef"
     },
     {
       title: "Payslip Generator",
       desc: "Generate Course Plan Generator.",
       img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1170&auto=format&fit=crop",
-      path: "/invoice"
+      path: "/payslip"
     },
     {
       title: "TOE (Terms of Engagement)",
@@ -56,56 +56,61 @@ const Home = () => {
       path: "/toe"
     },
     {
-      title: "TEF Generator",
-      desc: "TEF Generator",
+      title: "Generate INVOICE ",
+      desc: "Generate INVOICE ",
       img: "https://images.unsplash.com/photo-1568992687947-868a62a9f521?q=80&w=1332&auto=format&fit=crop",
-      path: "/tef"
+      path: "/invoice"
+    },
+    {
+      title: "TDS",
+      desc: "TDS",
+      img: "https://i.pinimg.com/736x/30/b0/01/30b001306e662f8c7ef387c2bf2edb77.jpg",
+      path: "/tds"
     }
   ];
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-white overflow-x-hidden">
       <div className="fixed w-full z-50">
         <Navbar />
       </div>
 
       {/* Hero Section */}
-      <div
-        className="w-full h-[480px] sm:h-[520px] md:min-h-screen bg-cover bg-center mb-16 relative flex items-center justify-center shadow"
-        style={{
-          backgroundImage: `url("https://wallpaperaccess.com/full/3901076.png")`,
-        }}
-      >
-        <div className="absolute inset-0 bg-black/60 rounded-b-3xl" />
-        <div className="relative z-10 text-center px-6" data-aos="fade-up">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow">
-            CUSTOMER RELATIONSHIP
-            <br /> MANAGEMENT
-            
-            
-          </h1>
-          <p className="text-white w-[70%] text-sm sm:text-base max-w-2xl mx-auto mb-6">
-            This page helps employees manage their tasks and enhance communication with customers.
-          </p>
-       <button
-  onClick={() => navigate('/login')}
-  className="
-    bg-white text-gray-900 font-semibold px-6 py-2 rounded-full
-    shadow transition duration-200
-    hover:bg-[#000]
-    hover:text-[#fff] hover:scale-105 hover:shadow-lg
-  "
+     <div
+  className="w-full  min-h-screen flex items-center justify-center relative bg-cover bg-center mb-10 shadow"
+  style={{
+    backgroundImage: `url("https://wallpaperaccess.com/full/3901076.png")`,
+  }}
 >
-  Employee Sign In
-</button>
-
-        </div>
-      </div>
+  <div className="absolute inset-0 bg-black/60 rounded-b-3xl" />
+  <div className="relative z-10 w-full max-w-3xl px-4 sm:px-8 md:px-16 text-center flex flex-col items-center"
+       data-aos="fade-up">
+    <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow">
+      CUSTOMER RELATIONSHIP
+      <br /> MANAGEMENT
+    </h1>
+    <p className="text-white text-sm sm:text-base md:text-lg max-w-xl mx-auto mb-6">
+      This page helps employees manage their tasks and enhance communication with customers.
+    </p>
+    <button
+      onClick={() => navigate('/login')}
+      className="
+        bg-white text-gray-900 font-semibold px-6 py-2 rounded-full
+        shadow transition duration-200
+        hover:bg-[#000]
+        hover:text-[#fff] hover:scale-105 hover:shadow-lg
+        focus:outline-none focus:ring-2 focus:ring-[#4f378a]
+      "
+    >
+      Employee Sign In
+    </button>
+  </div>
+</div>
 
       {/* Facilities */}
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-2xl font-bold mb-6 text-[#4f378a]" data-aos="fade-right">Facilities</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        <h2 className="text-xl sm:text-2xl font-bold mb-6 text-[#4f378a]" data-aos="fade-right">Facilities</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-10 mb-12">
           {cards.map((item, index) => (
             <div
               key={index}
@@ -113,13 +118,17 @@ const Home = () => {
               className="cursor-pointer group transition-transform duration-300 hover:scale-[1.03] hover:shadow-xl bg-white rounded-xl pb-5"
               data-aos="fade-up"
               data-aos-delay={index * 100}
+              tabIndex={0}
+              role="button"
+              aria-label={item.title}
+              onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && navigate(item.path)}
             >
               <img
                 src={item.img}
                 alt={item.title}
-                className="w-full h-36 object-cover rounded-t-xl"
+                className="w-full h-32 sm:h-36 md:h-44 object-cover rounded-t-xl"
               />
-              <div className="flex flex-col items-center text-center mt-3 px-4">
+              <div className="flex flex-col items-center text-center mt-3 px-2 sm:px-4">
                 <span className="font-semibold text-sm sm:text-base group-hover:text-[#4f378a] transition">
                   {item.title}
                 </span>
@@ -132,13 +141,13 @@ const Home = () => {
         {/* Mission & Vision Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-16" data-aos="fade-up">
           <div>
-            <h3 className="font-bold text-lg mb-2">MISSION</h3>
-            <p className="text-gray-700 mb-6">
+            <h3 className="font-bold text-base sm:text-lg mb-2">MISSION</h3>
+            <p className="text-gray-700 mb-6 text-sm sm:text-base">
               Our mission is to deliver high-quality, customized training programs that empower individuals and organizations to achieve their goals.
               We are dedicated to fostering a culture of continuous learning and professional growth, using innovative methods and practical skills to bridge knowledge gaps and create lasting value for our clients.
             </p>
-            <h3 className="font-bold text-lg mb-2">VISION</h3>
-            <p className="text-gray-700">
+            <h3 className="font-bold text-base sm:text-lg mb-2">VISION</h3>
+            <p className="text-gray-700 text-sm sm:text-base">
               We envision a future where every learner has access to world-class education and training opportunities.
               By embracing innovation and adapting to evolving needs, we aim to be a trusted partner in personal and organizational development, empowering communities and driving positive change through transformative learning experiences.
             </p>
@@ -147,7 +156,7 @@ const Home = () => {
             <img
               src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
               alt="Mission Vision"
-              className="w-full h-auto object-cover rounded-2xl shadow-lg"
+              className="w-full h-52 sm:h-64 md:h-80 object-cover rounded-2xl shadow-lg"
             />
           </div>
         </div>
