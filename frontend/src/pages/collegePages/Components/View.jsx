@@ -115,7 +115,7 @@ const Vieww = () => {
         <div className="flex gap-4 w-full justify-center items-center mb-4">
           <input
             type="text"
-            placeholder="Search by college code, name or POC,State"
+            placeholder="Search by college code,name,POC or State"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm"

@@ -1,7 +1,7 @@
 import express from 'express';
 import { addCollege, addPoc, addService, deleteCollege, deletePoc, deleteService, getAllColleges, getAllPocs, getPocs, getServices, updatePoc } from '../Controllers/CollegeControllers/collegeData.js';
 import { addProposal, addProposalPlan, addProposalService, deleteProposal, deleteProposalService, getAllProposalPlans, getAllProposals, getProposalServices, updateProposal } from '../Controllers/CollegeControllers/proposal.js';
-import { addTrainerToProposal, getAllTrainerAllocations } from '../Controllers/CollegeControllers/trainerAllocatn.js';
+import { addTrainerToProposal, deleteTrainerFromProposal, getAllTrainerAllocations } from '../Controllers/CollegeControllers/trainerAllocatn.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
 import { addProposalUpload, getAllProposalUploads } from '../Controllers/CollegeControllers/Sender.js';
 
@@ -48,6 +48,8 @@ router.post('/addTrainer', addTrainerToProposal);
 
 // GET
 router.get('/alloted', getAllTrainerAllocations);
+router.delete('/deleteAllocation', deleteTrainerFromProposal);
+
 
 
 

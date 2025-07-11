@@ -109,7 +109,7 @@ const Activate = () => {
                   {/* <th className="px-4 py-3 border-b">ID</th> */}
                   <th className="px-4 py-3 border-b">Proposal Code</th>
                   <th className="px-4 py-3 border-b">Status</th>
-                  <th className="px-4 py-3 border-b">ZIP File</th>
+                  {/* <th className="px-4 py-3 border-b">ZIP File</th> */}
                   <th className="px-4 py-3 border-b">POC Red Email</th>
                   <th className="px-4 py-3 border-b">Uploaded At</th>
                   <th className="px-4 py-3 border-b">Action</th>
@@ -132,7 +132,7 @@ const Activate = () => {
     {file.status}
   </span>
 </td>
-                    <td className="px-4 py-2 border-b break-all">
+                    {/* <td className="px-4 py-2 border-b break-all">
                       <a
                         href={file.zip_file_link}
                         target="_blank"
@@ -141,7 +141,7 @@ const Activate = () => {
                       >
                         Open
                       </a>
-                    </td>
+                    </td> */}
                     <td className="px-4 py-2 border-b">{file.poc_red_email}</td>
                     <td className="px-4 py-2 border-b">{new Date(file.uploaded_at).toLocaleString()}</td>
                     <td className="px-4 py-2 border-b text-center">

@@ -18,6 +18,9 @@ const Navbar = () => {
     { label: "INVOICE", path: "/invoice" },
     { label: "TOE", path: "/toe" },
     { label: "TDS", path: "/tds" },
+     { label: "HR", path: "/hrUpdate" },
+
+
   ];
 
   const [scrolled, setScrolled] = useState(false);
@@ -84,7 +87,7 @@ const Navbar = () => {
                 ${
                   showTransparent
                     ? "bg-transparent text-white"
-                    : "bg-white text-black"
+                    : " text-black"
                 }
                 ${
                   location.pathname === item.path

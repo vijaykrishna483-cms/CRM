@@ -23,5 +23,6 @@ router.use('/pdf',pdfRoutes)
 
 router.use('/zip', uploadRoute)
 
+router.use('/attendance',attendanceRoutes)
 
 export default router;

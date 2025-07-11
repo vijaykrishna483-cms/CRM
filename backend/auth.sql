@@ -1,12 +1,13 @@
--- Users Table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(200) NOT NULL,
     vertical_id INTEGER REFERENCES verticals(id),
-    position_id INTEGER REFERENCES positions(id)
+    position_id INTEGER REFERENCES positions(id),
+    employee_id VARCHAR(20) REFERENCES employees(employee_id)  -- FK to employees.employee_id
 );
+
 
 -- Verticals Table
 CREATE TABLE verticals (

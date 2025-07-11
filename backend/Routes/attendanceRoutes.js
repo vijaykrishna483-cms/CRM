@@ -1,15 +1,21 @@
-
-import express from 'express';
-import { deleteAttendance, getAllAttendance, getEmployeeAttendance, recordAttendance, updateAttendance } from '../Controllers/attendanceController/controller.js';
+import express from "express";
+import { authenticateToken } from "../middleware/authMiddleware.js";
+import { checkIn, checkOut, getAttendanceByDate, getMonthlyDailyRecords, updateAttendanceValidity } from "../Controllers/attendanceController/attendanceController.js";
 
 const router = express.Router();
 
-router.post('/record', recordAttendance);
-router.get('/employee/:employee_id', getEmployeeAttendance);
-router.get('/all', getAllAttendance);
-router.put('/:record_id', updateAttendance);
-router.delete('/:record_id', deleteAttendance);
+// Employee routes
+router.post("/checkin", authenticateToken, checkIn);
+router.post("/checkout", authenticateToken,checkOut);
 
 
+
+
+// HR: mark valid/invalid
+router.patch("/:id", authenticateToken, updateAttendanceValidity);
+
+// HR or self: fetch attendance records
+router.get("/", authenticateToken, getAttendanceByDate);
+router.get("/summary", authenticateToken, getMonthlyDailyRecords);
 
 export default router;

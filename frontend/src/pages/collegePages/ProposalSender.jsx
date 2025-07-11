@@ -21,8 +21,7 @@ const ProposalSender = () => {
   return (
     <div className="w-full min-h-screen bg-white px-6 sm:px-10">
       <h1 className="text-3xl font-bold text-center mb-10 text-[#4f378a]">
-        Proposal Plan Information Portal
-      </h1>
+Proposal & Course plan Updation      </h1>
 
       <div className="flex flex-wrap gap-4 bg-transparent justify-center rounded-2xl px-4 py-2 mb-8">
         {options.map(opt => (

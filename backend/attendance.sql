@@ -1,16 +1,23 @@
-CREATE TABLE attendance_records (
+CREATE TABLE attendance (
     id SERIAL PRIMARY KEY,
-    employee_id VARCHAR(20) NOT NULL,
-    date DATE NOT NULL,
-    in_time TIMESTAMP,
-    out_time TIMESTAMP,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT fk_employee
-      FOREIGN KEY(employee_id)
-      REFERENCES employees(employee_id)
-      ON DELETE CASCADE
+    employee_id VARCHAR(20) REFERENCES employees(employee_id),
+    check_in TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    check_out TIMESTAMP,
+    attendance_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    latitude DECIMAL(10, 7),   -- Storing user location (GPS)
+    longitude DECIMAL(10, 7),
+    is_valid BOOLEAN DEFAULT TRUE, -- HR can toggle this
+    remarks TEXT                -- HR remarks in case of invalid entry
 );
 
--- For fast lookup
-CREATE INDEX idx_attendance_employee_date ON attendance_records (employee_id, date);
+
+
+CREATE VIEW monthly_attendance_summary AS
+SELECT
+    employee_id,
+    DATE_TRUNC('month', attendance_date) AS month,
+    COUNT(*) FILTER (WHERE is_valid) AS present_days,
+    COUNT(*) FILTER (WHERE NOT is_valid) AS rejected_days
+FROM attendance
+GROUP BY employee_id, DATE_TRUNC('month', attendance_date);
+

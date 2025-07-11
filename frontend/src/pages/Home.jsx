@@ -92,6 +92,7 @@ const Home = () => {
     <p className="text-white text-sm sm:text-base md:text-lg max-w-xl mx-auto mb-6">
       This page helps employees manage their tasks and enhance communication with customers.
     </p>
+    <div className='flex gap-4'> 
     <button
       onClick={() => navigate('/login')}
       className="
@@ -102,8 +103,21 @@ const Home = () => {
         focus:outline-none focus:ring-2 focus:ring-[#4f378a]
       "
     >
-      Employee Sign In
+      Sign In
     </button>
+    <button
+      onClick={() => navigate('/attendance')}
+      className="
+         text-white  bg-black font-semibold px-6 py-2 rounded-full
+        shadow transition duration-200
+        hover:bg-[#fff]
+        hover:text-[#000] hover:scale-105 hover:shadow-lg
+        focus:outline-none focus:ring-2 focus:ring-[#4f378a]
+      "
+    >
+      Check In
+    </button>
+    </div>
   </div>
 </div>
 

@@ -76,3 +76,43 @@ export const getAllTrainerAllocations = async (req, res) => {
     });
   }
 };
+
+
+export const deleteTrainerFromProposal = async (req, res) => {
+  const { proposal_id, trainer_id } = req.body;
+
+  if (!proposal_id || !trainer_id) {
+    return res.status(400).json({
+      status: 'failed',
+      message: 'Proposal ID and Trainer ID are required',
+    });
+  }
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM proposal_trainer_map
+       WHERE proposal_id = $1 AND trainer_id = $2
+       RETURNING *`,
+      [proposal_id, trainer_id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        status: 'failed',
+        message: 'Mapping not found',
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Trainer mapping deleted successfully',
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Error deleting trainer from proposal:', error);
+    return res.status(500).json({
+      status: 'failed',
+      message: 'Server error',
+    });
+  }
+};

@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import api from "../../libs/apiCall";
 import { useNavigate } from "react-router-dom";
-import { HiUser, HiMail, HiLockClosed, HiOfficeBuilding, HiBriefcase } from "react-icons/hi";
+import Select from "react-select";
+import {
+  HiUser,
+  HiMail,
+  HiLockClosed,
+  HiOfficeBuilding,
+  HiBriefcase,
+} from "react-icons/hi";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -11,9 +18,11 @@ const Signup = () => {
     password: "",
     vertical_id: "",
     position_id: "",
+    employee_id: "",
   });
   const [verticals, setVerticals] = useState([]);
   const [positions, setPositions] = useState([]);
+  const [employeeData, setEmployeeData] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +33,20 @@ const Signup = () => {
     api.get("/auth/position/getall")
       .then(res => setPositions(res.data.data || []))
       .catch(() => setPositions([]));
+    fetchEmployees();
   }, []);
+
+  const fetchEmployees = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/employee');
+      setEmployeeData(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch employees");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -39,7 +61,14 @@ const Signup = () => {
       if (res.data.status === "success") {
         setMessage("Signup successful! Redirecting to login...");
         setTimeout(() => navigate('/login'), 1200);
-        setForm({ name: "", email: "", password: "", vertical_id: "", position_id: "" });
+        setForm({
+          name: "",
+          email: "",
+          password: "",
+          vertical_id: "",
+          position_id: "",
+          employee_id: "",
+        });
       } else {
         setMessage(res.data.message || "Signup failed");
       }
@@ -54,7 +83,7 @@ const Signup = () => {
       <div className="w-full max-w-lg p-10 bg-white rounded-3xl shadow-xl border border-gray-200 transition-all">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-extrabold text-[#6a54a6]">Register New Employee</h1>
-          <p className="text-gray-500 mt-2">Register New employee and save their password.</p>
+          <p className="text-gray-500 mt-2">Register a new employee and save their password.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Name */}
@@ -135,6 +164,24 @@ const Signup = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Employee ID - Search & Select */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">Select Employee</label>
+            <Select
+              options={employeeData.map(emp => ({
+                value: emp.employee_id,
+                label: `${emp.employee_name} (${emp.employee_id})`
+              }))}
+              onChange={(selectedOption) =>
+                setForm({ ...form, employee_id: selectedOption?.value || "" })
+              }
+              placeholder="Search or select employee"
+              className="basic-single"
+              classNamePrefix="select"
+              isClearable
+            />
           </div>
 
           {/* Submit */}

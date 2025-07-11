@@ -13,40 +13,14 @@ const numberToWords = (num) => {
   const convert = (n) => {
     if (n === 0) return "Zero";
     const ones = [
-      "",
-      "One",
-      "Two",
-      "Three",
-      "Four",
-      "Five",
-      "Six",
-      "Seven",
-      "Eight",
-      "Nine",
+      "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
     ];
     const teens = [
-      "Ten",
-      "Eleven",
-      "Twelve",
-      "Thirteen",
-      "Fourteen",
-      "Fifteen",
-      "Sixteen",
-      "Seventeen",
-      "Eighteen",
-      "Nineteen",
+      "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+      "Sixteen", "Seventeen", "Eighteen", "Nineteen",
     ];
     const tens = [
-      "",
-      "",
-      "Twenty",
-      "Thirty",
-      "Forty",
-      "Fifty",
-      "Sixty",
-      "Seventy",
-      "Eighty",
-      "Ninety",
+      "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety",
     ];
     if (n < 10) return ones[n];
     if (n < 20) return teens[n - 10];
@@ -83,22 +57,36 @@ const numberToWords = (num) => {
   return words;
 };
 
+// Format all rupee values to 2 decimal places (e.g., 100.00)
+const formatAmount = (value) => {
+  const num = parseFloat(value);
+  if (isNaN(num)) return "0.00";
+  return num.toFixed(2);
+};
+
 const Payslip = () => {
   const { allowed, loading: permissionLoading } = usePageAccess("payslip");
 
   const [formData, setFormData] = useState({
     employeeName: "",
+    employeeId: "",
     designation: "",
-    address_line1: "",
-    address_line2: "",
-    address_line3: "",
-    salary: "",
+    address1: "",
+    address2: "",
+    address3: "",
+    address: "",
     month: "",
     panId: "",
-    amount: "",
+    amount: "0.00",
     date: "",
     amountInWords: "",
-    location:"",
+    location: "",
+    basic: "0.00",
+    incomeTax: "0.00",
+    providentFund: "0.00",
+    houseRent: "0.00",
+    grossEarnings: "0.00",
+    totalDeductions: "0.00",
   });
   const [employeeData, setEmployeeData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -128,19 +116,28 @@ const Payslip = () => {
 
     if (selectedEmployee) {
       const salary = parseFloat(selectedEmployee.salary) || 0;
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         employeeName: selectedEmployee.employee_name,
+        employeeId: selectedEmployee.employee_id,
         designation: selectedEmployee.designation,
         address1: selectedEmployee.address_line1 || "",
         address2: selectedEmployee.address_line2 || "",
         address3: selectedEmployee.address_line3 || "",
-        salary: salary.toFixed(2),
+        month: "",
         panId: selectedEmployee.pan_id,
-        amount: salary.toFixed(2),
-        amountInWords: numberToWords(salary),
-        location:selectedEmployee.location || ""
-      });
+        location: selectedEmployee.location || "",
+        basic: "0.00",
+        houseRent: "0.00",
+        incomeTax: "0.00",
+        providentFund: "0.00",
+        grossEarnings: "0.00",
+        totalDeductions: "0.00",
+        amount: "0.00",
+        amountInWords: "",
+        date: "",
+        address: "",
+      }));
     }
   };
 
@@ -149,23 +146,36 @@ const Payslip = () => {
     const { name, value } = e.target;
     let updatedForm = { ...formData, [name]: value };
 
-    if (name === "amount") {
-      const num = parseFloat(value) || 0;
-      updatedForm.amountInWords = numberToWords(num);
+    // Always format rupee values to 2 decimal places
+    if (
+      ["basic", "houseRent", "incomeTax", "providentFund", "grossEarnings", "totalDeductions", "amount"].includes(name)
+    ) {
+      updatedForm[name] = formatAmount(value);
     }
+
+    // Auto-calculate gross earnings and total deductions
+    const basic = parseFloat(updatedForm.basic) || 0;
+    const houseRent = parseFloat(updatedForm.houseRent) || 0;
+    const incomeTax = parseFloat(updatedForm.incomeTax) || 0;
+    const providentFund = parseFloat(updatedForm.providentFund) || 0;
+
+    updatedForm.grossEarnings = formatAmount(basic + houseRent);
+    updatedForm.totalDeductions = formatAmount(incomeTax + providentFund);
+
+    // Calculate amount = grossEarnings - totalDeductions
+    const gross = parseFloat(updatedForm.grossEarnings) || 0;
+    const deductions = parseFloat(updatedForm.totalDeductions) || 0;
+    const amount = gross - deductions;
+    updatedForm.amount = formatAmount(amount);
+
+    // Update amount in words
+    updatedForm.amountInWords = numberToWords(amount);
 
     setFormData(updatedForm);
   };
 
   const handleSubmit = async () => {
-    // Pass address lines directly - no need to combine!
-    const payload = {
-      ...formData,
-      address_line1: formData.address1,
-      address_line2: formData.address2,
-      address_line3: formData.address3,
-      location:formData.location,
-    };
+    const payload = { ...formData };
     try {
       const res = await api.post("/pdf/payslip", payload, {
         responseType: "blob",
@@ -275,6 +285,19 @@ const Payslip = () => {
                   ))}
                 </select>
               </div>
+              {/* Employee ID */}
+              <div>
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
+                  Employee ID
+                </label>
+                <input
+                  name="employeeId"
+                  placeholder="Employee ID"
+                  value={formData.employeeId}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                />
+              </div>
               {/* Designation */}
               <div>
                 <label className="block text-sm font-semibold text-[#4f378a] mb-1">
@@ -285,20 +308,6 @@ const Payslip = () => {
                   placeholder="Designation"
                   value={formData.designation}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
-                />
-              </div>
-              {/* Salary */}
-              <div>
-                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
-                  Salary (₹)
-                </label>
-                <input
-                  name="salary"
-                  placeholder="Salary"
-                  value={formData.salary}
-                  onChange={handleChange}
-                  type="number"
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
                 />
               </div>
@@ -335,11 +344,12 @@ const Payslip = () => {
                 </label>
                 <input
                   name="amount"
-                  type="number"
+                  type="text"
                   placeholder="Amount"
                   value={formData.amount}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                  readOnly
                 />
               </div>
               {/* Date */}
@@ -384,6 +394,19 @@ const Payslip = () => {
               {/* Address Line 3 */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-[#4f378a] mb-1">
+                  Address Line 3
+                </label>
+                <input
+                  name="address3"
+                  placeholder="Address Line 3"
+                  value={formData.address3}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                />
+              </div>
+              {/* Location */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
                   Location
                 </label>
                 <input
@@ -392,6 +415,92 @@ const Payslip = () => {
                   value={formData.location}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                />
+              </div>
+              {/* Basic */}
+              <div>
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
+                  Basic
+                </label>
+                <input
+                  name="basic"
+                  type="text"
+                  placeholder="Basic"
+                  value={formData.basic}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                />
+              </div>
+              {/* Income Tax */}
+              <div>
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
+                  Income Tax
+                </label>
+                <input
+                  name="incomeTax"
+                  type="text"
+                  placeholder="Income Tax"
+                  value={formData.incomeTax}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                />
+              </div>
+              {/* Provident Fund */}
+              <div>
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
+                  Provident Fund
+                </label>
+                <input
+                  name="providentFund"
+                  type="text"
+                  placeholder="Provident Fund"
+                  value={formData.providentFund}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                />
+              </div>
+              {/* House Rent */}
+              <div>
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
+                  House Rent
+                </label>
+                <input
+                  name="houseRent"
+                  type="text"
+                  placeholder="House Rent"
+                  value={formData.houseRent}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                />
+              </div>
+              {/* Gross Earnings */}
+              <div>
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
+                  Gross Earnings
+                </label>
+                <input
+                  name="grossEarnings"
+                  type="text"
+                  placeholder="Gross Earnings"
+                  value={formData.grossEarnings}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                  readOnly
+                />
+              </div>
+              {/* Total Deductions */}
+              <div>
+                <label className="block text-sm font-semibold text-[#4f378a] mb-1">
+                  Total Deductions
+                </label>
+                <input
+                  name="totalDeductions"
+                  type="text"
+                  placeholder="Total Deductions"
+                  value={formData.totalDeductions}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
+                  readOnly
                 />
               </div>
             </div>
@@ -403,9 +512,9 @@ const Payslip = () => {
               <input
                 name="amountInWords"
                 value={formData.amountInWords}
-                onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
                 placeholder="Amount in words will appear here"
+                readOnly
               />
             </div>
             {/* Generate Button */}

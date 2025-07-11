@@ -259,9 +259,8 @@ const Add = () => {
   if (loadingg) return <div>Loading...</div>;
 
   return (
-    <div>
-      <div className="max-w-5xl mx-auto bg-gray-50 rounded-xl shadow-sm p-6 mb-10 border border-gray-200 space-y-6">
-        <h2 className="text-lg font-semibold text-[#4f378a]">
+  <div className="w-full bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto bg-gray-50 rounded-xl shadow-sm p-8 mb-10 border border-gray-200 space-y-6">        <h2 className="text-lg font-semibold text-[#4f378a]">
           Add New College
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -434,15 +433,15 @@ const Add = () => {
 
 
 
-<div className="overflow-x-auto">
-  <div className="bg-white p-4 rounded-xl shadow-sm border w-[95%] mx-auto">
+  <div className="max-w-7xl mx-auto">
+      <div className="bg-white p-4 rounded-xl shadow-sm border w-[100%] mx-auto">
     <h3 className="text-sm font-semibold mb-4 text-[#4f378a]">
       College Entries
     </h3>
     <div className="flex gap-4 w-full justify-center items-center mb-4">
       <input
         type="text"
-        placeholder="Search by college code, name or POC,State"
+            placeholder="Search by college code,name,POC or State"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-sm"
@@ -456,7 +455,7 @@ const Add = () => {
     </div>
 
     <div className="overflow-x-auto">
-      <table className="min-w-[1400px] w-full text-sm border-collapse border border-gray-300">
+      <table className=" w-full text-sm border-collapse border border-gray-300">
         <thead className="text-gray-600 bg-gray-100 border-b text-left">
           <tr>
             <th className="p-4 text-left border border-gray-300 whitespace-nowrap min-w-[130px]">College Code</th>

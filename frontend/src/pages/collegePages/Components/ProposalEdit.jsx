@@ -4,6 +4,9 @@ import { toast } from "react-toastify";
 import { MdDelete } from "react-icons/md";
 import usePageAccess from "../../../components/useAccessPage";
 import ProposalView from "./ProposalView";
+import Select from 'react-select';
+
+
 
 const ProposalEdit = () => {
 
@@ -73,6 +76,13 @@ const ProposalEdit = () => {
       setLoading(false);
     }
   };
+
+  const serviceOptions = services.map(service => ({
+  value: service.plan_id,
+  label: service.plan_name,
+}));
+
+
 
   const handleAddService = async () => {
     const { proposalCode, serviceId } = serviceForm;
@@ -247,6 +257,14 @@ const ProposalEdit = () => {
 
   // Filtering logic
  
+
+
+  const proposalOptions = proposals.map((proposal) => ({
+  value: proposal.proposal_code,
+  label: proposal.proposal_code,
+}));
+
+
 
   useEffect(() => {
     if (form.fromDate && form.duration) {
@@ -494,41 +512,46 @@ if (!allowed && !permissionLoading) return (
             <h2 className="text-lg font-semibold text-[#4f378a]">
               Add Plan to Proposal
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <select
-                name="proposalCode"
-                value={serviceForm.proposalCode}
-                onChange={handleServiceFormChange}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="">Select Proposal Code</option>
-                {proposals.map((proposal) => (
-                  <option
-                    key={proposal.proposal_id}
-                    value={proposal.proposal_code}
-                  >
-                    {proposal.proposal_code}
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-              <select
-                name="serviceId"
-                value={serviceForm.serviceId}
-                onChange={handleServiceFormChange}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="">Select Plan</option>
-                {services.map((service) => (
-                  <option key={service.plan_id} value={service.plan_id}>
-                    {service.plan_name}
-                  </option>
-                ))}
-              </select>
+<Select
+  name="proposalCode"
+  value={proposalOptions.find(option => option.value === serviceForm.proposalCode)}
+  onChange={selectedOption =>
+    handleServiceFormChange({
+      target: {
+        name: 'proposalCode',
+        value: selectedOption ? selectedOption.value : ''
+      }
+    })
+  }
+  options={proposalOptions}
+  placeholder="Select Proposal Code"
+  classNamePrefix="react-select"
+/>
+
+
+
+<Select
+  name="serviceId"
+  value={serviceOptions.find(option => option.value === serviceForm.serviceId)}
+  onChange={selectedOption =>
+    handleServiceFormChange({
+      target: {
+        name: 'serviceId',
+        value: selectedOption ? selectedOption.value : ''
+      }
+    })
+  }
+  options={serviceOptions}
+  placeholder="Select Plan"
+  classNamePrefix="react-select"
+/>
+
 
               <button
                 onClick={handleAddService}
-                className="px-5 py-2 bg-purple-100 hover:bg-purple-200 rounded-full font-medium text-sm text-gray-700"
+                className="p-1 bg-purple-100 hover:bg-purple-200 rounded-full font-medium text-md text-gray-700"
                 disabled={serviceLoading}
               >
                 {serviceLoading ? "Adding..." : "Add Plan"}

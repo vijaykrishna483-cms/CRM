@@ -7,9 +7,7 @@ import Exam from "./pages/examPages/index";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Home from "./pages/Home";
-import DocxForm from "./pages/pdfGenerators/Payslip";
 import Toe from "./pages/pdfGenerators/Toe";
-import Signup from "./pages/authPages/auth";
 import Login from "./pages/authPages/login";
 import PrivateRoute from "./components/privateRoute";
 import Admin from "./pages/adminPanel/admin";
@@ -20,6 +18,9 @@ import ZipUploader from "./pages/pdfGenerators/TDS";
 import Invoice from "./pages/pdfGenerators/invoice";
 import Payslip from "./pages/pdfGenerators/Payslip";
 import Tef from "./pages/pdfGenerators/Tef";
+import Signup from "./pages/authPages/SignUp";
+import AttendancePage from "./pages/attendancePages/AttendancePage";
+import AttendanceAdminPage from "./pages/attendancePages/AttendanceAdminPage";
 
 
 function App() {
@@ -46,6 +47,11 @@ useEffect(() => {
   <Route path="/tef" element={<Tef />} />
   <Route path="/college" element={<CollegeMain />} />
   <Route path="/tds" element={<ZipUploader />} />
+   <Route path="/attendance" element={<AttendancePage />} />
+      <Route path="/hrUpdate" element={<AttendanceAdminPage />} />
+
+
+ 
   <Route element={<PrivateRoute />}>
   <Route path="/register" element={<Signup />} />
   </Route>

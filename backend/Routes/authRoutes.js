@@ -1,5 +1,5 @@
 import express from 'express';
-import { signinUser, signupUser } from '../Controllers/authControllers/authControllers.js';
+import { deleteUser, getAllUsers, signinUser, signupUser } from '../Controllers/authControllers/authControllers.js';
 import { addVertical, deleteVertical, getAllVerticals } from '../Controllers/authControllers/vertical.js';
 import { addPosition, deletePosition, getAllPositions } from '../Controllers/authControllers/position.js';
 import { addPage, deletePage, getAllPages } from '../Controllers/authControllers/pages.js';
@@ -20,6 +20,9 @@ router.post("/check", authenticateToken, checkPageAccess);
 
 router.post('/signup',signupUser)
 router.post('/signin',signinUser)
+router.delete("/delete", deleteUser);
+router.get("/users", getAllUsers);
+
 
 
 router.post('/vertical/add', addVertical);
