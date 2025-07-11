@@ -38,9 +38,10 @@ const Index = () => {
     <div className="w-full min-h-screen bg-[#f7f6fd] overflow-x-hidden">
       <Navbar />
       <div className="flex flex-col items-center pt-24 px-2 sm:px-4">
-        {/* Tab Bar */}
-        <div className="w-full max-w-5xl overflow-x-auto">
-          <div className="flex flex-nowrap gap-2 sm:gap-4 bg-white shadow rounded-2xl px-2 sm:px-4 py-2 mb-8 border border-[#f3e6f1]">
+        {/* Main Container with max width */}
+<div className="w-full overflow-x-auto">
+  {/* Inline-flex ensures buttons stay in a row, not wrap */}
+  <div className="flex w-[100%]  gap-2 sm:gap-4 justify-center bg-white shadow rounded-2xl px-2 sm:px-4 py-2 mb-8 border border-[#e9d4ff]">
             {TABS.map((tab) => (
               <button
                 key={tab.label}

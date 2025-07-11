@@ -1,7 +1,7 @@
 import { pool } from "../../libs/database.js";
 import { comparePassword, createJWT, hashPassword } from "../../libs/index.js";
 
-import { sendMail } from "../../Controllers/Gmail/sendMail.js"; // adjust path if different
+import { sendMail } from "../Gmail/sendMail.js"; // adjust path if different
 
 
 export const signupUser = async (req, res) => {
