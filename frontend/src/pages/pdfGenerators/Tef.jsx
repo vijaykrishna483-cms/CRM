@@ -117,7 +117,7 @@ const Tef = () => {
       <Navbar />
       <div className="flex flex-1 justify-center items-center mt-8">
         <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 my-10">
-          <h2 className="text-3xl font-bold mb-8 text-center text-[#6750a4]">Training Details Form</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center text-[#6750a4]">Training Engagement Form</h2>
 
           {/* Proposal select input */}
           <div className="mb-6">

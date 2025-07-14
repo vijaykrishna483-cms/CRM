@@ -153,6 +153,10 @@ const ProposalEdit = () => {
     setServiceForm({ ...serviceForm, [e.target.name]: e.target.value });
   };
 
+   const token = localStorage.getItem("token");
+
+
+
   const handleAddProposal = async () => {
     const {
       collegeCode,
@@ -180,16 +184,23 @@ const ProposalEdit = () => {
     setLoading(true);
 
     try {
-      const res = await api.post("/college/addproposal", {
-        collegeCode,
-        proposalCode,
-        issueDate,
-        quotedPrice,
-        duration,
-        fromDate: fromDate || null,
-        toDate: toDate || null,
-        status: status || "pending", // use form's status or default to "pending"
-      });
+   const res = await api.post(
+  "/college/addproposal",
+  {
+    collegeCode,
+    proposalCode,
+    issueDate,
+    quotedPrice,
+    duration,
+    fromDate: fromDate || null,
+    toDate: toDate || null,
+    status: status || "pending",
+  },
+  {
+    headers: { Authorization: `Bearer ${token}` },
+  }
+);
+
 
       if (res.data.status !== "success") throw new Error(res.data.message);
 

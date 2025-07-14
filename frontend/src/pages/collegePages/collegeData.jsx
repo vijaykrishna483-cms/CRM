@@ -28,7 +28,7 @@ const CollegeData = () => {
         College Management Portal
       </h1>
       {/* Responsive tab buttons */}
-      <div className="w-full max-w-4xl overflow-x-auto">
+      <div className="w-full  overflow-x-auto">
         <div className="flex flex-nowrap gap-2 sm:gap-4 bg-transparent justify-center rounded-2xl px-2 sm:px-4 py-2 mb-8">
           <button
             onClick={() => { setOpen(true); /* setEdit(false); setEmployeeInfo(initialEmployeeState); setEditId(null); */ }}
@@ -58,7 +58,7 @@ const CollegeData = () => {
       </div>
 
       {/* Responsive content area */}
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow p-4 sm:p-8 min-h-[300px]">
+      <div className="w-full bg-white rounded-2xl shadow p-4 sm:p-8 min-h-[300px]">
         {open ? <Add /* pass props as needed */ /> : <Vieww /* pass props as needed */ />}
       </div>
     </div>

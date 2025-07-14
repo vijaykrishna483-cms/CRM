@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middleware/authMiddleware.js";
-import { checkIn, checkOut, getAttendanceByDate, getMonthlyDailyRecords, updateAttendanceValidity } from "../Controllers/attendanceController/attendanceController.js";
+import { checkIn, checkOut, getAllEmployeesMonthlyAttendance, getAttendanceByDate, getMonthlyDailyRecords, launchIn, launchOut, updateAttendanceValidity } from "../Controllers/attendanceController/attendanceController.js";
 
 const router = express.Router();
 
@@ -8,8 +8,13 @@ const router = express.Router();
 router.post("/checkin", authenticateToken, checkIn);
 router.post("/checkout", authenticateToken,checkOut);
 
+router.post("/lunchin", authenticateToken, launchIn);
+router.post("/lunchout", authenticateToken,launchOut);
 
 
+router.get("/month", authenticateToken,getAllEmployeesMonthlyAttendance
+);
+ 
 
 // HR: mark valid/invalid
 router.patch("/:id", authenticateToken, updateAttendanceValidity);

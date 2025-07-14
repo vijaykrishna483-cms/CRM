@@ -1,8 +1,11 @@
 import { pool } from "../../libs/database.js";
 import { v4 as uuidv4 } from 'uuid'; 
-
+import jwt from 'jsonwebtoken'
 export const addProposal = async (req, res) => {
   try {
+      const token = req.headers.authorization?.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const employee_id = decoded.employee_id;
     const {
       collegeCode,
       proposalCode,
@@ -16,7 +19,7 @@ export const addProposal = async (req, res) => {
     } = req.body;
 
     // Validate required fields (excluding fromDate, toDate)
-    if (!collegeCode || !proposalCode || !issueDate || !quotedPrice || !duration) {
+    if (!collegeCode || !proposalCode || !issueDate || !quotedPrice || !duration ) {
       return res.status(400).json({
         status: 'failed',
         message: 'Missing required fields',
@@ -42,8 +45,8 @@ export const addProposal = async (req, res) => {
       `INSERT INTO proposals (
         proposal_id, college_code, proposal_code,
         issue_date, last_updated, quoted_price,
-        duration, from_date, to_date, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        duration, from_date, to_date, status ,employee_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11)
       RETURNING *`,
       [
         proposalId,
@@ -55,7 +58,8 @@ export const addProposal = async (req, res) => {
         duration,
         fromDate || null,
         toDate || null,
-        status || 'pending'
+        status || 'pending',
+        employee_id
       ]
     );
 

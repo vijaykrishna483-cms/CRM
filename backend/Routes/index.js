@@ -7,6 +7,7 @@ import examRoutes from './exmRoutes.js'
 import pdfRoutes from './pdfRoutes.js'
 import uploadRoute from '../Controllers/ZipExtraction/uploadRoute.js'
 import attendanceRoutes from './attendanceRoutes.js'
+import leaveRoutes from './leaveRoutes.js'
 const router =express.Router();
 router.use('/auth',authRoutes)
 router.use('/college',collegeRoutes)
@@ -24,5 +25,8 @@ router.use('/pdf',pdfRoutes)
 router.use('/zip', uploadRoute)
 
 router.use('/attendance',attendanceRoutes)
+
+router.use('/leave',leaveRoutes)
+
 
 export default router;

@@ -10,6 +10,7 @@ const AdminEmployeeTable = () => {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [deleteMsg, setDeleteMsg] = useState("");
+const [verticalFilter, setVerticalFilter] = useState("All");
 
   // Fetch users, verticals, and positions from the backend
   useEffect(() => {
@@ -34,19 +35,28 @@ const AdminEmployeeTable = () => {
   }, []);
 
   // Filter users by search
-  useEffect(() => {
-    if (!search) {
-      setDisplayedUsers(users);
-    } else {
-      setDisplayedUsers(
-        users.filter(
-          user =>
-            user.name.toLowerCase().includes(search.toLowerCase()) ||
-            user.email.toLowerCase().includes(search.toLowerCase())
-        )
-      );
-    }
-  }, [search, users]);
+
+
+useEffect(() => {
+  let filtered = users;
+
+  if (verticalFilter !== "All") {
+    filtered = filtered.filter(user => String(user.vertical_id) === String(verticalFilter));
+  }
+
+  if (search) {
+    filtered = filtered.filter(
+      user =>
+        user.name.toLowerCase().includes(search.toLowerCase()) ||
+        user.email.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+
+  setDisplayedUsers(filtered);
+}, [search, users, verticalFilter]);
+
+
+
 
   // Helper functions to get names
   const getVerticalName = (id) => {
@@ -78,18 +88,31 @@ const AdminEmployeeTable = () => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-bold mb-4 text-[#543c85]">Employee Directory</h2>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-3">
-        <input
-          type="text"
-          placeholder="Search by name or email..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 w-full md:w-64 focus:outline-[#543c85]"
-        />
-        {deleteMsg && (
-          <div className="text-green-700 font-medium">{deleteMsg}</div>
-        )}
-      </div>
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-3">
+  <input
+    type="text"
+    placeholder="Search by name or email..."
+    value={search}
+    onChange={e => setSearch(e.target.value)}
+    className="border border-gray-300 rounded px-3 py-2 w-full md:w-64 focus:outline-[#543c85]"
+  />
+  <select
+    value={verticalFilter}
+    onChange={e => setVerticalFilter(e.target.value)}
+    className="border border-gray-300 rounded px-3 py-2 w-full md:w-64 focus:outline-[#543c85]"
+  >
+    <option value="All">All Verticals</option>
+    {verticals.map(v => (
+      <option key={v.id} value={v.id}>
+        {v.name}
+      </option>
+    ))}
+  </select>
+  {deleteMsg && (
+    <div className="text-green-700 font-medium">{deleteMsg}</div>
+  )}
+</div>
+
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead className="bg-[#e7f6f2]">

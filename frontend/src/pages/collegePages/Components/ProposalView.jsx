@@ -212,35 +212,39 @@ const ProposalView = ({ showDetails }) => {
     }
   };
 
-  const filteredProposals = proposals.filter((proposal) => {
-    // Main search (college code, name, proposal code, plans)
-    const collegeMatch =
-      proposal.college_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (collegeNameMap[proposal.college_code] || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+const lowerSearchTerm = searchTerm.trim().toLowerCase();
+const lowerStatusSearch = statusSearch.trim().toLowerCase();
+const filteredProposals = proposals.filter((proposal) => {
+  const collegeCode = proposal.college_code?.toLowerCase() || "";
+  const collegeEntry = collegeNameMap[proposal.college_code] || {};
+  const collegeName = (collegeEntry.name || "").toLowerCase();
+  const location = (collegeEntry.location || "").toLowerCase();
+  const proposalCode = proposal.proposal_code?.toLowerCase() || "";
+  const status = proposal.status?.toLowerCase() || "";
 
-    const proposalMatch = proposal.proposal_code
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+  const collegeMatch =
+    collegeCode.includes(lowerSearchTerm) ||
+    collegeName.includes(lowerSearchTerm);
 
-    // Plan name match
-    const plansArr = (proposalServices[proposal.proposal_id] || []).map(
-      (plan) => plan.plan_name.toLowerCase()
-    );
-    const planMatch = plansArr.some((planName) =>
-      planName.includes(searchTerm.toLowerCase())
-    );
+  const locationMatch = location.includes(lowerSearchTerm);
 
-    // Status filter (if statusSearch is not empty)
-    const statusMatch = statusSearch
-      ? proposal.status &&
-        proposal.status.toLowerCase().includes(statusSearch.toLowerCase())
-      : true;
+  const proposalMatch = proposalCode.includes(lowerSearchTerm);
 
-    // Combine all filters
-    return (collegeMatch || proposalMatch || planMatch) && statusMatch;
-  });
+  const plansArr = (proposalServices[proposal.proposal_id] || []).map(
+    (plan) => plan.plan_name?.toLowerCase() || ""
+  );
+  const planMatch = plansArr.some((planName) =>
+    planName.includes(lowerSearchTerm)
+  );
+
+  const statusMatch = statusSearch
+    ? status.includes(lowerStatusSearch)
+    : true;
+
+  return (collegeMatch || locationMatch || proposalMatch || planMatch) && statusMatch;
+});
+
+
 
   useEffect(() => {
     if (form.fromDate && form.duration) {
@@ -336,7 +340,7 @@ const ProposalView = ({ showDetails }) => {
         <div className="flex gap-4 w-full justify-center items-center mb-4 flex-wrap">
           <input
             type="text"
-            placeholder="Search by college name,proposal code, or plan"
+            placeholder="Search by College, Proposal Code, State or Plan "
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border border-gray-300 mb-4 rounded-lg px-3 py-2 text-sm w-full max-w-sm"

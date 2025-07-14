@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../libs/apiCall.js";
+import { toast } from "react-toastify";
 
 const Upload = () => {
   const [proposalId, setProposalId] = useState("");
@@ -64,38 +65,50 @@ const Upload = () => {
     }
   }, [files, proposals, loadingFiles, loadingProposals]);
 
-  // Handle upload submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setUploadStatus("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setUploadStatus("");
 
-    if (!proposalId || !pocRedEmail || !zipFileLink) {
-      setUploadStatus("Please fill all fields and provide a ZIP file link.");
-      return;
-    }
+  if (!proposalId || !pocRedEmail || !zipFileLink) {
+    setUploadStatus("Please fill all fields and provide a ZIP file link.");
+    return;
+  }
+// console.log(files)
+  const alreadyUploaded = files.some(
+    (file) => file.proposal_id === proposalId
+  );
 
-    try {
-      await api.post("/college/upload/add", {
-        proposal_id: proposalId,
-        zip_file_link: zipFileLink,
-        poc_red_email: pocRedEmail,
-      });
+  if (alreadyUploaded) {
+    toast.error("This proposal has already been uploaded.");
+    return;
+  }
 
-      await api.put(`/college/proposal/${proposalId}`, {
-        status: "uploaded",
-      });
+  setIsSubmitting(true); // Prevent duplicate submits
+  try {
+    await api.post("/college/upload/add", {
+      proposal_id: proposalId,
+      zip_file_link: zipFileLink,
+      poc_red_email: pocRedEmail,
+    });
 
-      setUploadStatus("Proposal file link saved successfully!");
-      setProposalId("");
-      setPocRedEmail("");
-      setZipFileLink("");
+    await api.put(`/college/proposal/${proposalId}`, {
+      status: "uploaded",
+    });
 
-      fetchFiles();
-      fetchProposals();
-    } catch (error) {
-      setUploadStatus("Upload failed. Please try again.");
-    }
-  };
+    setUploadStatus("Proposal file link saved successfully!");
+    setProposalId("");
+    setPocRedEmail("");
+    setZipFileLink("");
+
+    fetchFiles();
+    fetchProposals();
+  } catch (error) {
+    setUploadStatus("Upload failed. Please try again.");
+  } finally {
+    setIsSubmitting(false); // Allow future submits
+  }
+};
+const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -143,13 +156,11 @@ const Upload = () => {
         Proposal File Uploads
       </h2>
 
-      {/* Upload Form */}
       <form
         onSubmit={handleSubmit}
         className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8  mb-12"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Proposal Dropdown */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Proposal
@@ -176,7 +187,6 @@ const Upload = () => {
             )}
           </div>
 
-          {/* POC Red Email */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Designated Mail
@@ -200,7 +210,6 @@ const Upload = () => {
             )}
           </div>
 
-          {/* ZIP File Link */}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               ZIP File Link
@@ -216,23 +225,22 @@ const Upload = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="mt-6 text-center">
-          <button
-            type="submit"
-            className="bg-[#6750a4] hover:bg-[#543b90] text-white font-medium px-8 py-2 rounded-lg transition-all"
-          >
-            Save Link
-          </button>
+        <button
+  type="submit"
+  disabled={isSubmitting}
+  className={`bg-[#6750a4] hover:bg-[#543b90] text-white font-medium px-8 py-2 rounded-lg transition-all ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+>
+  Save Link
+</button>
+
           {uploadStatus && (
             <p className="mt-4 text-sm text-gray-600">{uploadStatus}</p>
           )}
         </div>
       </form>
 
-      {/* Uploaded Files Table */}
-
-      <div className="bg-white   rounded-2xl p-6 sm:p-8 ">
+      <div className="bg-white rounded-2xl p-6 sm:p-8">
         <h3 className="text-xl font-semibold mb-6 text-[#4f378a]">
           Uploaded Proposal Files
         </h3>
@@ -246,26 +254,23 @@ const Upload = () => {
             <table className="min-w-full table-auto border-collapse text-sm">
               <thead>
                 <tr className="bg-[#f3e6f1] text-left text-gray-800">
-                  {/* <th className="px-4 py-2 border">ID</th> */}
-                  {/* <th className="px-4 py-2 border">Proposal ID</th> */}
                   <th className="px-4 py-2 border">Proposal Code</th>
                   <th className="px-4 py-2 border">Status</th>
                   <th className="px-4 py-2 border">ZIP File Link</th>
                   <th className="px-4 py-2 border">Designated Mail</th>
                   <th className="px-4 py-2 border">Uploaded At</th>
-                  {/* <th className="px-4 py-2 border">Send Mail</th> */}
                 </tr>
               </thead>
               <tbody>
                 {filesWithCodes
-                  .filter((file) => file.status === "uploaded" || file.status=="pending")
+                  .filter(
+                    (file) => file.status === "uploaded" || file.status === "pending"
+                  )
                   .map((file, index) => (
                     <tr
                       key={file.id}
                       className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                     >
-                      {/* <td className="px-4 py-2 border">{file.id}</td> */}
-                      {/* <td className="px-4 py-2 border">{file.proposal_id}</td> */}
                       <td className="px-4 py-2 border">{file.proposal_code}</td>
                       <td className="px-4 py-2 border">
                         <span

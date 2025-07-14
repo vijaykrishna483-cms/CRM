@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import api from "../../libs/apiCall.js"; // Your axios instance
-import { FaSignInAlt, FaSignOutAlt, FaCalendarAlt } from "react-icons/fa";
+import api from "../../libs/apiCall.js";
+import { FaSignInAlt, FaSignOutAlt, FaCalendarAlt, FaUtensils, FaCoffee } from "react-icons/fa";
 import Navbar from '../../components/Navbar.jsx'
 import Footer from '../../components/Footer.jsx'
 
@@ -20,7 +20,6 @@ const AttendancePage = () => {
   // Auth
   const token = localStorage.getItem("token");
 
-  // Authentication check
   if (!token) {
     return (
       <div className="p-6 text-center text-red-600 font-semibold bg-red-100 rounded-md max-w-md mx-auto mt-20">
@@ -28,32 +27,29 @@ const AttendancePage = () => {
       </div>
     );
   }
+const fetchRecords = async () => {
+  setRecordsLoading(true);
+  setRecordsError("");
 
-  // Fetch daily records whenever month changes
-  useEffect(() => {
-    const fetchRecords = async () => {
-      setRecordsLoading(true);
-      setRecordsError("");
-      try {
-        // Convert YYYY-MM to YYYY-MM-01 for API
-        const monthParam = `${month}-01`;
-        const res = await api.get("/attendance/summary", {
-          params: { month: monthParam },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setRecords(res.data || []);
-      } catch (err) {
-        setRecordsError(
-          err.response?.data?.message || "Failed to fetch records."
-        );
-      } finally {
-        setRecordsLoading(false);
-      }
-    };
-    fetchRecords();
-  }, [month, token]);
+  try {
+    const monthParam = `${month}-01`;
+    const res = await api.get("/attendance/summary", {
+      params: { month: monthParam },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setRecords(res.data || []);
+  } catch (err) {
+    setRecordsError(err.response?.data?.message || "Failed to fetch records.");
+  } finally {
+    setRecordsLoading(false);
+  }
+};
 
-  // Get GPS location
+useEffect(() => {
+  fetchRecords();
+}, [month, token]);
+
+
   const getLocation = () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -93,10 +89,10 @@ const AttendancePage = () => {
           },
         }
       );
-      setMessage(response.data.message || "Checked in successfully");
+ await fetchRecords();
+       setMessage(response.data.message || "Checked in successfully");
     } catch (error) {
-      const msg =
-        error.response?.data?.message || "Check-in failed. Try again.";
+      const msg = error.response?.data?.message || "Check-in failed. Try again.";
       setMessage(msg);
     } finally {
       setLoading(false);
@@ -117,17 +113,64 @@ const AttendancePage = () => {
           },
         }
       );
+       await fetchRecords();
       setMessage(response.data.message || "Checked out successfully");
     } catch (error) {
-      const msg =
-        error.response?.data?.message || "Check-out failed. Try again.";
+      const msg = error.response?.data?.message || "Check-out failed. Try again.";
       setMessage(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  // Format time to show AM/PM
+  // Lunch In
+  const handleLunchIn = async () => {
+    setLoading(true);
+    setMessage("Marking lunch-in...");
+    try {
+      const response = await api.post(
+        "/attendance/lunchin",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+ await fetchRecords();
+       setMessage(response.data.message || "Lunch-in marked successfully");
+    } catch (error) {
+      const msg = error.response?.data?.message || "Lunch-in failed. Try again.";
+      setMessage(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Lunch Out
+  const handleLunchOut = async () => {
+    setLoading(true);
+    setMessage("Marking lunch-out...");
+    try {
+      const response = await api.post(
+        "/attendance/lunchout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+       await fetchRecords();
+      setMessage(response.data.message || "Lunch-out marked successfully");
+    } catch (error) {
+      const msg = error.response?.data?.message || "Lunch-out failed. Try again.";
+      setMessage(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatTime = (timeStr) => {
     if (!timeStr) return "-";
     let date;
@@ -144,37 +187,50 @@ const AttendancePage = () => {
   };
 
   return (
-    <> 
-      <Navbar/> 
-      <div className="min-h-screen p-8 flex flex-col items-center justify-center gap-8 bg-gradient-to-r from-blue-50 to-indigo-50">
-        <h1 className="text-3xl font-extrabold text-gray-900 drop-shadow-md">
-          Employee Attendance
-        </h1>
+    <>
+      <Navbar />
+      <div className="min-h-screen p-8 flex flex-col pt-30 items-center justify-center gap-8 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <h1 className="text-3xl font-extrabold text-gray-900 drop-shadow-md">Employee Attendance</h1>
 
-        {/* Check In/Out Buttons */}
+        {/* Check In/Out + Lunch In/Out Buttons */}
         {loading ? (
-          <div className="text-blue-700 font-semibold text-lg animate-pulse">
-            Processing...
-          </div>
+          <div className="text-blue-700 font-semibold text-lg animate-pulse">Processing...</div>
         ) : (
-          <div className="flex gap-6">
-            <button
-              className="flex items-center gap-3 px-8 py-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out transform hover:-translate-y-1"
-              onClick={handleCheckIn}
-              disabled={loading}
-            >
-              <FaSignInAlt size={20} />
-              Check In
-            </button>
-            <button
-              className="flex items-center gap-3 px-8 py-3 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:-translate-y-1"
-              onClick={handleCheckOut}
-              disabled={loading}
-            >
-              <FaSignOutAlt size={20} />
-              Check Out
-            </button>
-          </div>
+        <div className="flex flex-wrap justify-center items-center gap-0 w-full max-w-2xl mx-auto bg-white rounded-lg shadow divide-x divide-gray-200 overflow-hidden">
+  <button
+    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-green-600 text-white hover:bg-green-700 transition"
+    onClick={handleCheckIn}
+    disabled={loading}
+  >
+    <FaSignInAlt size={18} />
+    Check In
+  </button>
+  <button
+    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-yellow-500 text-white hover:bg-yellow-600 transition"
+    onClick={handleLunchIn}
+    disabled={loading}
+  >
+    <FaUtensils size={18} />
+    Lunch In
+  </button>
+  <button
+    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-yellow-700 text-white hover:bg-yellow-800 transition"
+    onClick={handleLunchOut}
+    disabled={loading}
+  >
+    <FaCoffee size={18} />
+    Lunch Out
+  </button>
+  <button
+    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white hover:bg-blue-700 transition"
+    onClick={handleCheckOut}
+    disabled={loading}
+  >
+    <FaSignOutAlt size={18} />
+    Check Out
+  </button>
+</div>
+
         )}
 
         {message && (
@@ -218,40 +274,49 @@ const AttendancePage = () => {
                 return (
                   <div
                     key={rec.id}
-className={`${
-  rec.is_valid ? "bg-green-100" : "bg-red-100"
-} rounded-xl shadow-md p-5 border-l-4 border-indigo-500 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:shadow-lg transition-all duration-200`}
+                    className={`${
+                      rec.is_valid ? "bg-green-100" : "bg-red-100"
+                    } rounded-xl shadow-md p-5 border-l-4 border-indigo-500 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:shadow-lg transition-all duration-200`}
                   >
                     <div className="mb-4 sm:mb-0 mr-6">
                       <div className="text-2xl font-bold text-gray-800">{dateStr}</div>
                       <div className="text-sm text-gray-500">{weekDay}</div>
                     </div>
-                    <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-700">
-                      <div>
-                        <span className="font-medium text-gray-500">Check In:</span>{" "}
-                        <span className="text-black">
-                          {formatTime(rec.check_in)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-500">Check Out:</span>{" "}
-                        <span className="text-black">
-                          {formatTime(rec.check_out)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-500">Status:</span>{" "}
-                        {rec.is_valid ? (
-                          <span className="text-green-600 font-semibold">verified</span>
-                        ) : (
-                          <span className="text-red-600 font-semibold">Found Scam</span>
-                        )}
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-500">Remarks:</span>{" "}
-                        <span className="text-black">{rec.remarks || "-"}</span>
-                      </div>
-                    </div>
+                 <div className="flex-1">
+  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm text-gray-700">
+    <div>
+      <dt className="font-medium text-gray-500">Check In:</dt>
+      <dd className="text-black">{formatTime(rec.check_in)}</dd>
+    </div>
+    <div>
+      <dt className="font-medium text-gray-500">Lunch In:</dt>
+      <dd className="text-black">{formatTime(rec.lunch_in)}</dd>
+    </div>
+    <div>
+      <dt className="font-medium text-gray-500">Lunch Out:</dt>
+      <dd className="text-black">{formatTime(rec.lunch_out)}</dd>
+    </div>
+    <div>
+      <dt className="font-medium text-gray-500">Check Out:</dt>
+      <dd className="text-black">{formatTime(rec.check_out)}</dd>
+    </div>
+    <div>
+      <dt className="font-medium text-gray-500">Status:</dt>
+      <dd>
+        {rec.is_valid ? (
+          <span className="text-green-600 font-semibold">Verified</span>
+        ) : (
+          <span className="text-red-600 font-semibold">Found Scam</span>
+        )}
+      </dd>
+    </div>
+    <div>
+      <dt className="font-medium text-gray-500">Remarks:</dt>
+      <dd className="text-black">{rec.remarks || "-"}</dd>
+    </div>
+  </dl>
+</div>
+
                   </div>
                 );
               })}
@@ -263,7 +328,7 @@ className={`${
           )}
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };

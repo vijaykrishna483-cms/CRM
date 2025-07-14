@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import api from '../../libs/apiCall';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { toast } from 'react-toastify';
 
 function ZipUploader() {
   const [tableData, setTableData] = useState([]);
@@ -30,15 +31,17 @@ function ZipUploader() {
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
-
+const[click,setClick]=useState(false);
   // Dummy mail functions
-  const handleSendMail = (row) => {
-    alert(`Dummy: Sending mail to ${row.email} (PAN: ${row.pan})`);
-  };
+const handleSendMail = (row) => {
+    toast.error('This feature is currently under maintenance. Please try again later.');
+    setClick(true);
+};
 
-  const handleSendAllMails = () => {
-    alert('Dummy: Sending all mails!');
-  };
+const handleSendAllMails = () => {
+    toast.error('Bulk mail feature is under maintenance. We appreciate your patience.');
+};
+
 
   // Filter table data by PAN
   const filteredData = tableData.filter(row =>
@@ -110,12 +113,15 @@ function ZipUploader() {
                           <td className="px-4 py-2 text-sm text-gray-700">{row.pan}</td>
                           <td className="px-4 py-2 text-sm text-gray-700">{row.email}</td>
                           <td className="px-4 py-2 text-center">
-                            <button
-                              onClick={() => handleSendMail(row)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded shadow text-xs font-medium transition"
-                            >
-                              Send Mail
-                            </button>
+                        <button
+  onClick={() => handleSendMail(row)}
+  // disabled={sendingRowId === row.id}
+  className=
+   "bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded shadow text-xs font-medium transition"
+>
+  {click ? "Sent" : "Send Mail"}
+</button>
+
                           </td>
                         </tr>
                       ))

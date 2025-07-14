@@ -11,8 +11,8 @@ import ProposalSender from './ProposalSender';
 const TABS = [
   { label: 'College Data' },
   { label: 'Proposal Data' },
-  { label: 'Services Data' },
   { label: 'Trainer Allocation' },
+  { label: 'Services Data' },
   { label: 'Proposal Plans' },
   { label: 'Trainer Feedback' },
   { label: 'Proposal Sender' }
