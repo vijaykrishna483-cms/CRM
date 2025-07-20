@@ -122,7 +122,7 @@ const Handover = () => {
               onClick={() => startEdit(proposal)}
               className="text-sm bg-purple-200 hover:bg-purple-300 px-3 py-1 rounded-full"
             >
-              Edit
+              Handover
             </button>
           </div>
         ))}

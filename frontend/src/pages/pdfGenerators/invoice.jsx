@@ -153,8 +153,8 @@ const Invoice = () => {
       <div className='fixed w-[100vw] z-[100]'>
         <Navbar />
       </div>
-      <div className="min-h-screen bg-[#ffff] flex items-center justify-center py-8 px-2">
-        <div className="max-w-2xl w-full p-1 md:p-2 relative overflow-hidden">
+      <div className="min-h-screen w-[100vw]  bg-[#ffff] flex items-center justify-center py-8 px-2">
+        <div className="w-[80%] p-1 md:p-2 relative overflow-hidden">
           <div className="relative z-10 p-6 text-white mt-10">
             <h1 className="text-3xl font-bold text-[#88139a] text-center tracking-wide">INVOICE GENERATOR</h1>
             <p className="text-center text-xl text-[#88139a] mt-2">Enter your details below</p>
@@ -188,25 +188,26 @@ const Invoice = () => {
             <div>
               <label className="block text-sm font-semibold text-[#4f378a] mb-2">Invoice Items</label>
               {formData.lines.map((line, idx) => (
-                <div key={idx} className="grid grid-cols-1 md:grid-cols-7 gap-2 mb-2 items-end">
-                  <input name="sl" value={line.sl} onChange={e => handleChange(e, idx)} placeholder="SL No."
-                    className="border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
-                  <input name="sacNum" value={line.sacNum} onChange={e => handleChange(e, idx)} placeholder="SAC Number"
-                    className="border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
-                  <input name="desc" value={line.desc} onChange={e => handleChange(e, idx)} placeholder="Description"
-                    className="border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
-                  <input name="batch" value={line.batch} onChange={e => handleChange(e, idx)} placeholder="Batch"
-                    className="border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
-                  <input name="days" value={line.days} onChange={e => handleChange(e, idx)} placeholder="Days"
-                    className="border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
-                  <input name="rate" value={line.rate} onChange={e => handleChange(e, idx)} placeholder="Rate"
-                    className="border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
-                  <input name="amt" value={line.amt} onChange={e => handleChange(e, idx)} placeholder="Amount"
-                    className="border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
-                  {formData.lines.length > 1 && (
-                    <button type="button" onClick={() => removeLine(idx)} className="text-red-500 ml-1 text-xs">Remove</button>
-                  )}
-                </div>
+               <div key={idx} className="grid grid-cols-12 gap-2 mb-2 items-end">
+  <input name="sl" value={line.sl} onChange={e => handleChange(e, idx)} placeholder="SL No."
+    className="col-span-1 border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
+  <input name="sacNum" value={line.sacNum} onChange={e => handleChange(e, idx)} placeholder="SAC Number"
+    className="col-span-2 border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
+  <input name="desc" value={line.desc} onChange={e => handleChange(e, idx)} placeholder="Description"
+    className="col-span-3 border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
+  <input name="batch" value={line.batch} onChange={e => handleChange(e, idx)} placeholder="Batch"
+    className="col-span-1 border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
+  <input name="days" value={line.days} onChange={e => handleChange(e, idx)} placeholder="Days"
+    className="col-span-1 border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
+  <input name="rate" value={line.rate} onChange={e => handleChange(e, idx)} placeholder="Rate"
+    className="col-span-2 border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
+  <input name="amt" value={line.amt} onChange={e => handleChange(e, idx)} placeholder="Amount"
+    className="col-span-2 border border-gray-300 rounded-lg px-2 py-2 bg-white/80 text-xs" />
+  {formData.lines.length > 1 && (
+    <button type="button" onClick={() => removeLine(idx)} className="text-red-500 ml-1 text-xs">Remove</button>
+  )}
+</div>
+
               ))}
               {formData.lines.length < 4 && (
                 <button type="button" onClick={addLine}

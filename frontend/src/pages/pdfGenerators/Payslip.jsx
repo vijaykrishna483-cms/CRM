@@ -5,6 +5,8 @@ import Footer from "../../components/Footer";
 import usePageAccess from "../../components/useAccessPage";
 import api from "../../libs/apiCall";
 
+  import Select from 'react-select';
+
 // Number to words function (Indian format, supports decimals)
 const numberToWords = (num) => {
   if (isNaN(num)) return "";
@@ -60,12 +62,15 @@ const numberToWords = (num) => {
 // Format all rupee values to 2 decimal places (e.g., 100.00)
 const formatAmount = (value) => {
   const num = parseFloat(value);
-  if (isNaN(num)) return "0.00";
+  if (isNaN(num)) return "";
   return num.toFixed(2);
 };
 
 const Payslip = () => {
   const { allowed, loading: permissionLoading } = usePageAccess("payslip");
+
+
+
 
   const [formData, setFormData] = useState({
     employeeName: "",
@@ -77,16 +82,16 @@ const Payslip = () => {
     address: "",
     month: "",
     panId: "",
-    amount: "0.00",
+    amount: "",
     date: "",
     amountInWords: "",
     location: "",
-    basic: "0.00",
-    incomeTax: "0.00",
-    providentFund: "0.00",
-    houseRent: "0.00",
-    grossEarnings: "0.00",
-    totalDeductions: "0.00",
+    basic: "",
+    incomeTax: "",
+    providentFund: "",
+    houseRent: "",
+    grossEarnings: "",
+    totalDeductions: "",
   });
   const [employeeData, setEmployeeData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -108,71 +113,30 @@ const Payslip = () => {
   }, []);
 
   // Handle employee selection and auto-fill
-  const handleEmployeeSelect = (e) => {
-    const employeeId = e.target.value;
-    const selectedEmployee = employeeData.find(
-      (emp) => emp.employee_id === employeeId
-    );
 
-    if (selectedEmployee) {
-      const salary = parseFloat(selectedEmployee.salary) || 0;
-      setFormData((prev) => ({
-        ...prev,
-        employeeName: selectedEmployee.employee_name,
-        employeeId: selectedEmployee.employee_id,
-        designation: selectedEmployee.designation,
-        address1: selectedEmployee.address_line1 || "",
-        address2: selectedEmployee.address_line2 || "",
-        address3: selectedEmployee.address_line3 || "",
-        month: "",
-        panId: selectedEmployee.pan_id,
-        location: selectedEmployee.location || "",
-        basic: "0.00",
-        houseRent: "0.00",
-        incomeTax: "0.00",
-        providentFund: "0.00",
-        grossEarnings: "0.00",
-        totalDeductions: "0.00",
-        amount: "0.00",
-        amountInWords: "",
-        date: "",
-        address: "",
-      }));
-    }
-  };
 
   // Handle other field changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    let updatedForm = { ...formData, [name]: value };
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  let updatedForm = { ...formData, [name]: value };
 
-    // Always format rupee values to 2 decimal places
-    if (
-      ["basic", "houseRent", "incomeTax", "providentFund", "grossEarnings", "totalDeductions", "amount"].includes(name)
-    ) {
-      updatedForm[name] = formatAmount(value);
-    }
+  const basic = parseFloat(updatedForm.basic) || 0;
+  const houseRent = parseFloat(updatedForm.houseRent) || 0;
+  const incomeTax = parseFloat(updatedForm.incomeTax) || 0;
+  const providentFund = parseFloat(updatedForm.providentFund) || 0;
 
-    // Auto-calculate gross earnings and total deductions
-    const basic = parseFloat(updatedForm.basic) || 0;
-    const houseRent = parseFloat(updatedForm.houseRent) || 0;
-    const incomeTax = parseFloat(updatedForm.incomeTax) || 0;
-    const providentFund = parseFloat(updatedForm.providentFund) || 0;
+  updatedForm.grossEarnings = formatAmount(basic + houseRent);
+  updatedForm.totalDeductions = formatAmount(incomeTax + providentFund);
 
-    updatedForm.grossEarnings = formatAmount(basic + houseRent);
-    updatedForm.totalDeductions = formatAmount(incomeTax + providentFund);
+  const gross = parseFloat(updatedForm.grossEarnings) || 0;
+  const deductions = parseFloat(updatedForm.totalDeductions) || 0;
+  const amount = gross - deductions;
+  updatedForm.amount = formatAmount(amount);
+  updatedForm.amountInWords = numberToWords(amount);
 
-    // Calculate amount = grossEarnings - totalDeductions
-    const gross = parseFloat(updatedForm.grossEarnings) || 0;
-    const deductions = parseFloat(updatedForm.totalDeductions) || 0;
-    const amount = gross - deductions;
-    updatedForm.amount = formatAmount(amount);
+  setFormData(updatedForm);
+};
 
-    // Update amount in words
-    updatedForm.amountInWords = numberToWords(amount);
-
-    setFormData(updatedForm);
-  };
 
   const handleSubmit = async () => {
     const payload = { ...formData };
@@ -193,6 +157,44 @@ const Payslip = () => {
       toast.error("Failed to generate document.");
     }
   };
+
+  const employeeOptions = employeeData.map((employee) => ({
+  value: employee.employee_id,
+  label: employee.employee_name,
+}));
+
+const handleEmployeeChange = (selectedOption) => {
+  const selectedEmployee = employeeData.find(
+    (emp) => emp.employee_id === selectedOption?.value
+  );
+
+  if (selectedEmployee) {
+    const salary = parseFloat(selectedEmployee.salary) || 0;
+    setFormData((prev) => ({
+      ...prev,
+      employeeName: selectedEmployee.employee_name,
+      employeeId: selectedEmployee.employee_id,
+      designation: selectedEmployee.designation,
+      address1: selectedEmployee.address_line1 || "",
+      address2: selectedEmployee.address_line2 || "",
+      address3: selectedEmployee.address_line3 || "",
+      month: "",
+      panId: selectedEmployee.pan_id,
+      location: selectedEmployee.location || "",
+      basic: selectedEmployee.salary,
+      houseRent: "",
+      incomeTax: "0.00",
+      providentFund: "0.00",
+      grossEarnings: "0.00",
+      totalDeductions: "0.00",
+      amount: "0.00",
+      amountInWords: "",
+      date: "",
+      address: "",
+    }));
+  }
+};
+
 
   if (!allowed && !permissionLoading)
     return (
@@ -264,26 +266,18 @@ const Payslip = () => {
                 <label className="block text-sm font-semibold text-[#4f378a] mb-1">
                   Select Employee
                 </label>
-                <select
-                  value={
-                    employeeData.find(
-                      (emp) => emp.employee_name === formData.employeeName
-                    )?.employee_id || ""
-                  }
-                  onChange={handleEmployeeSelect}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
-                  disabled={loading}
-                >
-                  <option value="">Select an employee</option>
-                  {employeeData.map((employee) => (
-                    <option
-                      key={employee.employee_id}
-                      value={employee.employee_id}
-                    >
-                      {employee.employee_name}
-                    </option>
-                  ))}
-                </select>
+            <Select
+  isDisabled={loading}
+  options={employeeOptions}
+  value={employeeOptions.find(option => 
+    option.label === formData.employeeName
+  )}
+  onChange={handleEmployeeChange}
+  placeholder="Select an employee"
+  className="react-select-container"
+  classNamePrefix="react-select"
+/>
+
               </div>
               {/* Employee ID */}
               <div>
@@ -423,11 +417,17 @@ const Payslip = () => {
                   Basic
                 </label>
                 <input
-                  name="basic"
-                  type="text"
-                  placeholder="Basic"
-                  value={formData.basic}
-                  onChange={handleChange}
+                   name="basic"
+  type="text"
+  placeholder="Basic"
+  value={formData.basic}
+  onChange={handleChange}
+  onBlur={(e) =>
+    setFormData((prev) => ({
+      ...prev,
+      basic: formatAmount(e.target.value),
+    }))
+  }
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
                 />
               </div>
@@ -437,11 +437,17 @@ const Payslip = () => {
                   Income Tax
                 </label>
                 <input
-                  name="incomeTax"
-                  type="text"
-                  placeholder="Income Tax"
-                  value={formData.incomeTax}
-                  onChange={handleChange}
+                 name="incomeTax"
+  type="text"
+  placeholder="Income Tax"
+  value={formData.incomeTax}
+  onChange={handleChange}
+  onBlur={(e) =>
+    setFormData((prev) => ({
+      ...prev,
+      incomeTax: formatAmount(e.target.value),
+    }))
+  }
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
                 />
               </div>
@@ -452,10 +458,16 @@ const Payslip = () => {
                 </label>
                 <input
                   name="providentFund"
-                  type="text"
-                  placeholder="Provident Fund"
-                  value={formData.providentFund}
-                  onChange={handleChange}
+  type="text"
+  placeholder="Provident Fund"
+  value={formData.providentFund}
+  onChange={handleChange}
+  onBlur={(e) =>
+    setFormData((prev) => ({
+      ...prev,
+      providentFund: formatAmount(e.target.value),
+    }))
+  }
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
                 />
               </div>
@@ -465,11 +477,17 @@ const Payslip = () => {
                   House Rent
                 </label>
                 <input
-                  name="houseRent"
-                  type="text"
-                  placeholder="House Rent"
-                  value={formData.houseRent}
-                  onChange={handleChange}
+                 name="houseRent"
+  type="text"
+  placeholder="House Rent"
+  value={formData.houseRent}
+  onChange={handleChange}
+  onBlur={(e) =>
+    setFormData((prev) => ({
+      ...prev,
+      houseRent: formatAmount(e.target.value),
+    }))
+  }
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#7c3aed] bg-white/80"
                 />
               </div>

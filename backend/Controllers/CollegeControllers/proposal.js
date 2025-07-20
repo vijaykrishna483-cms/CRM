@@ -132,6 +132,7 @@ export const deleteProposal = async (req, res) => {
 };
 
 // utils/toSnakeCase.js
+// utils/toSnakeCase.js
 function toSnakeCase(str) {
   return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 }
@@ -141,12 +142,10 @@ export const updateProposal = async (req, res) => {
   const updates = req.body;
 
   try {
-    // Check if proposal exists
     const check = await pool.query(
       'SELECT * FROM proposals WHERE proposal_id = $1',
       [proposalId]
     );
-
     if (check.rows.length === 0) {
       return res.status(404).json({
         status: 'failed',
@@ -154,26 +153,57 @@ export const updateProposal = async (req, res) => {
       });
     }
 
-    // Only allow these fields to be updated
-const allowedFields = [
-  'collegeCode', 'proposalCode', 'issueDate',
-  'quotedPrice', 'duration', 'fromDate', 'toDate',
-  'status' ,'employee_id' // ← add this
-];
+    const allowedFields = [
+      'collegeCode', 'proposalCode', 'issueDate',
+      'quotedPrice', 'duration', 'fromDate', 'toDate',
+      'status', 'employee_id', 'location'
+    ];
 
     const fields = [];
     const values = [];
     let idx = 1;
 
+    // Only check employee_id if provided and not empty string
+    if (
+      Object.prototype.hasOwnProperty.call(updates, "employee_id") &&
+      updates.employee_id !== null &&
+      updates.employee_id !== undefined &&
+      updates.employee_id !== ""
+    ) {
+      const empCheck = await pool.query(
+        'SELECT 1 FROM employees WHERE employee_id = $1',
+        [updates.employee_id]
+      );
+      if (empCheck.rows.length === 0) {
+        return res.status(400).json({
+          status: 'failed',
+          message: 'Employee ID does not exist',
+        });
+      }
+    }
+
     for (const key in updates) {
       if (!allowedFields.includes(key)) continue;
+      // Skip employee_id if null, undefined, or empty string
+      if (
+        key === "employee_id" &&
+        (updates[key] === null ||
+         updates[key] === undefined ||
+         updates[key] === "")
+      ) continue;
       const dbKey = toSnakeCase(key);
       fields.push(`${dbKey} = $${idx}`);
       values.push(updates[key]);
       idx++;
     }
 
-    // Add last_updated
+    if (fields.length === 0) {
+      return res.status(400).json({
+        status: 'failed',
+        message: 'No valid fields provided to update',
+      });
+    }
+
     fields.push(`last_updated = $${idx}`);
     values.push(new Date());
 
@@ -201,6 +231,8 @@ const allowedFields = [
     });
   }
 };
+
+
 
 
 

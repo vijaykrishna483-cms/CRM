@@ -428,6 +428,15 @@ const filteredProposals = proposals.filter((proposal) => {
                       ))}
                     </select>
                   </td>
+                   <td className="p-2 border border-gray-300">
+                      {/* {proposal.location} */}
+                    {/* <input
+                      name="location"
+                      value={editForm.location}
+                      onChange={handleEditChange}
+                      className="border px-2 py-1 rounded"
+                    /> */}
+                  </td>
                   <td className="p-2 border border-gray-300">
                     <input
                       name="proposalCode"

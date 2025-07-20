@@ -73,6 +73,9 @@ useEffect(() => {
 
   // Check In
   const handleCheckIn = async () => {
+      const confirmed = window.confirm("Are you sure you want to check in?");
+  if (!confirmed) return; // Don't proceed if user cancels
+
     setLoading(true);
     setMessage("Requesting location...");
     try {
@@ -100,31 +103,37 @@ useEffect(() => {
   };
 
   // Check Out
-  const handleCheckOut = async () => {
-    setLoading(true);
-    setMessage("Processing check-out...");
-    try {
-      const response = await api.post(
-        "/attendance/checkout",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-       await fetchRecords();
-      setMessage(response.data.message || "Checked out successfully");
-    } catch (error) {
-      const msg = error.response?.data?.message || "Check-out failed. Try again.";
-      setMessage(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleCheckOut = async () => {
+  const confirmed = window.confirm("Are you sure you want to check out?");
+  if (!confirmed) return; // Don't proceed if user cancels
+
+  setLoading(true);
+  setMessage("Processing check-out...");
+  try {
+    const response = await api.post(
+      "/attendance/checkout",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    await fetchRecords();
+    setMessage(response.data.message || "Checked out successfully");
+  } catch (error) {
+    const msg = error.response?.data?.message || "Check-out failed. Try again.";
+    setMessage(msg);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Lunch In
   const handleLunchIn = async () => {
+      const confirmed = window.confirm("Are you sure you want to lunch In?");
+  if (!confirmed) return; // Don't proceed if user cancels
     setLoading(true);
     setMessage("Marking lunch-in...");
     try {
@@ -149,6 +158,8 @@ useEffect(() => {
 
   // Lunch Out
   const handleLunchOut = async () => {
+      const confirmed = window.confirm("Are you sure you want to lunch out?");
+  if (!confirmed) return; // Don't proceed if user cancels
     setLoading(true);
     setMessage("Marking lunch-out...");
     try {
@@ -205,6 +216,17 @@ useEffect(() => {
     <FaSignInAlt size={18} />
     Check In
   </button>
+
+    <button
+    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-yellow-700 text-white hover:bg-yellow-800 transition"
+    onClick={handleLunchOut}
+    disabled={loading}
+  >
+    <FaCoffee size={18} />
+    Lunch Out
+  </button>
+
+  
   <button
     className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-yellow-500 text-white hover:bg-yellow-600 transition"
     onClick={handleLunchIn}
@@ -213,14 +235,7 @@ useEffect(() => {
     <FaUtensils size={18} />
     Lunch In
   </button>
-  <button
-    className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-yellow-700 text-white hover:bg-yellow-800 transition"
-    onClick={handleLunchOut}
-    disabled={loading}
-  >
-    <FaCoffee size={18} />
-    Lunch Out
-  </button>
+
   <button
     className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white hover:bg-blue-700 transition"
     onClick={handleCheckOut}
@@ -260,66 +275,56 @@ useEffect(() => {
             <div className="text-red-600 font-medium">{recordsError}</div>
           ) : records.length > 0 ? (
             <div className="flex flex-col gap-4">
-              {records.map((rec) => {
-                const dateObj = new Date(rec.attendance_date);
-                const dateStr = dateObj.toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                });
-                const weekDay = dateObj.toLocaleDateString("en-GB", {
-                  weekday: "long",
-                });
+              <table className="min-w-full divide-y divide-gray-200 bg-white shadow rounded-xl">
+  <thead className="bg-indigo-100">
+    <tr>
+      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Date</th>
+      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Weekday</th>
+      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Check In</th>
+      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Lunch In</th>
+      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Lunch Out</th>
+      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Check Out</th>
+      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Status</th>
+      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">Remarks</th>
+    </tr>
+  </thead>
+  <tbody className="divide-y divide-gray-100">
+    {records.map((rec) => {
+      const dateObj = new Date(rec.attendance_date);
+      const dateStr = dateObj.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+      const weekDay = dateObj.toLocaleDateString("en-GB", {
+        weekday: "long",
+      });
 
-                return (
-                  <div
-                    key={rec.id}
-                    className={`${
-                      rec.is_valid ? "bg-green-100" : "bg-red-100"
-                    } rounded-xl shadow-md p-5 border-l-4 border-indigo-500 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:shadow-lg transition-all duration-200`}
-                  >
-                    <div className="mb-4 sm:mb-0 mr-6">
-                      <div className="text-2xl font-bold text-gray-800">{dateStr}</div>
-                      <div className="text-sm text-gray-500">{weekDay}</div>
-                    </div>
-                 <div className="flex-1">
-  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm text-gray-700">
-    <div>
-      <dt className="font-medium text-gray-500">Check In:</dt>
-      <dd className="text-black">{formatTime(rec.check_in)}</dd>
-    </div>
-    <div>
-      <dt className="font-medium text-gray-500">Lunch In:</dt>
-      <dd className="text-black">{formatTime(rec.lunch_in)}</dd>
-    </div>
-    <div>
-      <dt className="font-medium text-gray-500">Lunch Out:</dt>
-      <dd className="text-black">{formatTime(rec.lunch_out)}</dd>
-    </div>
-    <div>
-      <dt className="font-medium text-gray-500">Check Out:</dt>
-      <dd className="text-black">{formatTime(rec.check_out)}</dd>
-    </div>
-    <div>
-      <dt className="font-medium text-gray-500">Status:</dt>
-      <dd>
-        {rec.is_valid ? (
-          <span className="text-green-600 font-semibold">Verified</span>
-        ) : (
-          <span className="text-red-600 font-semibold">Found Scam</span>
-        )}
-      </dd>
-    </div>
-    <div>
-      <dt className="font-medium text-gray-500">Remarks:</dt>
-      <dd className="text-black">{rec.remarks || "-"}</dd>
-    </div>
-  </dl>
-</div>
+      return (
+        <tr
+          key={rec.id}
+          className={rec.is_valid ? "bg-green-50" : "bg-red-50"}
+        >
+          <td className="px-4 py-2 text-gray-800 font-semibold">{dateStr}</td>
+          <td className="px-4 py-2 text-gray-600">{weekDay}</td>
+          <td className="px-4 py-2">{formatTime(rec.check_in)}</td>
+          <td className="px-4 py-2">{formatTime(rec.lunch_in)}</td>
+          <td className="px-4 py-2">{formatTime(rec.lunch_out)}</td>
+          <td className="px-4 py-2">{formatTime(rec.check_out)}</td>
+          <td className="px-4 py-2">
+            {rec.is_valid ? (
+              <span className="text-green-600 font-semibold">Verified</span>
+            ) : (
+              <span className="text-red-600 font-semibold">Found Scam</span>
+            )}
+          </td>
+          <td className="px-4 py-2">{rec.remarks || "-"}</td>
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
 
-                  </div>
-                );
-              })}
             </div>
           ) : (
             <div className="text-gray-500 text-center">

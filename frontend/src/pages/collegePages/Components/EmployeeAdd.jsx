@@ -1,5 +1,8 @@
 import React from 'react';
 import usePageAccess from '../../../components/useAccessPage';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import api from '../../../libs/apiCall';
 
 const fields = [
   { label: 'Employee ID', name: 'employee_id' },
@@ -28,6 +31,24 @@ const EmployeeAddEdit = ({
 }) => {
   const { allowed, loading: permissionLoading } = usePageAccess("employeedataeditor");
 
+
+  const [verticals, setVerticals] = useState([]);
+
+
+  const [positions, setPositions] = useState([]);
+
+  useEffect(() => {
+    api.get("/auth/vertical/getall")
+      .then(res => setVerticals(res.data.data || []))
+      .catch(() => setVerticals([]));
+    api.get("/auth/position/getall")
+      .then(res => setPositions(res.data.data || []))
+      .catch(() => setPositions([]));
+  }, []);
+
+
+
+
   if (!allowed && !permissionLoading) return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">
       {/* ...access denied UI... */}
@@ -47,21 +68,22 @@ const EmployeeAddEdit = ({
             <label htmlFor={name} className="text-sm font-medium text-gray-700 mb-1">{label}</label>
             {name === 'designation' ? (
               <select
-                id={name}
+            id={name}
                 name={name}
                 value={employeeInfo[name]}
                 onChange={handleChange}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="">Select Vertical</option>
-                <option value="operations">Operations</option>
-                <option value="accounts">Accounts</option>
-                <option value="marketing">Marketing</option>
-                <option value="lms">LMS</option>
-                <option value="hr">HR</option>
-                <option value="backend">Backend</option>
-                <option value="ceo">CEO</option>
-              </select>
+          
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6a54a6] bg-gray-50"
+            >
+              <option value="">Select Vertical</option>
+              {verticals.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+
+       
             ) : name === 'position' ? (
               <select
                 id={name}
@@ -70,10 +92,12 @@ const EmployeeAddEdit = ({
                 onChange={handleChange}
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
               >
-                <option value="">Select Position</option>
-                <option value="senior">Senior</option>
-                <option value="junior">Junior</option>
-                <option value="intern">Intern</option>
+               <option value="">Select Position</option>
+              {positions.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
               </select>
             ) : (
               <input

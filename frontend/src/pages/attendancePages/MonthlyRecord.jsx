@@ -15,11 +15,7 @@ function formatTime(timeStr) {
 }
 
 const MonthlyRecord = () => {
-
-      const { allowed, loading: loadingg } = usePageAccess("attendanceUpdate");
-
-
-
+  const { allowed, loading: loadingg } = usePageAccess("attendanceUpdate");
 
   const [month, setMonth] = useState(() => {
     const now = new Date();
@@ -51,16 +47,34 @@ const MonthlyRecord = () => {
     fetchRecords();
   }, [month, token]);
 
-  // Filter records by employee name or employee id (case-insensitive)
-  const filteredRecords = records.filter((rec) => {
-    const searchLower = search.toLowerCase();
-    return (
-      rec.name?.toLowerCase().includes(searchLower) ||
-      String(rec.employee_id || "").toLowerCase().includes(searchLower)
-    );
-  });
+  // Utility to normalize string for search
+  const normalize = (str) => (str || "").toLowerCase().trim();
+  const searchLower = normalize(search);
 
-   if (!allowed && !loadingg)
+  // Filter, then sort so search hits appear at the top,
+  // then sort each group by most recent date.
+  const sortedRecords = [...records]
+    .filter(
+      (rec) =>
+        !searchLower ||
+        normalize(rec.name).includes(searchLower) ||
+        normalize(rec.employee_id).includes(searchLower)
+    )
+    .sort((a, b) => {
+      if (searchLower) {
+        const aMatch =
+          normalize(a.name).includes(searchLower) ||
+          normalize(a.employee_id).includes(searchLower);
+        const bMatch =
+          normalize(b.name).includes(searchLower) ||
+          normalize(b.employee_id).includes(searchLower);
+        if (aMatch !== bMatch) return aMatch ? -1 : 1;
+      }
+      return new Date(b.attendance_date) - new Date(a.attendance_date);
+    });
+
+  // Access denial UI
+  if (!allowed && !loadingg)
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center">
         <div className="flex flex-col items-center bg-white px-8 py-10 ">
@@ -87,9 +101,7 @@ const MonthlyRecord = () => {
               strokeWidth="2"
             />
           </svg>
-          <h2 className="text-2xl font-bold text-[#6750a4] mb-2">
-            Access Denied
-          </h2>
+          <h2 className="text-2xl font-bold text-[#6750a4] mb-2">Access Denied</h2>
           <p className="text-gray-600 text-center mb-4">
             You do not have permission to view this page.
             <br />
@@ -104,8 +116,8 @@ const MonthlyRecord = () => {
         </div>
       </div>
     );
-  if (loadingg) return <div>Loading...</div>;
 
+  if (loadingg) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen p-6 flex flex-col items-center bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -132,7 +144,7 @@ const MonthlyRecord = () => {
         <div className="text-blue-600 font-medium">Loading records...</div>
       ) : error ? (
         <div className="text-red-600 font-medium">{error}</div>
-      ) : filteredRecords.length > 0 ? (
+      ) : sortedRecords.length > 0 ? (
         <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-6">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-separate border-spacing-y-2">
@@ -150,7 +162,7 @@ const MonthlyRecord = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredRecords.map((rec) => (
+                {sortedRecords.map((rec) => (
                   <tr
                     key={rec.id}
                     className={`${

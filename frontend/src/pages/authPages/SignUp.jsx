@@ -6,8 +6,6 @@ import {
   HiUser,
   HiMail,
   HiLockClosed,
-  HiOfficeBuilding,
-  HiBriefcase,
 } from "react-icons/hi";
 
 const Signup = () => {
@@ -20,9 +18,12 @@ const Signup = () => {
     position_id: "",
     employee_id: "",
   });
+
   const [verticals, setVerticals] = useState([]);
   const [positions, setPositions] = useState([]);
   const [employeeData, setEmployeeData] = useState([]);
+  const [designation, setDesignation] = useState("");
+  const [position, setPosition] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +31,7 @@ const Signup = () => {
     api.get("/auth/vertical/getall")
       .then(res => setVerticals(res.data.data || []))
       .catch(() => setVerticals([]));
+
     api.get("/auth/position/getall")
       .then(res => setPositions(res.data.data || []))
       .catch(() => setPositions([]));
@@ -52,11 +54,48 @@ const Signup = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+const handleEmployeeSelect = (selectedOption) => {
+    if (!selectedOption) {
+        setForm({
+            ...form,
+            name: "",
+            email: "",
+            vertical_id: "",
+            position_id: "",
+            employee_id: "",
+        });
+        setDesignation("");
+        setPosition("");
+        return;
+    }
+
+    const emp = employeeData.find(emp => emp.employee_id === selectedOption.value);
+
+    setForm((prev) => ({
+        ...prev,
+        name: emp?.employee_name || "",
+        email: emp?.personal_email || "",
+        vertical_id: emp?.designation || "",
+        position_id: emp?.position || "",
+        employee_id: emp?.employee_id || "",
+    }));
+
+    const verticalMatch = verticals.find(v => v.id === Number(emp?.designation));
+    const positionMatch = positions.find(p => p.id === Number(emp?.position));
+
+    setDesignation(verticalMatch?.name || "");
+    setPosition(positionMatch?.name || "");
+};
+
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
     try {
+      console.log(form)
+
       const res = await api.post("/auth/signup", form);
       if (res.data.status === "success") {
         setMessage("Signup successful! Redirecting to login...");
@@ -69,6 +108,8 @@ const Signup = () => {
           position_id: "",
           employee_id: "",
         });
+        setDesignation("");
+        setPosition("");
       } else {
         setMessage(res.data.message || "Signup failed");
       }
@@ -85,7 +126,24 @@ const Signup = () => {
           <h1 className="text-4xl font-extrabold text-[#6a54a6]">Register New Employee</h1>
           <p className="text-gray-500 mt-2">Register a new employee and save their password.</p>
         </div>
+
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Employee ID Select */}
+          <div>
+            <label className="block mb-1 text-gray-700 font-medium">Select Employee ID</label>
+            <Select
+              options={employeeData.map(emp => ({
+                value: emp.employee_id,
+                label: `${emp.employee_id} - ${emp.employee_name}`,
+              }))}
+              onChange={handleEmployeeSelect}
+              placeholder="Search or select employee"
+              className="basic-single"
+              classNamePrefix="select"
+              isClearable
+            />
+          </div>
+
           {/* Name */}
           <div className="relative">
             <HiUser className="absolute top-3 left-3 text-[#6a54a6]" />
@@ -128,60 +186,16 @@ const Signup = () => {
             />
           </div>
 
-          {/* Vertical */}
-          <div className="relative">
-            <HiOfficeBuilding className="absolute top-3 left-3 text-[#6a54a6]" />
-            <select
-              name="vertical_id"
-              value={form.vertical_id}
-              onChange={handleChange}
-              required
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6a54a6] bg-gray-50"
-            >
-              <option value="">Select Vertical</option>
-              {verticals.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Position */}
-          <div className="relative">
-            <HiBriefcase className="absolute top-3 left-3 text-[#6a54a6]" />
-            <select
-              name="position_id"
-              value={form.position_id}
-              onChange={handleChange}
-              required
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6a54a6] bg-gray-50"
-            >
-              <option value="">Select Position</option>
-              {positions.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Employee ID - Search & Select */}
-          <div>
-            <label className="block mb-1 text-gray-700 font-medium">Select Employee</label>
-            <Select
-              options={employeeData.map(emp => ({
-                value: emp.employee_id,
-                label: `${emp.employee_name} (${emp.employee_id})`
-              }))}
-              onChange={(selectedOption) =>
-                setForm({ ...form, employee_id: selectedOption?.value || "" })
-              }
-              placeholder="Search or select employee"
-              className="basic-single"
-              classNamePrefix="select"
-              isClearable
-            />
+          {/* Display Designation and Position */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700">Designation (Vertical)</label>
+              <div className="mt-1 p-3 rounded-xl border border-gray-300 bg-gray-100">{designation || "-"}</div>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700">Position</label>
+              <div className="mt-1 p-3 rounded-xl border border-gray-300 bg-gray-100">{position || "-"}</div>
+            </div>
           </div>
 
           {/* Submit */}
