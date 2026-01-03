@@ -21,6 +21,46 @@ import Tef from "./pages/pdfGenerators/Tef";
 import Signup from "./pages/authPages/SignUp";
 import AttendancePage from "./pages/attendancePages/AttendancePage";
 import AttendanceAdminPage from "./pages/attendancePages/AttendanceAdminPage";
+import { useState } from "react";
+import { Navigate, Outlet } from "react-router-dom";
+
+
+
+const AdminRoute = () => {
+  const [status, setStatus] = useState("loading");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setStatus("unauth");
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (Number(payload.vertical_id) === 1) {
+        setStatus("allowed");
+      } else {
+        setStatus("forbidden");
+      }
+    } catch {
+      setStatus("unauth");
+    }
+  }, []);
+
+  if (status === "loading") return null;
+
+  if (status === "unauth") {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (status === "forbidden") {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+};
+
 
 
 function App() {
@@ -55,9 +95,14 @@ useEffect(() => {
   <Route element={<PrivateRoute />}>
   <Route path="/register" element={<Signup />} />
   </Route>
-  <Route element={<PrivateRoute />}>
-  <Route path="/admin" element={<Admin />} />
+
+
+ <Route element={<AdminRoute />}>
+    <Route path="/admin" element={<Admin />} />
   </Route>
+
+
+
   </Routes>
 
     </Router>
